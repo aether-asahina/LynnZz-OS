@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LynnZz OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/desktop.css">
+<link rel="stylesheet" href="css/taskbar.css">
+</head>
+<body>
+
+<!-- ===================== BOOT SCREEN ===================== -->
+<div id="boot-screen" class="screen">
+  <div class="boot-logo">
+    <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <path d="M36 4 L64 20 V52 L36 68 L8 52 V20 Z" stroke="url(#bootGrad)" stroke-width="2.5" fill="rgba(123,47,247,0.08)"/>
+      <path d="M28 24 L28 48 L44 48" stroke="url(#bootGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs>
+        <linearGradient id="bootGrad" x1="0" y1="0" x2="72" y2="72">
+          <stop offset="0" stop-color="#a855f7"/>
+          <stop offset="1" stop-color="#ff2e63"/>
+        </linearGradient>
+      </defs>
+    </svg>
+  </div>
+  <div class="boot-title">LynnZz<span>OS</span></div>
+  <div class="boot-version">v1.0</div>
+  <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+  <div class="boot-status" id="boot-status">Menyalakan sistem…</div>
+</div>
+
+<!-- ===================== AUTH SCREEN ===================== -->
+<div id="auth-screen" class="screen hidden">
+  <div class="auth-bg-orb orb1"></div>
+  <div class="auth-bg-orb orb2"></div>
+
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-mark">Lz</div>
+      <div class="auth-brand-text">LynnZz<span>OS</span></div>
+    </div>
+
+    <!-- LOGIN -->
+    <form id="login-form" class="auth-form">
+      <h1>Masuk</h1>
+      <p class="auth-sub">Lanjutkan ke workspace lo.</p>
+
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="login-email" required placeholder="nama@email.com" autocomplete="email">
+      </label>
+      <label class="field">
+        <span>Kata sandi</span>
+        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+      </label>
+
+      <div class="auth-error" id="login-error"></div>
+
+      <button type="submit" class="btn-primary">Masuk</button>
+      <button type="button" class="btn-ghost" id="btn-guest">Masuk sebagai Tamu</button>
+
+      <p class="auth-switch">Belum punya akun? <a href="#" id="go-register">Daftar</a></p>
+    </form>
+
+    <!-- REGISTER -->
+    <form id="register-form" class="auth-form hidden">
+      <h1>Daftar</h1>
+      <p class="auth-sub">Bikin akun buat nyimpen data lo di cloud.</p>
+
+      <label class="field">
+        <span>Nama</span>
+        <input type="text" id="register-name" required placeholder="Nama lo">
+      </label>
+      <label class="field">
+        <span>Email</span>
+        <input type="email" id="register-email" required placeholder="nama@email.com" autocomplete="email">
+      </label>
+      <label class="field">
+        <span>Kata sandi</span>
+        <input type="password" id="register-password" required placeholder="Minimal 6 karakter" autocomplete="new-password">
+      </label>
+
+      <div class="auth-error" id="register-error"></div>
+
+      <button type="submit" class="btn-primary">Buat Akun</button>
+
+      <p class="auth-switch">Udah punya akun? <a href="#" id="go-login">Masuk</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ===================== DESKTOP ===================== -->
+<div id="desktop-screen" class="screen hidden">
+
+  <div id="wallpaper"></div>
+
+  <!-- Desktop icons -->
+  <div id="desktop-icons"></div>
+
+  <!-- Windows render here -->
+  <div id="window-layer"></div>
+
+  <!-- Notification stack -->
+  <div id="notification-stack"></div>
+
+  <!-- Taskbar -->
+  <div id="taskbar">
+    <button id="start-btn">
+      <span class="start-mark">Lz</span>
+      <span class="start-label">Start</span>
+    </button>
+
+    <div id="taskbar-apps"></div>
+
+    <div id="tray">
+      <button id="tray-notif" title="Notifikasi">🔔</button>
+      <div id="tray-clock">
+        <span id="tray-time">--:--</span>
+        <span id="tray-date">-- --- ----</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start menu -->
+  <div id="start-menu" class="hidden">
+    <div class="start-menu-header">
+      <div class="user-avatar" id="sm-avatar">?</div>
+      <div class="user-meta">
+        <div class="user-name" id="sm-username">Pengguna</div>
+        <div class="user-email" id="sm-email">-</div>
+      </div>
+    </div>
+    <div class="start-menu-apps" id="start-menu-apps"></div>
+    <div class="start-menu-footer">
+      <button id="btn-lock">🔒 Kunci</button>
+      <button id="btn-logout">⏻ Keluar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/os.js"></script>
+<script src="js/window.js"></script>
+<script src="js/apps.js"></script>
+</body>
+</html>

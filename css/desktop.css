@@ -1,0 +1,174 @@
+:root{
+  --void:#0a0a12;
+  --surface:#15151f;
+  --surface-2:#1c1c29;
+  --border:rgba(255,255,255,0.08);
+  --border-strong:rgba(255,255,255,0.16);
+  --text:#eceaf5;
+  --text-muted:#9491ac;
+  --violet:#a855f7;
+  --violet-dim:#7b2ff7;
+  --crimson:#ff2e63;
+  --grad:linear-gradient(135deg,var(--violet-dim),var(--crimson));
+  --font-ui:'Space Grotesk',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:14px;
+}
+
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{
+  margin:0; padding:0; height:100%; overflow:hidden;
+  font-family:var(--font-ui); color:var(--text); background:var(--void);
+  user-select:none;
+}
+button,input,textarea{font-family:inherit;}
+.hidden{display:none !important;}
+
+.screen{position:fixed; inset:0; width:100%; height:100%;}
+
+/* ===================== BOOT ===================== */
+#boot-screen{
+  background:radial-gradient(circle at 50% 40%, #1a1229 0%, var(--void) 70%);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px;
+}
+.boot-logo{animation:pulse 1.8s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.75; transform:scale(1);} 50%{opacity:1; transform:scale(1.06);}}
+.boot-title{font-size:28px; font-weight:700; letter-spacing:-0.5px;}
+.boot-title span{
+  background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.boot-version{font-family:var(--font-mono); font-size:12px; color:var(--text-muted); letter-spacing:2px; margin-top:-10px;}
+.boot-bar{width:220px; height:3px; background:var(--surface-2); border-radius:2px; overflow:hidden; margin-top:18px;}
+.boot-bar-fill{height:100%; width:0%; background:var(--grad); transition:width .3s ease;}
+.boot-status{font-family:var(--font-mono); font-size:11px; color:var(--text-muted);}
+
+/* ===================== AUTH ===================== */
+#auth-screen{
+  background:var(--void); display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.auth-bg-orb{position:absolute; border-radius:50%; filter:blur(90px); opacity:.35; pointer-events:none;}
+.orb1{width:420px; height:420px; background:var(--violet); top:-120px; left:-100px;}
+.orb2{width:380px; height:380px; background:var(--crimson); bottom:-140px; right:-100px;}
+
+.auth-card{
+  position:relative; width:min(380px, 88vw); background:rgba(21,21,31,0.75);
+  border:1px solid var(--border); border-radius:20px; padding:32px 28px;
+  backdrop-filter:blur(20px); box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+.auth-brand{display:flex; align-items:center; gap:10px; margin-bottom:28px;}
+.auth-brand-mark{
+  width:34px; height:34px; border-radius:9px; background:var(--grad);
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;
+}
+.auth-brand-text{font-weight:600; font-size:15px; letter-spacing:.2px;}
+.auth-brand-text span{color:var(--violet);}
+
+.auth-form h1{margin:0 0 4px; font-size:22px; font-weight:600;}
+.auth-sub{margin:0 0 22px; color:var(--text-muted); font-size:13px;}
+
+.field{display:block; margin-bottom:14px;}
+.field span{display:block; font-size:12px; color:var(--text-muted); margin-bottom:6px;}
+.field input{
+  width:100%; padding:11px 13px; border-radius:10px; border:1px solid var(--border);
+  background:var(--surface-2); color:var(--text); font-size:14px; outline:none;
+  transition:border-color .15s;
+}
+.field input:focus{border-color:var(--violet);}
+
+.btn-primary{
+  width:100%; padding:12px; border:none; border-radius:10px; background:var(--grad);
+  color:#fff; font-weight:600; font-size:14px; cursor:pointer; margin-top:6px;
+  transition:opacity .15s, transform .1s;
+}
+.btn-primary:active{transform:scale(.98);}
+.btn-ghost{
+  width:100%; padding:11px; border-radius:10px; margin-top:8px; cursor:pointer;
+  background:transparent; border:1px solid var(--border); color:var(--text-muted); font-size:13px;
+}
+.auth-switch{text-align:center; font-size:13px; color:var(--text-muted); margin-top:18px;}
+.auth-switch a{color:var(--violet); text-decoration:none; font-weight:500;}
+.auth-error{color:var(--crimson); font-size:12.5px; min-height:16px; margin-bottom:4px;}
+
+/* ===================== DESKTOP ===================== */
+#desktop-screen{overflow:hidden;}
+#wallpaper{
+  position:absolute; inset:0; z-index:0;
+  background:
+    radial-gradient(ellipse 60% 45% at 20% 15%, rgba(168,85,247,0.35), transparent 60%),
+    radial-gradient(ellipse 55% 45% at 85% 75%, rgba(255,46,99,0.28), transparent 60%),
+    radial-gradient(ellipse 70% 60% at 50% 100%, rgba(80,40,160,0.25), transparent 70%),
+    linear-gradient(160deg, #0d0b16 0%, #0a0a12 55%, #0c0a14 100%);
+  background-size:200% 200%;
+  animation:driftBg 26s ease-in-out infinite alternate;
+}
+@keyframes driftBg{
+  0%{background-position:0% 0%, 100% 100%, 50% 100%, 0 0;}
+  100%{background-position:15% 10%, 85% 90%, 55% 90%, 0 0;}
+}
+
+#desktop-icons{
+  position:absolute; top:18px; left:14px; z-index:1;
+  display:flex; flex-direction:column; flex-wrap:wrap; gap:6px; max-height:calc(100vh - 120px);
+}
+.desktop-icon{
+  width:76px; display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:8px 4px; border-radius:10px; cursor:pointer; text-align:center;
+}
+.desktop-icon:active{background:rgba(255,255,255,0.08);}
+.desktop-icon .icon-glyph{
+  width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+  font-size:20px; background:rgba(255,255,255,0.06); border:1px solid var(--border);
+  backdrop-filter:blur(6px);
+}
+.desktop-icon .icon-label{font-size:11px; color:var(--text); text-shadow:0 1px 3px rgba(0,0,0,.8); line-height:1.2;}
+
+#window-layer{position:absolute; inset:0; z-index:5; pointer-events:none;}
+#window-layer .os-window{pointer-events:auto;}
+
+/* ===================== WINDOWS ===================== */
+.os-window{
+  position:absolute; min-width:260px; min-height:180px;
+  background:rgba(21,21,31,0.92); border:1px solid var(--border-strong); border-radius:12px;
+  box-shadow:0 25px 60px rgba(0,0,0,.55); backdrop-filter:blur(16px);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.os-window.focused{border-color:rgba(168,85,247,0.5); box-shadow:0 25px 70px rgba(123,47,247,.25);}
+.win-titlebar{
+  display:flex; align-items:center; gap:8px; padding:0 10px; height:40px; flex-shrink:0;
+  background:var(--surface); border-bottom:1px solid var(--border); cursor:move;
+}
+.win-title{font-size:12.5px; font-weight:500; color:var(--text-muted); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.win-icon{font-size:14px;}
+.win-controls{display:flex; gap:6px;}
+.win-controls button{
+  width:22px; height:22px; border-radius:6px; border:none; background:var(--surface-2);
+  color:var(--text-muted); font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.win-controls button:active{background:var(--border-strong);}
+.win-controls .win-close:active{background:var(--crimson); color:#fff;}
+.win-body{flex:1; overflow:auto; position:relative;}
+.win-resize-handle{
+  position:absolute; right:0; bottom:0; width:18px; height:18px; cursor:nwse-resize;
+  background:linear-gradient(135deg, transparent 50%, var(--border-strong) 50%);
+}
+.os-window.maximized{border-radius:0 !important;}
+
+/* ===================== NOTIFICATIONS ===================== */
+#notification-stack{
+  position:absolute; top:16px; right:16px; z-index:50;
+  display:flex; flex-direction:column; gap:10px; width:280px; max-width:80vw;
+}
+.notif-toast{
+  background:rgba(28,28,41,0.95); border:1px solid var(--border-strong); border-radius:12px;
+  padding:12px 14px; box-shadow:0 12px 30px rgba(0,0,0,.4); backdrop-filter:blur(14px);
+  animation:notifIn .25s ease;
+}
+@keyframes notifIn{from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);}}
+.notif-title{font-size:13px; font-weight:600; margin-bottom:3px; display:flex; align-items:center; gap:6px;}
+.notif-body{font-size:12px; color:var(--text-muted); line-height:1.4;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:8px; height:8px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong); border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
