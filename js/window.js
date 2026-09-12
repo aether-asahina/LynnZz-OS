@@ -131,6 +131,7 @@ LZ.win = (function(){
     let sx, sy, ox, oy, dragging = false;
     function start(e){
       if (win.classList.contains('maximized')) return;
+      if (e.target.closest('.win-controls')) return; // let min/max/close buttons receive their own click
       const p = e.touches ? e.touches[0] : e;
       dragging = true;
       sx = p.clientX; sy = p.clientY;
