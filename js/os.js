@@ -239,6 +239,7 @@ function enterDesktop(){
   document.getElementById('sm-username').textContent = LZ.auth.currentUser.displayName || 'Pengguna';
   document.getElementById('sm-email').textContent = LZ.auth.currentUser.email || '';
   document.getElementById('sm-avatar').textContent = (LZ.auth.currentUser.displayName || 'P')[0].toUpperCase();
+  LZ.applyWallpaper();
   LZ.renderLaunchers();
   LZ.startClock();
   setTimeout(()=> LZ.notify('Selamat datang', `Halo, ${LZ.auth.currentUser.displayName || 'Pengguna'} 👋`, '✨'), 500);

@@ -9,30 +9,93 @@ function h(html){
   return t.content.firstChild;
 }
 
+// Injects a <style> block into <head> exactly once per app (keyed by id).
+// Fixes the earlier bug where <style> tags placed inside h()'s template
+// string were silently dropped (h() only returns the first child).
+function ensureStyle(id, css){
+  if (document.getElementById('style-' + id)) return;
+  const s = document.createElement('style');
+  s.id = 'style-' + id;
+  s.textContent = css;
+  document.head.appendChild(s);
+}
+
+/* ============================================================
+   SHARED VIRTUAL FILESYSTEM
+   Used by both File Manager and Terminal so they see the same
+   folders/files (single storage key: 'vfs').
+============================================================ */
+const VFS = {
+  defaultRoot(){
+    return {
+      name:'root', type:'folder',
+      children:[
+        {name:'Dokumen', type:'folder', children:[]},
+        {name:'Proyek', type:'folder', children:[]},
+        {name:'baca-aku.txt', type:'file', content:'Selamat datang di LynnZz OS!\n\nBuat folder & file baru lewat File Manager atau Terminal — keduanya baca disk virtual yang sama.'}
+      ]
+    };
+  },
+  load(){ return LZ.storage.get('vfs', this.defaultRoot()); },
+  save(root){ LZ.storage.set('vfs', root); },
+  getNode(root, pathArr){
+    let node = root;
+    for (const seg of pathArr){
+      const next = node.children && node.children.find(c => c.name === seg);
+      if (!next) return root;
+      node = next;
+    }
+    return node;
+  }
+};
+
+/* ============================================================
+   WALLPAPER THEMES — shared between Settings app and boot-time apply
+============================================================ */
+LZ.THEMES = [
+  { id:'nebula',  label:'Nebula',      grad:'linear-gradient(135deg,#a855f7,#ff2e63)', css:null },
+  { id:'crimson', label:'Crimson Dusk', grad:'linear-gradient(135deg,#ff2e63,#a855f7)', css:`radial-gradient(ellipse 60% 45% at 20% 15%, rgba(255,46,99,0.35), transparent 60%), radial-gradient(ellipse 55% 45% at 85% 75%, rgba(168,85,247,0.28), transparent 60%), linear-gradient(160deg, #150a10 0%, #0a0a12 55%, #0c0a14 100%)` },
+  { id:'abyss',   label:'Deep Abyss',  grad:'linear-gradient(135deg,#1e40af,#581c87)', css:`radial-gradient(ellipse 60% 45% at 30% 20%, rgba(30,64,175,0.35), transparent 60%), radial-gradient(ellipse 55% 45% at 80% 80%, rgba(88,28,135,0.3), transparent 60%), linear-gradient(160deg, #060812 0%, #05050a 55%, #07060f 100%)` },
+  { id:'ember',   label:'Ember',       grad:'linear-gradient(135deg,#ff6a00,#ff2e63)', css:`radial-gradient(ellipse 60% 45% at 25% 20%, rgba(255,106,0,0.3), transparent 60%), radial-gradient(ellipse 55% 45% at 80% 80%, rgba(255,46,99,0.28), transparent 60%), linear-gradient(160deg, #150c08 0%, #0a0a12 55%, #0c0a14 100%)` },
+];
+
+LZ.applyWallpaper = function(){
+  const saved = LZ.storage.get('settings', { theme:'nebula', wallpaperAnim:true });
+  const theme = LZ.THEMES.find(t => t.id === saved.theme) || LZ.THEMES[0];
+  const wp = document.getElementById('wallpaper');
+  if (theme.css) wp.style.background = theme.css;
+  else wp.removeAttribute('style');
+  wp.style.animation = saved.wallpaperAnim === false ? 'none' : '';
+};
+
 /* ============================================================
    1. FILE MANAGER — virtual filesystem persisted in storage
 ============================================================ */
 function renderFileManager(body){
-  let fs = LZ.storage.get('filemanager', {
-    name:'root', type:'folder',
-    children:[
-      {name:'Dokumen', type:'folder', children:[]},
-      {name:'Proyek', type:'folder', children:[]},
-      {name:'baca-aku.txt', type:'file', content:'Selamat datang di LynnZz OS File Manager!\n\nBuat folder & file baru pakai tombol di atas.'}
-    ]
-  });
+  ensureStyle('filemanager', `
+    .fm-wrap{display:flex; flex-direction:column; height:100%; font-size:13px;}
+    .fm-toolbar{display:flex; gap:6px; padding:8px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+    .fm-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:8px; font-size:12px; cursor:pointer;}
+    .fm-btn:active{background:var(--border-strong);}
+    .fm-crumbs{padding:6px 10px; color:var(--text-muted); font-family:var(--font-mono); font-size:11px;}
+    .fm-crumb{cursor:pointer;} .fm-crumb:active{color:var(--violet);}
+    .fm-sep{margin:0 4px;}
+    .fm-list{flex:1; overflow:auto; padding:6px;}
+    .fm-item{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer;}
+    .fm-item:active{background:var(--surface-2);}
+    .fm-item .fm-name{flex:1;}
+    .fm-del{opacity:.5; padding:2px 6px;}
+    .fm-editor{position:absolute; inset:0; background:var(--surface); display:flex; flex-direction:column;}
+    .fm-editor textarea{flex:1; background:var(--void); color:var(--text); border:none; padding:12px; font-family:var(--font-mono); font-size:13px; resize:none; outline:none;}
+    .fm-editor-bar{display:flex; gap:8px; padding:8px; border-bottom:1px solid var(--border);}
+    .fm-empty{padding:24px; text-align:center; color:var(--text-muted);}
+  `);
+
+  let fs = VFS.load();
   let path = []; // array of names from root
 
-  function saveFS(){ LZ.storage.set('filemanager', fs); }
-
-  function getNode(p){
-    let node = fs;
-    for (const seg of p){
-      node = node.children.find(c => c.name === seg);
-      if (!node) return fs;
-    }
-    return node;
-  }
+  function saveFS(){ VFS.save(fs); }
+  function getNode(p){ return VFS.getNode(fs, p); }
 
   function draw(){
     const node = getNode(path);
@@ -50,23 +113,6 @@ function renderFileManager(body){
         <div class="fm-crumbs">${crumbs}</div>
         <div class="fm-list"></div>
       </div>
-      <style>
-        .fm-wrap{display:flex; flex-direction:column; height:100%; font-size:13px;}
-        .fm-toolbar{display:flex; gap:6px; padding:8px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
-        .fm-btn{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:6px 10px; border-radius:8px; font-size:12px; cursor:pointer;}
-        .fm-crumbs{padding:6px 10px; color:var(--text-muted); font-family:var(--font-mono); font-size:11px;}
-        .fm-crumb{cursor:pointer;} .fm-crumb:hover{color:var(--violet);}
-        .fm-sep{margin:0 4px;}
-        .fm-list{flex:1; overflow:auto; padding:6px;}
-        .fm-item{display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px; cursor:pointer;}
-        .fm-item:hover{background:var(--surface-2);}
-        .fm-item .fm-name{flex:1;}
-        .fm-del{opacity:.5; padding:2px 6px;}
-        .fm-editor{position:absolute; inset:0; background:var(--surface); display:flex; flex-direction:column;}
-        .fm-editor textarea{flex:1; background:var(--void); color:var(--text); border:none; padding:12px; font-family:var(--font-mono); font-size:13px; resize:none; outline:none;}
-        .fm-editor-bar{display:flex; gap:8px; padding:8px; border-bottom:1px solid var(--border);}
-        .fm-empty{padding:24px; text-align:center; color:var(--text-muted);}
-      </style>
     `));
 
     const list = body.querySelector('.fm-list');
@@ -131,6 +177,19 @@ function renderFileManager(body){
    2. NOTES
 ============================================================ */
 function renderNotes(body){
+  ensureStyle('notes', `
+    .notes-wrap{display:flex; height:100%;}
+    .notes-sidebar{width:150px; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0;}
+    .notes-new{margin:8px; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:12px; cursor:pointer;}
+    .notes-new:active{background:var(--border-strong);}
+    .notes-list{flex:1; overflow-y:auto; padding:0 6px;}
+    .notes-item{padding:8px; border-radius:8px; font-size:12px; cursor:pointer; color:var(--text-muted); margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .notes-item.active{background:var(--surface-2); color:var(--text);}
+    .notes-editor{flex:1; display:flex; flex-direction:column;}
+    .notes-title{border:none; background:transparent; color:var(--text); font-size:15px; font-weight:600; padding:12px 14px 4px; outline:none;}
+    .notes-body{flex:1; border:none; background:transparent; color:var(--text); font-size:13.5px; padding:0 14px 14px; outline:none; resize:none; line-height:1.6;}
+  `);
+
   let notes = LZ.storage.get('notes', []);
   let activeId = notes[0]?.id || null;
 
@@ -149,17 +208,6 @@ function renderNotes(body){
           <textarea class="notes-body" placeholder="Tulis sesuatu…"></textarea>
         </div>
       </div>
-      <style>
-        .notes-wrap{display:flex; height:100%;}
-        .notes-sidebar{width:150px; border-right:1px solid var(--border); display:flex; flex-direction:column; flex-shrink:0;}
-        .notes-new{margin:8px; padding:8px; border-radius:8px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font-size:12px; cursor:pointer;}
-        .notes-list{flex:1; overflow-y:auto; padding:0 6px;}
-        .notes-item{padding:8px; border-radius:8px; font-size:12px; cursor:pointer; color:var(--text-muted); margin-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
-        .notes-item.active{background:var(--surface-2); color:var(--text);}
-        .notes-editor{flex:1; display:flex; flex-direction:column;}
-        .notes-title{border:none; background:transparent; color:var(--text); font-size:15px; font-weight:600; padding:12px 14px 4px; outline:none;}
-        .notes-body{flex:1; border:none; background:transparent; color:var(--text); font-size:13.5px; padding:0 14px 14px; outline:none; resize:none; line-height:1.6;}
-      </style>
     `));
 
     const list = body.querySelector('.notes-list');
@@ -195,26 +243,36 @@ function renderNotes(body){
    3. CALCULATOR
 ============================================================ */
 function renderCalculator(body){
+  ensureStyle('calculator', `
+    .calc-wrap{display:flex; flex-direction:column; height:100%; background:var(--void);}
+    .calc-screen{padding:24px 18px 12px; text-align:right; display:flex; flex-direction:column; gap:4px; min-height:70px; justify-content:flex-end;}
+    .calc-expr{color:var(--text-muted); font-size:13px; font-family:var(--font-mono); min-height:16px; overflow-x:auto; white-space:nowrap;}
+    .calc-result{font-size:34px; font-weight:600; font-family:var(--font-mono); overflow-x:auto; white-space:nowrap; color:var(--text);}
+    .calc-grid{flex:1; display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:1fr; gap:1px; background:var(--border);}
+    .calc-key{background:var(--surface); border:none; color:var(--text); font-size:18px; font-family:var(--font-mono); cursor:pointer; transition:transform .08s;}
+    .calc-key:active{background:var(--surface-2); transform:scale(.94);}
+    .calc-key.fn{color:var(--crimson);}
+    .calc-key.op{color:var(--violet); font-weight:600; background:#1a1626;}
+    .calc-key.op:active{background:#241d33;}
+    .calc-key.eq{background:var(--grad); color:#fff; font-weight:700;}
+    .calc-key.eq:active{opacity:.85; transform:scale(.94);}
+  `);
+
   let expr = '';
+  let justEvaluated = false;
+  const OPS = ['÷','×','−','+'];
+
   body.innerHTML = '';
   body.appendChild(h(`
     <div class="calc-wrap">
       <div class="calc-screen"><div class="calc-expr"></div><div class="calc-result">0</div></div>
       <div class="calc-grid">
-        ${['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','='].map(k=>`<button class="calc-key${['÷','×','−','+','='].includes(k)?' op':''}${k==='='?' eq':''}" data-k="${k}">${k}</button>`).join('')}
+        ${['C','⌫','%','÷','7','8','9','×','4','5','6','−','1','2','3','+','0','.','='].map(k=>{
+          const cls = OPS.includes(k) ? ' op' : (k==='='?' eq':(k==='C'||k==='⌫'?' fn':''));
+          return `<button class="calc-key${cls}" data-k="${k}">${k}</button>`;
+        }).join('')}
       </div>
     </div>
-    <style>
-      .calc-wrap{display:flex; flex-direction:column; height:100%;}
-      .calc-screen{padding:20px 16px 10px; text-align:right;}
-      .calc-expr{color:var(--text-muted); font-size:13px; font-family:var(--font-mono); min-height:16px;}
-      .calc-result{font-size:32px; font-weight:600; font-family:var(--font-mono); overflow-x:auto;}
-      .calc-grid{flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border);}
-      .calc-key{background:var(--surface); border:none; color:var(--text); font-size:17px; cursor:pointer;}
-      .calc-key:active{background:var(--surface-2);}
-      .calc-key.op{color:var(--violet); font-weight:600;}
-      .calc-key.eq{background:var(--grad); color:#fff; grid-row: span 1;}
-    </style>
   `));
 
   const exprEl = body.querySelector('.calc-expr');
@@ -223,28 +281,40 @@ function renderCalculator(body){
   function safeEval(str){
     const sanitized = str.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-').replace(/%/g,'/100');
     if (!/^[0-9+\-*/.() ]*$/.test(sanitized)) throw new Error('bad');
-    // eslint-disable-next-line no-new-func
-    return Function(`"use strict"; return (${sanitized})`)();
+    const r = Function(`"use strict"; return (${sanitized})`)();
+    if (!isFinite(r)) throw new Error('inf');
+    return r;
+  }
+
+  function refresh(){
+    exprEl.textContent = expr;
+    if (!expr){ resEl.textContent = '0'; return; }
+    try{ resEl.textContent = safeEval(expr); }
+    catch(e){ /* keep last shown result while expr is mid-typing */ }
   }
 
   body.querySelectorAll('.calc-key').forEach(btn => {
     btn.onclick = () => {
       const k = btn.dataset.k;
-      if (k === 'C'){ expr = ''; }
-      else if (k === '⌫'){ expr = expr.slice(0,-1); }
-      else if (k === '='){
+      if (k === 'C'){ expr = ''; justEvaluated = false; refresh(); return; }
+      if (k === '⌫'){ expr = expr.slice(0,-1); justEvaluated = false; refresh(); return; }
+      if (k === '='){
         try{
           const r = safeEval(expr);
           exprEl.textContent = expr + ' =';
           expr = String(r);
           resEl.textContent = expr;
-          return;
-        }catch(e){ resEl.textContent = 'Error'; expr=''; return; }
+          justEvaluated = true;
+        }catch(e){ resEl.textContent = 'Error'; expr=''; justEvaluated=false; }
+        return;
+      }
+      if (justEvaluated){
+        expr = OPS.includes(k) ? expr + k : k; // chain from result on operator, start fresh on digit
+        justEvaluated = false;
       } else {
         expr += k;
       }
-      exprEl.textContent = expr;
-      resEl.textContent = expr ? (()=>{ try{ return safeEval(expr); }catch(e){ return expr; } })() : '0';
+      refresh();
     };
   });
 }
@@ -253,25 +323,41 @@ function renderCalculator(body){
    4. BROWSER
 ============================================================ */
 function renderBrowser(body){
+  ensureStyle('browser', `
+    .br-wrap{display:flex; flex-direction:column; height:100%;}
+    .br-bar{display:flex; gap:6px; padding:8px 8px 6px;}
+    .br-url{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; font-size:12.5px; outline:none;}
+    .br-go, .br-ext{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:0 12px; cursor:pointer; font-size:12.5px;}
+    .br-shortcuts{display:flex; gap:6px; padding:0 8px 8px; flex-wrap:wrap;}
+    .br-chip{background:transparent; border:1px solid var(--border); color:var(--text-muted); border-radius:20px; padding:4px 11px; font-size:11px; cursor:pointer;}
+    .br-chip:active{background:var(--surface-2); color:var(--violet);}
+    .br-loadbar{height:2px; background:transparent; overflow:hidden;}
+    .br-loadbar-fill{height:100%; width:0%; background:var(--grad); transition:width .3s;}
+    .br-loadbar-fill.loading{width:60%; animation:brLoad 1s ease-in-out infinite;}
+    @keyframes brLoad{0%{margin-left:-60%;} 100%{margin-left:100%;}}
+    .br-note{font-size:10.5px; color:var(--text-muted); padding:0 10px 6px;}
+    .br-frame{flex:1; border:none; background:#fff;}
+  `);
+
+  const shortcuts = [
+    { label:'Wikipedia', url:'https://www.wikipedia.org' },
+    { label:'DuckDuckGo', url:'https://duckduckgo.com' },
+    { label:'GitHub', url:'https://github.com' },
+  ];
+
   body.innerHTML = '';
   body.appendChild(h(`
     <div class="br-wrap">
       <div class="br-bar">
-        <input class="br-url" placeholder="Ketik URL, mis. wikipedia.org" value="https://www.wikipedia.org">
+        <input class="br-url" placeholder="Ketik URL, mis. wikipedia.org" value="${shortcuts[0].url}">
         <button class="br-go">Buka</button>
         <button class="br-ext" title="Buka di tab baru">↗</button>
       </div>
+      <div class="br-shortcuts">${shortcuts.map(s=>`<button class="br-chip" data-url="${s.url}">${s.label}</button>`).join('')}</div>
+      <div class="br-loadbar"><div class="br-loadbar-fill"></div></div>
       <div class="br-note">Sebagian situs (Google, YouTube, dll) memblokir tampilan embed (X-Frame-Options). Kalau blank, pakai tombol ↗.</div>
-      <iframe class="br-frame" src="https://www.wikipedia.org"></iframe>
+      <iframe class="br-frame" src="${shortcuts[0].url}"></iframe>
     </div>
-    <style>
-      .br-wrap{display:flex; flex-direction:column; height:100%;}
-      .br-bar{display:flex; gap:6px; padding:8px; border-bottom:1px solid var(--border);}
-      .br-url{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:8px; font-size:12.5px; outline:none;}
-      .br-go, .br-ext{background:var(--surface-2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:0 12px; cursor:pointer; font-size:12.5px;}
-      .br-note{font-size:10.5px; color:var(--text-muted); padding:2px 10px 6px;}
-      .br-frame{flex:1; border:none; background:#fff;}
-    </style>
   `));
 
   function normalize(u){
@@ -280,15 +366,37 @@ function renderBrowser(body){
   }
   const urlInput = body.querySelector('.br-url');
   const frame = body.querySelector('.br-frame');
-  body.querySelector('.br-go').onclick = () => { frame.src = normalize(urlInput.value.trim()); };
-  urlInput.onkeydown = (e) => { if (e.key === 'Enter') frame.src = normalize(urlInput.value.trim()); };
+  const loadFill = body.querySelector('.br-loadbar-fill');
+
+  function go(u){
+    urlInput.value = u;
+    loadFill.classList.add('loading');
+    frame.src = normalize(u);
+  }
+  frame.onload = () => loadFill.classList.remove('loading');
+
+  body.querySelector('.br-go').onclick = () => go(urlInput.value.trim());
+  urlInput.onkeydown = (e) => { if (e.key === 'Enter') go(urlInput.value.trim()); };
   body.querySelector('.br-ext').onclick = () => window.open(normalize(urlInput.value.trim()), '_blank');
+  body.querySelectorAll('.br-chip').forEach(chip => { chip.onclick = () => go(chip.dataset.url); });
 }
 
 /* ============================================================
    5. MUSIC PLAYER
 ============================================================ */
 function renderMusicPlayer(body){
+  ensureStyle('music', `
+    .mp-wrap{display:flex; flex-direction:column; height:100%; padding:12px; gap:10px;}
+    .mp-add{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:10px; cursor:pointer; font-size:12.5px;}
+    .mp-now{text-align:center; font-size:13px; color:var(--text-muted); font-family:var(--font-mono); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .mp-controls{display:flex; justify-content:center; gap:16px;}
+    .mp-controls button{width:44px; height:44px; border-radius:50%; border:none; background:var(--grad); color:#fff; font-size:16px; cursor:pointer;}
+    .mp-controls button:active{opacity:.85;}
+    .mp-list{flex:1; overflow-y:auto; border-top:1px solid var(--border); padding-top:8px;}
+    .mp-track{padding:8px; border-radius:8px; font-size:12.5px; cursor:pointer; color:var(--text-muted);}
+    .mp-track.active{background:var(--surface-2); color:var(--violet);}
+  `);
+
   let playlist = [];
   let current = -1;
   body.innerHTML = '';
@@ -305,16 +413,6 @@ function renderMusicPlayer(body){
       </div>
       <div class="mp-list"></div>
     </div>
-    <style>
-      .mp-wrap{display:flex; flex-direction:column; height:100%; padding:12px; gap:10px;}
-      .mp-add{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:10px; cursor:pointer; font-size:12.5px;}
-      .mp-now{text-align:center; font-size:13px; color:var(--text-muted); font-family:var(--font-mono);}
-      .mp-controls{display:flex; justify-content:center; gap:16px;}
-      .mp-controls button{width:44px; height:44px; border-radius:50%; border:none; background:var(--grad); color:#fff; font-size:16px; cursor:pointer;}
-      .mp-list{flex:1; overflow-y:auto; border-top:1px solid var(--border); padding-top:8px;}
-      .mp-track{padding:8px; border-radius:8px; font-size:12.5px; cursor:pointer; color:var(--text-muted);}
-      .mp-track.active{background:var(--surface-2); color:var(--violet);}
-    </style>
   `));
 
   const audio = body.querySelector('.mp-audio');
@@ -360,47 +458,90 @@ function renderMusicPlayer(body){
    6. GALLERY
 ============================================================ */
 function renderGallery(body){
-  let images = [];
+  ensureStyle('gallery', `
+    .gal-wrap{display:flex; flex-direction:column; height:100%; padding:12px; gap:10px;}
+    .gal-toolbar{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+    .gal-add{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:9px 14px; border-radius:10px; cursor:pointer; font-size:12.5px;}
+    .gal-count{font-size:11.5px; color:var(--text-muted); font-family:var(--font-mono);}
+    .gal-grid{flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px; align-content:start;}
+    .gal-item{position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer;}
+    .gal-item img{width:100%; height:100%; object-fit:cover; display:block;}
+    .gal-item .gal-del{position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(0,0,0,.6); color:#fff; border:none; font-size:11px; display:flex; align-items:center; justify-content:center;}
+    .gal-empty{text-align:center; color:var(--text-muted); font-size:12px; margin-top:20px;}
+    .gal-lightbox{position:fixed; inset:0; background:rgba(0,0,0,.9); display:flex; align-items:center; justify-content:center; z-index:999;}
+    .gal-lightbox img{max-width:85%; max-height:80%; border-radius:8px;}
+    .gal-lb-close{position:absolute; top:20px; right:20px; width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.12); color:#fff; border:none; font-size:16px;}
+    .gal-lb-nav{position:absolute; top:50%; transform:translateY(-50%); width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.12); color:#fff; border:none; font-size:18px;}
+    .gal-lb-prev{left:14px;} .gal-lb-next{right:14px;}
+    .gal-lb-count{position:absolute; bottom:20px; left:50%; transform:translateX(-50%); color:#fff; font-size:12px; font-family:var(--font-mono); opacity:.8;}
+  `);
+
+  let images = []; // {url, name}
+  let lightboxIndex = -1;
+
   body.innerHTML = '';
   body.appendChild(h(`
     <div class="gal-wrap">
       <input type="file" class="gal-input" accept="image/*" multiple hidden>
-      <button class="gal-add">🖼 Tambah Gambar</button>
+      <div class="gal-toolbar">
+        <button class="gal-add">🖼 Tambah Gambar</button>
+        <span class="gal-count"></span>
+      </div>
       <div class="gal-grid"></div>
       <div class="gal-empty">Belum ada gambar. Gambar hanya tersimpan untuk sesi ini.</div>
     </div>
-    <style>
-      .gal-wrap{display:flex; flex-direction:column; height:100%; padding:12px; gap:10px;}
-      .gal-add{background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:10px; border-radius:10px; cursor:pointer; font-size:12.5px;}
-      .gal-grid{flex:1; overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px;}
-      .gal-grid img{width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; cursor:pointer;}
-      .gal-empty{text-align:center; color:var(--text-muted); font-size:12px;}
-      .gal-lightbox{position:fixed; inset:0; background:rgba(0,0,0,.85); display:flex; align-items:center; justify-content:center; z-index:999;}
-      .gal-lightbox img{max-width:90%; max-height:90%; border-radius:8px;}
-    </style>
   `));
 
   const grid = body.querySelector('.gal-grid');
   const input = body.querySelector('.gal-input');
   const empty = body.querySelector('.gal-empty');
+  const countEl = body.querySelector('.gal-count');
 
   body.querySelector('.gal-add').onclick = () => input.click();
   input.onchange = () => {
-    Array.from(input.files).forEach(f => images.push(URL.createObjectURL(f)));
+    Array.from(input.files).forEach(f => images.push({ url: URL.createObjectURL(f), name: f.name }));
     draw();
   };
+
   function draw(){
     grid.innerHTML = '';
     empty.style.display = images.length ? 'none' : 'block';
-    images.forEach(src => {
-      const img = h(`<img src="${src}">`);
-      img.onclick = () => {
-        const lb = h(`<div class="gal-lightbox"><img src="${src}"></div>`);
-        lb.onclick = () => lb.remove();
-        document.body.appendChild(lb);
-      };
-      grid.appendChild(img);
+    countEl.textContent = images.length ? `${images.length} gambar` : '';
+    images.forEach((img, i) => {
+      const item = h(`<div class="gal-item"><img src="${img.url}"><button class="gal-del">✕</button></div>`);
+      item.querySelector('img').onclick = () => openLightbox(i);
+      item.querySelector('.gal-del').onclick = (e) => { e.stopPropagation(); images.splice(i,1); draw(); };
+      grid.appendChild(item);
     });
+  }
+
+  function openLightbox(i){
+    lightboxIndex = i;
+    const lb = h(`
+      <div class="gal-lightbox">
+        <img src="${images[i].url}">
+        <button class="gal-lb-close">✕</button>
+        <button class="gal-lb-nav gal-lb-prev">‹</button>
+        <button class="gal-lb-nav gal-lb-next">›</button>
+        <div class="gal-lb-count">${i+1} / ${images.length}</div>
+      </div>
+    `);
+    function update(){
+      lb.querySelector('img').src = images[lightboxIndex].url;
+      lb.querySelector('.gal-lb-count').textContent = `${lightboxIndex+1} / ${images.length}`;
+    }
+    lb.querySelector('.gal-lb-close').onclick = () => lb.remove();
+    lb.addEventListener('click', (e) => { if (e.target === lb) lb.remove(); });
+    lb.querySelector('.gal-lb-prev').onclick = (e) => { e.stopPropagation(); lightboxIndex = (lightboxIndex-1+images.length)%images.length; update(); };
+    lb.querySelector('.gal-lb-next').onclick = (e) => { e.stopPropagation(); lightboxIndex = (lightboxIndex+1)%images.length; update(); };
+    let sx = 0;
+    lb.addEventListener('touchstart', (e)=>{ sx = e.touches[0].clientX; });
+    lb.addEventListener('touchend', (e)=>{
+      const dx = e.changedTouches[0].clientX - sx;
+      if (dx > 50){ lightboxIndex = (lightboxIndex-1+images.length)%images.length; update(); }
+      else if (dx < -50){ lightboxIndex = (lightboxIndex+1)%images.length; update(); }
+    });
+    document.body.appendChild(lb);
   }
   draw();
 }
@@ -409,16 +550,29 @@ function renderGallery(body){
    7. SETTINGS
 ============================================================ */
 function renderSettings(body){
-  const themes = [
-    { id:'nebula', label:'Nebula (default)', css: null },
-    { id:'crimson', label:'Crimson Dusk', css: `radial-gradient(ellipse 60% 45% at 20% 15%, rgba(255,46,99,0.35), transparent 60%), radial-gradient(ellipse 55% 45% at 85% 75%, rgba(168,85,247,0.28), transparent 60%), linear-gradient(160deg, #150a10 0%, #0a0a12 55%, #0c0a14 100%)` },
-    { id:'abyss', label:'Deep Abyss', css: `radial-gradient(ellipse 60% 45% at 30% 20%, rgba(30,64,175,0.35), transparent 60%), radial-gradient(ellipse 55% 45% at 80% 80%, rgba(88,28,135,0.3), transparent 60%), linear-gradient(160deg, #060812 0%, #05050a 55%, #07060f 100%)` },
-    { id:'ember', label:'Ember', css: `radial-gradient(ellipse 60% 45% at 25% 20%, rgba(255,106,0,0.3), transparent 60%), radial-gradient(ellipse 55% 45% at 80% 80%, rgba(255,46,99,0.28), transparent 60%), linear-gradient(160deg, #150c08 0%, #0a0a12 55%, #0c0a14 100%)` },
-  ];
-  const saved = LZ.storage.get('settings', { theme:'nebula' });
+  ensureStyle('settings', `
+    .st-wrap{padding:16px; overflow-y:auto; height:100%;}
+    .st-section{margin-bottom:22px;}
+    .st-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:10px;}
+    .st-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+    .st-account{display:flex; align-items:center; gap:12px;}
+    .st-themes{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
+    .st-theme{height:56px; border-radius:10px; border:2px solid var(--border); cursor:pointer; position:relative; display:flex; align-items:flex-end; padding:6px 8px; font-size:11px; font-weight:500; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6);}
+    .st-theme.active{border-color:var(--violet); box-shadow:0 0 0 2px rgba(168,85,247,.25);}
+    .st-danger{background:rgba(255,46,99,0.12); border:1px solid var(--crimson); color:var(--crimson); padding:9px 14px; border-radius:9px; cursor:pointer; font-size:12.5px;}
+    .st-switch{display:flex; align-items:center; gap:6px; cursor:pointer;}
+    .st-switch input{display:none;}
+    .st-switch-track{width:34px; height:19px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); position:relative; transition:background .15s; display:inline-block;}
+    .st-switch-thumb{position:absolute; top:1px; left:1px; width:15px; height:15px; border-radius:50%; background:var(--text-muted); transition:transform .15s, background .15s;}
+    .st-switch input:checked + .st-switch-track{background:rgba(168,85,247,.3); border-color:var(--violet);}
+    .st-switch input:checked + .st-switch-track .st-switch-thumb{transform:translateX(15px); background:var(--violet);}
+    .st-switch-label{font-size:11.5px; color:var(--text-muted);}
+  `);
+
+  const saved = LZ.storage.get('settings', { theme:'nebula', wallpaperAnim:true });
+  const u = LZ.auth.currentUser;
 
   body.innerHTML = '';
-  const u = LZ.auth.currentUser;
   body.appendChild(h(`
     <div class="st-wrap">
       <div class="st-section">
@@ -430,7 +584,14 @@ function renderSettings(body){
         </div>
       </div>
       <div class="st-section">
-        <div class="st-label">Wallpaper</div>
+        <div class="st-row">
+          <div class="st-label" style="margin-bottom:0;">Wallpaper</div>
+          <label class="st-switch">
+            <input type="checkbox" class="st-anim-toggle" ${saved.wallpaperAnim !== false ? 'checked' : ''}>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+            <span class="st-switch-label">Animasi</span>
+          </label>
+        </div>
         <div class="st-themes"></div>
       </div>
       <div class="st-section">
@@ -442,28 +603,16 @@ function renderSettings(body){
         <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">LynnZz OS v1.0<br>Dibangun dengan HTML, CSS, JS & Firebase.</div>
       </div>
     </div>
-    <style>
-      .st-wrap{padding:16px; overflow-y:auto; height:100%;}
-      .st-section{margin-bottom:22px;}
-      .st-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:10px;}
-      .st-account{display:flex; align-items:center; gap:12px;}
-      .st-themes{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
-      .st-theme{height:52px; border-radius:10px; border:2px solid var(--border); cursor:pointer; position:relative; display:flex; align-items:flex-end; padding:6px; font-size:10px; color:#fff; text-shadow:0 1px 2px #000;}
-      .st-theme.active{border-color:var(--violet);}
-      .st-danger{background:rgba(255,46,99,0.12); border:1px solid var(--crimson); color:var(--crimson); padding:9px 14px; border-radius:9px; cursor:pointer; font-size:12.5px;}
-    </style>
   `));
 
   const themeGrid = body.querySelector('.st-themes');
-  themes.forEach(t => {
+  LZ.THEMES.forEach(t => {
     const el = h(`<div class="st-theme ${saved.theme===t.id?'active':''}">${t.label}</div>`);
-    el.style.background = t.css || getComputedStyle(document.getElementById('wallpaper')).backgroundImage;
-    if (t.id === 'nebula') el.style.background = 'linear-gradient(135deg,#a855f7,#ff2e63)';
-    else el.style.background = t.css;
+    el.style.background = t.grad;
     el.onclick = () => {
-      LZ.storage.set('settings', { theme: t.id });
-      document.getElementById('wallpaper').style.background = t.css ? t.css + ', linear-gradient(160deg,#0d0b16,#0a0a12)' : '';
-      if (!t.css) document.getElementById('wallpaper').removeAttribute('style');
+      const settings = { ...LZ.storage.get('settings', {}), theme: t.id };
+      LZ.storage.set('settings', settings);
+      LZ.applyWallpaper();
       body.querySelectorAll('.st-theme').forEach(x=>x.classList.remove('active'));
       el.classList.add('active');
       LZ.notify('Settings', `Wallpaper diganti ke ${t.label}.`, '🎨', 2000);
@@ -471,11 +620,13 @@ function renderSettings(body){
     themeGrid.appendChild(el);
   });
 
-  // apply saved theme on load
-  const savedTheme = themes.find(t => t.id === saved.theme);
-  if (savedTheme && savedTheme.css){
-    document.getElementById('wallpaper').style.background = savedTheme.css;
-  }
+  LZ.applyWallpaper(); // reflect current saved state whenever Settings is opened
+
+  body.querySelector('.st-anim-toggle').onchange = (e) => {
+    const settings = { ...LZ.storage.get('settings', {}), wallpaperAnim: e.target.checked };
+    LZ.storage.set('settings', settings);
+    LZ.applyWallpaper();
+  };
 
   body.querySelector('.st-danger').onclick = () => {
     if (confirm('Yakin mau hapus semua data lokal LynnZz OS? Ini tidak bisa dibatalkan.')){
@@ -483,6 +634,184 @@ function renderSettings(body){
       LZ.notify('Settings', 'Data lokal dihapus. Reload halaman untuk efek penuh.', '🗑');
     }
   };
+}
+
+/* ============================================================
+   8. TERMINAL — commands + shared virtual filesystem (VFS)
+============================================================ */
+function renderTerminal(body){
+  ensureStyle('terminal', `
+    .term-wrap{display:flex; flex-direction:column; height:100%; background:#08080d; font-family:var(--font-mono); font-size:12.5px;}
+    .term-output{flex:1; overflow-y:auto; padding:10px 12px; white-space:pre-wrap; word-break:break-word; color:#c9c6e0;}
+    .term-line{margin-bottom:2px; line-height:1.5;}
+    .term-echo{color:#7dd3fc;}
+    .term-err{color:var(--crimson);}
+    .term-ok{color:#86efac;}
+    .term-inputline{display:flex; align-items:center; gap:6px; padding:8px 12px; border-top:1px solid var(--border);}
+    .term-prompt{color:var(--violet); white-space:nowrap; flex-shrink:0;}
+    .term-input{flex:1; background:transparent; border:none; outline:none; color:#eceaf5; font-family:var(--font-mono); font-size:12.5px;}
+  `);
+
+  let fs = VFS.load();
+  let cwd = [];
+  let history = [];
+  let histIdx = -1;
+
+  function saveFS(){ VFS.save(fs); }
+  function node(p = cwd){ return VFS.getNode(fs, p); }
+  function pathStr(){ return '/' + cwd.join('/'); }
+
+  body.innerHTML = '';
+  body.appendChild(h(`
+    <div class="term-wrap">
+      <div class="term-output"></div>
+      <div class="term-inputline">
+        <span class="term-prompt"></span>
+        <input class="term-input" autocomplete="off" autocapitalize="off" spellcheck="false">
+      </div>
+    </div>
+  `));
+
+  const out = body.querySelector('.term-output');
+  const input = body.querySelector('.term-input');
+  const promptEl = body.querySelector('.term-prompt');
+  const user = (LZ.auth.currentUser?.displayName || 'guest').toLowerCase().replace(/\s+/g,'');
+
+  function updatePrompt(){ promptEl.textContent = `${user}@lynnzz${pathStr()}$`; }
+
+  function print(text, cls){
+    const line = h(`<div class="term-line ${cls||''}"></div>`);
+    line.textContent = text;
+    out.appendChild(line);
+    out.scrollTop = out.scrollHeight;
+  }
+
+  const COMMANDS = {
+    help(){
+      print([
+        'Perintah yang tersedia:',
+        '  help                tampilkan bantuan ini',
+        '  clear               bersihkan layar',
+        '  about               tentang LynnZz OS',
+        '  date                tanggal & waktu sekarang',
+        '  whoami              tampilkan user aktif',
+        '  pwd                 tampilkan lokasi sekarang',
+        '  ls                  daftar isi folder',
+        '  cd <folder>         pindah folder ("cd .." naik, "cd /" ke root)',
+        '  mkdir <nama>        buat folder baru',
+        '  touch <nama>        buat file kosong',
+        '  cat <nama>          tampilkan isi file',
+        '  echo <teks>         tampilkan teks (dukung: echo teks > file.txt)',
+        '  rm <nama>           hapus file/folder',
+      ].join('\n'));
+    },
+    clear(){ out.innerHTML = ''; },
+    about(){
+      print('LynnZz OS v2.0 — Terminal\nDibangun dengan HTML, CSS, JS & Firebase.\nKetik "help" buat lihat daftar perintah.');
+    },
+    date(){ print(new Date().toString()); },
+    whoami(){ print(LZ.auth.currentUser?.email || 'guest@lynnzz.os'); },
+    pwd(){ print(pathStr()); },
+    ls(){
+      const n = node();
+      if (!n.children || !n.children.length){ print('(kosong)'); return; }
+      print(n.children.map(c => c.type === 'folder' ? c.name + '/' : c.name).join('   '));
+    },
+    cd(arg){
+      if (!arg || arg === '~' || arg === '/'){ cwd = []; updatePrompt(); return; }
+      if (arg === '..'){ cwd.pop(); updatePrompt(); return; }
+      const segs = arg.split('/').filter(Boolean);
+      let testPath = [...cwd];
+      for (const seg of segs){
+        if (seg === '..'){ testPath.pop(); continue; }
+        const n = VFS.getNode(fs, testPath);
+        const target = n.children && n.children.find(c => c.name === seg && c.type === 'folder');
+        if (!target){ print(`cd: folder tidak ditemukan: ${seg}`, 'term-err'); return; }
+        testPath.push(seg);
+      }
+      cwd = testPath;
+      updatePrompt();
+    },
+    mkdir(arg){
+      if (!arg){ print('mkdir: butuh nama folder', 'term-err'); return; }
+      const n = node();
+      if (n.children.find(c => c.name === arg)){ print(`mkdir: "${arg}" sudah ada`, 'term-err'); return; }
+      n.children.push({ name: arg, type:'folder', children:[] });
+      saveFS();
+      print(`folder "${arg}" dibuat`, 'term-ok');
+    },
+    touch(arg){
+      if (!arg){ print('touch: butuh nama file', 'term-err'); return; }
+      const n = node();
+      if (n.children.find(c => c.name === arg)){ print(`touch: "${arg}" sudah ada`, 'term-err'); return; }
+      n.children.push({ name: arg, type:'file', content:'' });
+      saveFS();
+      print(`file "${arg}" dibuat`, 'term-ok');
+    },
+    cat(arg){
+      if (!arg){ print('cat: butuh nama file', 'term-err'); return; }
+      const n = node();
+      const f = n.children.find(c => c.name === arg && c.type === 'file');
+      if (!f){ print(`cat: file tidak ditemukan: ${arg}`, 'term-err'); return; }
+      print(f.content || '(kosong)');
+    },
+    rm(arg){
+      if (!arg){ print('rm: butuh nama file/folder', 'term-err'); return; }
+      const n = node();
+      const before = n.children.length;
+      n.children = n.children.filter(c => c.name !== arg);
+      if (n.children.length === before){ print(`rm: tidak ditemukan: ${arg}`, 'term-err'); return; }
+      saveFS();
+      print(`"${arg}" dihapus`, 'term-ok');
+    },
+    echo(argRaw){
+      const redirect = argRaw.match(/^(.*)>\s*(\S+)$/);
+      if (redirect){
+        const text = redirect[1].trim();
+        const filename = redirect[2].trim();
+        const n = node();
+        let f = n.children.find(c => c.name === filename && c.type === 'file');
+        if (!f){ f = { name: filename, type:'file', content:'' }; n.children.push(f); }
+        f.content = text;
+        saveFS();
+        print(`ditulis ke "${filename}"`, 'term-ok');
+      } else {
+        print(argRaw);
+      }
+    }
+  };
+
+  function run(raw){
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+    print(`${user}@lynnzz${pathStr()}$ ${trimmed}`, 'term-echo');
+    const sp = trimmed.indexOf(' ');
+    const cmd = sp === -1 ? trimmed : trimmed.slice(0, sp);
+    const arg = sp === -1 ? '' : trimmed.slice(sp + 1);
+    if (COMMANDS[cmd]) COMMANDS[cmd](arg);
+    else print(`command not found: ${cmd} (ketik "help")`, 'term-err');
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter'){
+      const val = input.value;
+      run(val);
+      if (val.trim()){ history.push(val); histIdx = history.length; }
+      input.value = '';
+    } else if (e.key === 'ArrowUp'){
+      if (histIdx > 0){ histIdx--; input.value = history[histIdx] || ''; }
+      e.preventDefault();
+    } else if (e.key === 'ArrowDown'){
+      if (histIdx < history.length){ histIdx++; input.value = history[histIdx] || ''; }
+      e.preventDefault();
+    }
+  });
+
+  body.querySelector('.term-wrap').addEventListener('click', () => input.focus());
+
+  print('LynnZz OS Terminal — ketik "help" buat mulai.', 'term-ok');
+  updatePrompt();
+  setTimeout(()=> input.focus(), 50);
 }
 
 /* ============================================================
@@ -496,4 +825,5 @@ LZ.APPS = [
   { id:'music',        name:'Music Player', icon:'🎵', width:340, height:420, render: renderMusicPlayer },
   { id:'gallery',      name:'Gallery',      icon:'🖼️', width:400, height:380, render: renderGallery },
   { id:'settings',     name:'Settings',     icon:'⚙️', width:380, height:440, render: renderSettings },
+  { id:'terminal',     name:'Terminal',     icon:'💻', width:460, height:360, render: renderTerminal },
 ];
