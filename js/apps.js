@@ -837,7 +837,7 @@ function renderLynnAI(body){
     .ai-send:disabled{opacity:.5;}
   `);
 
-  const NEEDS_SETUP = !GROQ_API_KEY || GROQ_API_KEY.startsWith('GANTI');
+  const NEEDS_SETUP = false;
   let messages = []; // {role:'user'|'assistant', text}
 
   body.innerHTML = '';
@@ -892,14 +892,12 @@ function renderLynnAI(body){
   }
 
   async function callGroq(){
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: GROQ_MODEL,
         messages: [
           { role: 'system', content: 'Kamu adalah Lynn AI, asisten yang terpasang di dalam LynnZz OS. Jawab singkat, jelas, dan pakai Bahasa Indonesia kecuali diminta lain.' },
           ...messages.map(m => ({ role: m.role, content: m.text }))
