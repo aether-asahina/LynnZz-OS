@@ -67,7 +67,13 @@ LZ.win = (function(){
 
     // render app content
     const body = win.querySelector('.win-body');
-    app.render(body);
+    try{
+      app.render(body);
+    }catch(err){
+      console.error('[LynnZz OS] render error in', appId, err);
+      body.innerHTML = `<div style="padding:16px; color:var(--crimson); font-family:var(--font-mono); font-size:12px; white-space:pre-wrap;">Error render "${app.name}":\n${err.message}</div>`;
+      if (LZ.notify) LZ.notify('⚠️ Gagal render app', `${app.name}: ${err.message}`, '⚠️', 10000);
+    }
 
     // taskbar entry
     const tb = document.createElement('div');

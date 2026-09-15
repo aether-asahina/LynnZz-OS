@@ -6,6 +6,30 @@
 const LZ = {}; // global namespace to avoid polluting window
 
 /* ---------------------------------------------------------
+   DIAGNOSTICS — surfaces silent JS errors as visible toasts
+   since there's no devtools/console access on mobile.
+--------------------------------------------------------- */
+window.addEventListener('error', (e) => {
+  console.error('[LynnZz OS error]', e);
+  const msg = `${e.message} — ${(e.filename||'?').split('/').pop()}:${e.lineno}`;
+  if (LZ.notify) LZ.notify('⚠️ Error terdeteksi', msg, '⚠️', 12000);
+  else alert('Error sebelum OS siap: ' + msg);
+});
+
+// Self-test: can we actually inject a <style> tag and have it take effect?
+(function styleInjectionSelfTest(){
+  try{
+    const s = document.createElement('style');
+    s.textContent = ':root{ --lz-smoketest: 1px; }';
+    document.head.appendChild(s);
+    const val = getComputedStyle(document.documentElement).getPropertyValue('--lz-smoketest').trim();
+    window.__LZ_STYLE_OK__ = (val === '1px');
+  }catch(e){
+    window.__LZ_STYLE_OK__ = false;
+  }
+})();
+
+/* ---------------------------------------------------------
    STORAGE HELPERS (namespaced by logged-in user)
 --------------------------------------------------------- */
 LZ.storage = {
@@ -243,6 +267,7 @@ function enterDesktop(){
   LZ.renderLaunchers();
   LZ.startClock();
   setTimeout(()=> LZ.notify('Selamat datang', `Halo, ${LZ.auth.currentUser.displayName || 'Pengguna'} 👋`, '✨'), 500);
+  setTimeout(()=> LZ.notify('Diagnostik', `Injeksi CSS dinamis: ${window.__LZ_STYLE_OK__ ? '✅ OK' : '❌ GAGAL'}`, '🔧', 9000), 1200);
 }
 
 /* ---------------------------------------------------------
