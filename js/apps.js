@@ -963,12 +963,4 @@ LZ.APPS = [
   { id:'settings',     name:'Settings',     icon:'⚙️', width:380, height:440, render: renderSettings },
   { id:'terminal',     name:'Terminal',     icon:'💻', width:460, height:360, render: renderTerminal },
   { id:'lynnai',       name:'Lynn AI',      icon:'🤖', width:400, height:460, render: renderLynnAI },
-  { id:'filemanager', name:'File Manager', icon:'📁', width:420, height:380, render: renderFileManager },
-  { id:'notes',        name:'Notes',        icon:'📝', width:440, height:360, render: renderNotes },
-  { id:'calculator',   name:'Calculator',   icon:'🧮', width:280, height:400, render: renderCalculator },
-  { id:'browser',      name:'Browser',      icon:'🌐', width:520, height:420, render: renderBrowser },
-  { id:'music',        name:'Music Player', icon:'🎵', width:340, height:420, render: renderMusicPlayer },
-  { id:'gallery',      name:'Gallery',      icon:'🖼️', width:400, height:380, render: renderGallery },
-  { id:'settings',     name:'Settings',     icon:'⚙️', width:380, height:440, render: renderSettings },
-  { id:'terminal',     name:'Terminal',     icon:'💻', width:460, height:360, render: renderTerminal },
 ];
