@@ -817,7 +817,152 @@ function renderTerminal(body){
 /* ============================================================
    APP REGISTRY
 ============================================================ */
+function renderLynnAI(body){
+  ensureStyle('lynnai', `
+    .ai-wrap{display:flex; flex-direction:column; height:100%; background:var(--void);}
+    .ai-header{display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border); flex-shrink:0;}
+    .ai-avatar{width:26px; height:26px; border-radius:8px; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;}
+    .ai-header-text{font-size:12.5px; color:var(--text-muted);}
+    .ai-messages{flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px;}
+    .ai-msg{max-width:85%; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.5; white-space:pre-wrap; word-break:break-word;}
+    .ai-msg.user{align-self:flex-end; background:var(--grad); color:#fff; border-bottom-right-radius:4px;}
+    .ai-msg.assistant{align-self:flex-start; background:var(--surface-2); border:1px solid var(--border); border-bottom-left-radius:4px;}
+    .ai-msg.system{align-self:center; background:transparent; color:var(--text-muted); font-size:11.5px; text-align:center; max-width:100%;}
+    .ai-msg pre{background:#08080d; border:1px solid var(--border); border-radius:8px; padding:10px; overflow-x:auto; margin:6px 0; font-family:var(--font-mono); font-size:11.5px; white-space:pre;}
+    .ai-msg code{font-family:var(--font-mono);}
+    .ai-typing{align-self:flex-start; color:var(--text-muted); font-size:12px; padding:0 4px;}
+    .ai-inputbar{display:flex; gap:6px; padding:8px; border-top:1px solid var(--border); flex-shrink:0;}
+    .ai-input{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:20px; font-size:13px; outline:none; resize:none; max-height:80px; font-family:inherit;}
+    .ai-send{width:36px; height:36px; border-radius:50%; border:none; background:var(--grad); color:#fff; font-size:15px; cursor:pointer; flex-shrink:0;}
+    .ai-send:disabled{opacity:.5;}
+  `);
+
+  const NEEDS_SETUP = !GROQ_API_KEY || GROQ_API_KEY.startsWith('GANTI');
+  let messages = []; // {role:'user'|'assistant', text}
+
+  body.innerHTML = '';
+  body.appendChild(h(`
+    <div class="ai-wrap">
+      <div class="ai-header">
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-header-text">Lynn AI ${NEEDS_SETUP ? '— belum dikonfigurasi' : '— ditenagai Groq (Llama 3.3)'}</div>
+      </div>
+      <div class="ai-messages"></div>
+      <div class="ai-inputbar">
+        <textarea class="ai-input" rows="1" placeholder="Tanya apa aja, mis. 'Buatkan kode Java CRUD mahasiswa'…"></textarea>
+        <button class="ai-send">➤</button>
+      </div>
+    </div>
+  `));
+
+  const msgsEl = body.querySelector('.ai-messages');
+  const input = body.querySelector('.ai-input');
+  const sendBtn = body.querySelector('.ai-send');
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // very small markdown-lite: turns ```code``` fences into <pre>, keeps rest as plain text
+  function renderMarkdownLite(text){
+    const parts = text.split(/```(\w*)\n?([\s\S]*?)```/g);
+    let out = '';
+    for (let i = 0; i < parts.length; i++){
+      if (i % 3 === 0){ out += escapeHtml(parts[i]); }
+      else if (i % 3 === 2){ out += `<pre><code>${escapeHtml(parts[i])}</code></pre>`; }
+      // i % 3 === 1 is the language tag, skip rendering it visibly
+    }
+    return out;
+  }
+
+  function addMessage(role, text){
+    const el = h(`<div class="ai-msg ${role}"></div>`);
+    if (role === 'assistant') el.innerHTML = renderMarkdownLite(text);
+    else el.textContent = text;
+    msgsEl.appendChild(el);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    return el;
+  }
+
+  if (NEEDS_SETUP){
+    addMessage('system',
+      'Lynn AI belum aktif. Isi API key Groq lo di js/groq-config.js (gratis, ambil di console.groq.com/keys), lalu push ulang.');
+  } else {
+    addMessage('system', 'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.');
+  }
+
+  async function callGroq(){
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [
+          { role: 'system', content: 'Kamu adalah Lynn AI, asisten yang terpasang di dalam LynnZz OS. Jawab singkat, jelas, dan pakai Bahasa Indonesia kecuali diminta lain.' },
+          ...messages.map(m => ({ role: m.role, content: m.text }))
+        ]
+      })
+    });
+    if (!res.ok){
+      const errBody = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
+    }
+    const data = await res.json();
+    return data?.choices?.[0]?.message?.content || '(respons kosong)';
+  }
+
+  async function send(){
+    const text = input.value.trim();
+    if (!text || NEEDS_SETUP) return;
+    input.value = '';
+    input.style.height = 'auto';
+    messages.push({ role:'user', text });
+    addMessage('user', text);
+
+    const typing = h(`<div class="ai-typing">Lynn AI sedang mengetik…</div>`);
+    msgsEl.appendChild(typing);
+    msgsEl.scrollTop = msgsEl.scrollHeight;
+    sendBtn.disabled = true;
+
+    try{
+      const reply = await callGroq();
+      messages.push({ role:'assistant', text: reply });
+      typing.remove();
+      addMessage('assistant', reply);
+    }catch(err){
+      typing.remove();
+      addMessage('system', `Gagal menghubungi Groq: ${err.message}`);
+    } finally {
+      sendBtn.disabled = false;
+    }
+  }
+
+  sendBtn.onclick = send;
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+  });
+  input.addEventListener('input', () => {
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 80) + 'px';
+  });
+}
+
+/* ============================================================
+   APP REGISTRY
+============================================================ */
 LZ.APPS = [
+  { id:'filemanager', name:'File Manager', icon:'📁', width:420, height:380, render: renderFileManager },
+  { id:'notes',        name:'Notes',        icon:'📝', width:440, height:360, render: renderNotes },
+  { id:'calculator',   name:'Calculator',   icon:'🧮', width:280, height:400, render: renderCalculator },
+  { id:'browser',      name:'Browser',      icon:'🌐', width:520, height:420, render: renderBrowser },
+  { id:'music',        name:'Music Player', icon:'🎵', width:340, height:420, render: renderMusicPlayer },
+  { id:'gallery',      name:'Gallery',      icon:'🖼️', width:400, height:380, render: renderGallery },
+  { id:'settings',     name:'Settings',     icon:'⚙️', width:380, height:440, render: renderSettings },
+  { id:'terminal',     name:'Terminal',     icon:'💻', width:460, height:360, render: renderTerminal },
+  { id:'lynnai',       name:'Lynn AI',      icon:'🤖', width:400, height:460, render: renderLynnAI },
   { id:'filemanager', name:'File Manager', icon:'📁', width:420, height:380, render: renderFileManager },
   { id:'notes',        name:'Notes',        icon:'📝', width:440, height:360, render: renderNotes },
   { id:'calculator',   name:'Calculator',   icon:'🧮', width:280, height:400, render: renderCalculator },
