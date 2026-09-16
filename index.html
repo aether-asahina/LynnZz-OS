@@ -4,10 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>LynnZz OS</title>
+<script>
+// Debug console overlay — only loads when URL has ?debug (e.g. ?debug=1)
+(function(){
+  if (/[?&]debug/.test(location.search)){
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/eruda';
+    s.onload = function(){ eruda.init(); };
+    document.head.appendChild(s);
+  }
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/desktop.css?v=1.3">
-<link rel="stylesheet" href="css/taskbar.css?v=1.3">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"></noscript>
+<link rel="stylesheet" href="css/desktop.css?v=1.8">
+<link rel="stylesheet" href="css/taskbar.css?v=1.8">
 </head>
 <body>
 
@@ -140,13 +152,14 @@
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js" async></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js" async></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js" async></script>
 
-<script src="js/firebase-config.js?v=1.3"></script>
-<script src="js/os.js?v=1.3"></script>
-<script src="js/window.js?v=1.3"></script>
-<script src="js/apps.js?v=1.3"></script>
+<script src="js/firebase-config.js?v=1.8"></script>
+<script src="js/groq-config.js?v=1.8"></script>
+<script src="js/os.js?v=1.8"></script>
+<script src="js/window.js?v=1.8"></script>
+<script src="js/apps.js?v=1.8"></script>
 </body>
 </html>

@@ -647,6 +647,8 @@ function renderTerminal(body){
     .term-echo{color:#7dd3fc;}
     .term-err{color:var(--crimson);}
     .term-ok{color:#86efac;}
+    .term-dir{color:#7cc0ff; font-weight:600;}
+    .term-file{color:#c9c6e0;}
     .term-inputline{display:flex; align-items:center; gap:6px; padding:8px 12px; border-top:1px solid var(--border);}
     .term-prompt{color:var(--violet); white-space:nowrap; flex-shrink:0;}
     .term-input{flex:1; background:transparent; border:none; outline:none; color:#eceaf5; font-family:var(--font-mono); font-size:12.5px;}
@@ -658,8 +660,52 @@ function renderTerminal(body){
   let histIdx = -1;
 
   function saveFS(){ VFS.save(fs); }
-  function node(p = cwd){ return VFS.getNode(fs, p); }
   function pathStr(){ return '/' + cwd.join('/'); }
+
+  // ---- tokenizer: splits on spaces but respects "quoted strings" ----
+  function tokenize(str){
+    const regex = /"([^"]*)"|'([^']*)'|(\S+)/g;
+    const tokens = [];
+    let m;
+    while ((m = regex.exec(str))){
+      tokens.push(m[1] !== undefined ? m[1] : (m[2] !== undefined ? m[2] : m[3]));
+    }
+    return tokens;
+  }
+
+  // ---- path resolution helpers (all relative to cwd unless starting with /) ----
+  function absSegs(pathStr){
+    let segs = pathStr.startsWith('/') ? [] : [...cwd];
+    for (const p of pathStr.split('/').filter(Boolean)){
+      if (p === '.') continue;
+      else if (p === '..') segs.pop();
+      else segs.push(p);
+    }
+    return segs;
+  }
+  function findNode(segs){
+    let n = fs;
+    for (const seg of segs){
+      if (!n.children) return null;
+      const next = n.children.find(c => c.name === seg);
+      if (!next) return null;
+      n = next;
+    }
+    return n;
+  }
+  // resolves the parent folder + leaf name for a path (used to create/move/remove)
+  function resolveParent(pathStr){
+    const segs = absSegs(pathStr);
+    const name = segs.pop();
+    const parent = findNode(segs);
+    if (!parent || parent.type !== 'folder') return null;
+    return { parent, name, segs: [...segs, name] };
+  }
+  function deepCopy(node){
+    return node.type === 'folder'
+      ? { name: node.name, type:'folder', children: node.children.map(deepCopy) }
+      : { name: node.name, type:'file', content: node.content };
+  }
 
   body.innerHTML = '';
   body.appendChild(h(`
@@ -685,101 +731,237 @@ function renderTerminal(body){
     out.appendChild(line);
     out.scrollTop = out.scrollHeight;
   }
+  function printHtml(html, cls){
+    const line = h(`<div class="term-line ${cls||''}"></div>`);
+    line.innerHTML = html;
+    out.appendChild(line);
+    out.scrollTop = out.scrollHeight;
+  }
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   const COMMANDS = {
     help(){
       print([
         'Perintah yang tersedia:',
-        '  help                tampilkan bantuan ini',
-        '  clear               bersihkan layar',
-        '  about               tentang LynnZz OS',
-        '  date                tanggal & waktu sekarang',
-        '  whoami              tampilkan user aktif',
-        '  pwd                 tampilkan lokasi sekarang',
-        '  ls                  daftar isi folder',
-        '  cd <folder>         pindah folder ("cd .." naik, "cd /" ke root)',
-        '  mkdir <nama>        buat folder baru',
-        '  touch <nama>        buat file kosong',
-        '  cat <nama>          tampilkan isi file',
-        '  echo <teks>         tampilkan teks (dukung: echo teks > file.txt)',
-        '  rm <nama>           hapus file/folder',
+        '  help                    tampilkan bantuan ini',
+        '  clear                   bersihkan layar',
+        '  about                   tentang LynnZz OS',
+        '  neofetch                info sistem gaya neofetch',
+        '  date                    tanggal & waktu sekarang',
+        '  whoami                  tampilkan user aktif',
+        '  history                 daftar perintah sebelumnya',
+        '  pwd                     tampilkan lokasi sekarang',
+        '  ls [path]               daftar isi folder',
+        '  cd <path>               pindah folder ("cd .." naik, "cd /" ke root)',
+        '  mkdir <path>            buat folder baru',
+        '  touch <path>            buat file kosong',
+        '  cat <path>              tampilkan isi file',
+        '  echo <teks>             tampilkan teks (dukung > dan >> ke file)',
+        '  rm <path>               hapus file/folder',
+        '  mv <src> <dest>         pindah/ganti nama file/folder',
+        '  cp <src> <dest>         salin file/folder',
+        '  find <nama>             cari file/folder dari lokasi sekarang',
+        '  tree [path]             tampilkan struktur folder',
+        '  wc <file>               hitung baris/kata/karakter',
+        '  head <file> [n]         n baris pertama (default 10)',
+        '  tail <file> [n]         n baris terakhir (default 10)',
+        '  exit                    tutup Terminal',
+        '',
+        'Path bisa relatif ("Proyek/main.txt") atau absolut ("/Dokumen"). Pakai tanda kutip buat nama dengan spasi.',
       ].join('\n'));
     },
     clear(){ out.innerHTML = ''; },
     about(){
       print('LynnZz OS v2.0 — Terminal\nDibangun dengan HTML, CSS, JS & Firebase.\nKetik "help" buat lihat daftar perintah.');
     },
+    neofetch(){
+      const email = LZ.auth.currentUser?.email || 'guest@lynnzz.os';
+      const countNodes = (n) => n.type === 'file' ? 1 : 1 + n.children.reduce((a,c)=>a+countNodes(c),0);
+      printHtml(
+        `<span class="term-ok">   /\\_/\\  </span>  <b>${user}</b>@lynnzz\n` +
+        `<span class="term-ok">  ( o.o ) </span>  ─────────────\n` +
+        `<span class="term-ok">   > ^ <  </span>  OS: LynnZz OS v2.0\n` +
+        `           Shell: LynnZz Terminal\n` +
+        `           User: ${esc(email)}\n` +
+        `           Item VFS: ${countNodes(fs)-1}\n` +
+        `           Lokasi: ${esc(pathStr())}`
+      );
+    },
     date(){ print(new Date().toString()); },
     whoami(){ print(LZ.auth.currentUser?.email || 'guest@lynnzz.os'); },
-    pwd(){ print(pathStr()); },
-    ls(){
-      const n = node();
-      if (!n.children || !n.children.length){ print('(kosong)'); return; }
-      print(n.children.map(c => c.type === 'folder' ? c.name + '/' : c.name).join('   '));
+    history(){
+      if (!history.length){ print('(belum ada riwayat perintah)'); return; }
+      print(history.map((h,i)=>`  ${i+1}  ${h}`).join('\n'));
     },
-    cd(arg){
+    pwd(){ print(pathStr()); },
+    ls(args){
+      const target = args[0] ? absSegs(args[0]) : cwd;
+      const n = findNode(target);
+      if (!n || n.type !== 'folder'){ print(`ls: folder tidak ditemukan: ${args[0]||''}`, 'term-err'); return; }
+      if (!n.children.length){ print('(kosong)'); return; }
+      const html = n.children
+        .slice()
+        .sort((a,b)=> (a.type===b.type ? a.name.localeCompare(b.name) : a.type==='folder'?-1:1))
+        .map(c => c.type === 'folder' ? `<span class="term-dir">${esc(c.name)}/</span>` : `<span class="term-file">${esc(c.name)}</span>`)
+        .join('   ');
+      printHtml(html);
+    },
+    cd(args){
+      const arg = args[0];
       if (!arg || arg === '~' || arg === '/'){ cwd = []; updatePrompt(); return; }
-      if (arg === '..'){ cwd.pop(); updatePrompt(); return; }
-      const segs = arg.split('/').filter(Boolean);
-      let testPath = [...cwd];
-      for (const seg of segs){
-        if (seg === '..'){ testPath.pop(); continue; }
-        const n = VFS.getNode(fs, testPath);
-        const target = n.children && n.children.find(c => c.name === seg && c.type === 'folder');
-        if (!target){ print(`cd: folder tidak ditemukan: ${seg}`, 'term-err'); return; }
-        testPath.push(seg);
-      }
-      cwd = testPath;
+      const segs = absSegs(arg);
+      const n = findNode(segs);
+      if (!n || n.type !== 'folder'){ print(`cd: folder tidak ditemukan: ${arg}`, 'term-err'); return; }
+      cwd = segs;
       updatePrompt();
     },
-    mkdir(arg){
-      if (!arg){ print('mkdir: butuh nama folder', 'term-err'); return; }
-      const n = node();
-      if (n.children.find(c => c.name === arg)){ print(`mkdir: "${arg}" sudah ada`, 'term-err'); return; }
-      n.children.push({ name: arg, type:'folder', children:[] });
+    mkdir(args){
+      if (!args[0]){ print('mkdir: butuh nama folder', 'term-err'); return; }
+      const r = resolveParent(args[0]);
+      if (!r){ print(`mkdir: path induk tidak ditemukan`, 'term-err'); return; }
+      if (r.parent.children.find(c => c.name === r.name)){ print(`mkdir: "${r.name}" sudah ada`, 'term-err'); return; }
+      r.parent.children.push({ name: r.name, type:'folder', children:[] });
       saveFS();
-      print(`folder "${arg}" dibuat`, 'term-ok');
+      print(`folder "${r.name}" dibuat`, 'term-ok');
     },
-    touch(arg){
-      if (!arg){ print('touch: butuh nama file', 'term-err'); return; }
-      const n = node();
-      if (n.children.find(c => c.name === arg)){ print(`touch: "${arg}" sudah ada`, 'term-err'); return; }
-      n.children.push({ name: arg, type:'file', content:'' });
+    touch(args){
+      if (!args[0]){ print('touch: butuh nama file', 'term-err'); return; }
+      const r = resolveParent(args[0]);
+      if (!r){ print(`touch: path induk tidak ditemukan`, 'term-err'); return; }
+      if (r.parent.children.find(c => c.name === r.name)){ print(`touch: "${r.name}" sudah ada`, 'term-err'); return; }
+      r.parent.children.push({ name: r.name, type:'file', content:'' });
       saveFS();
-      print(`file "${arg}" dibuat`, 'term-ok');
+      print(`file "${r.name}" dibuat`, 'term-ok');
     },
-    cat(arg){
-      if (!arg){ print('cat: butuh nama file', 'term-err'); return; }
-      const n = node();
-      const f = n.children.find(c => c.name === arg && c.type === 'file');
-      if (!f){ print(`cat: file tidak ditemukan: ${arg}`, 'term-err'); return; }
-      print(f.content || '(kosong)');
+    cat(args){
+      if (!args[0]){ print('cat: butuh nama file', 'term-err'); return; }
+      const n = findNode(absSegs(args[0]));
+      if (!n || n.type !== 'file'){ print(`cat: file tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      print(n.content || '(kosong)');
     },
-    rm(arg){
-      if (!arg){ print('rm: butuh nama file/folder', 'term-err'); return; }
-      const n = node();
-      const before = n.children.length;
-      n.children = n.children.filter(c => c.name !== arg);
-      if (n.children.length === before){ print(`rm: tidak ditemukan: ${arg}`, 'term-err'); return; }
+    rm(args){
+      if (!args[0]){ print('rm: butuh nama file/folder', 'term-err'); return; }
+      const r = resolveParent(args[0]);
+      if (!r){ print(`rm: tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const before = r.parent.children.length;
+      r.parent.children = r.parent.children.filter(c => c.name !== r.name);
+      if (r.parent.children.length === before){ print(`rm: tidak ditemukan: ${args[0]}`, 'term-err'); return; }
       saveFS();
-      print(`"${arg}" dihapus`, 'term-ok');
+      print(`"${r.name}" dihapus`, 'term-ok');
     },
-    echo(argRaw){
-      const redirect = argRaw.match(/^(.*)>\s*(\S+)$/);
-      if (redirect){
-        const text = redirect[1].trim();
-        const filename = redirect[2].trim();
-        const n = node();
-        let f = n.children.find(c => c.name === filename && c.type === 'file');
-        if (!f){ f = { name: filename, type:'file', content:'' }; n.children.push(f); }
-        f.content = text;
-        saveFS();
-        print(`ditulis ke "${filename}"`, 'term-ok');
+    mv(args){
+      if (!args[0] || !args[1]){ print('mv: butuh sumber dan tujuan', 'term-err'); return; }
+      const src = resolveParent(args[0]);
+      if (!src){ print(`mv: sumber tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const srcNode = src.parent.children.find(c => c.name === src.name);
+      if (!srcNode){ print(`mv: sumber tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      // if destination is an existing folder, move INTO it keeping the same name
+      const destAsFolder = findNode(absSegs(args[1]));
+      let destParent, destName;
+      if (destAsFolder && destAsFolder.type === 'folder'){
+        destParent = destAsFolder; destName = srcNode.name;
       } else {
-        print(argRaw);
+        const dst = resolveParent(args[1]);
+        if (!dst){ print(`mv: tujuan tidak valid: ${args[1]}`, 'term-err'); return; }
+        destParent = dst.parent; destName = dst.name;
       }
+      if (destParent.children.find(c => c.name === destName)){ print(`mv: "${destName}" sudah ada di tujuan`, 'term-err'); return; }
+      src.parent.children = src.parent.children.filter(c => c !== srcNode);
+      srcNode.name = destName;
+      destParent.children.push(srcNode);
+      saveFS();
+      print(`dipindah ke "${destName}"`, 'term-ok');
+    },
+    cp(args){
+      if (!args[0] || !args[1]){ print('cp: butuh sumber dan tujuan', 'term-err'); return; }
+      const srcNode = findNode(absSegs(args[0]));
+      if (!srcNode){ print(`cp: sumber tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const destAsFolder = findNode(absSegs(args[1]));
+      let destParent, destName;
+      if (destAsFolder && destAsFolder.type === 'folder'){
+        destParent = destAsFolder; destName = srcNode.name;
+      } else {
+        const dst = resolveParent(args[1]);
+        if (!dst){ print(`cp: tujuan tidak valid: ${args[1]}`, 'term-err'); return; }
+        destParent = dst.parent; destName = dst.name;
+      }
+      if (destParent.children.find(c => c.name === destName)){ print(`cp: "${destName}" sudah ada di tujuan`, 'term-err'); return; }
+      const copy = deepCopy(srcNode);
+      copy.name = destName;
+      destParent.children.push(copy);
+      saveFS();
+      print(`disalin ke "${destName}"`, 'term-ok');
+    },
+    find(args){
+      if (!args[0]){ print('find: butuh kata kunci', 'term-err'); return; }
+      const results = [];
+      (function walk(n, path){
+        if (n.name.toLowerCase().includes(args[0].toLowerCase()) && path) results.push(path);
+        if (n.children) n.children.forEach(c => walk(c, path ? path + '/' + c.name : c.name));
+      })(findNode(cwd), '');
+      print(results.length ? results.join('\n') : '(tidak ditemukan)');
+    },
+    tree(args){
+      const start = args[0] ? findNode(absSegs(args[0])) : findNode(cwd);
+      if (!start || start.type !== 'folder'){ print('tree: folder tidak ditemukan', 'term-err'); return; }
+      const lines = ['.'];
+      (function walk(n, prefix){
+        n.children.forEach((c, i) => {
+          const last = i === n.children.length - 1;
+          lines.push(prefix + (last ? '└── ' : '├── ') + c.name + (c.type==='folder'?'/':''));
+          if (c.type === 'folder') walk(c, prefix + (last ? '    ' : '│   '));
+        });
+      })(start, '');
+      print(lines.join('\n'));
+    },
+    wc(args){
+      if (!args[0]){ print('wc: butuh nama file', 'term-err'); return; }
+      const n = findNode(absSegs(args[0]));
+      if (!n || n.type !== 'file'){ print(`wc: file tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const text = n.content || '';
+      const lines = text ? text.split('\n').length : 0;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      print(`${lines} baris  ${words} kata  ${text.length} karakter  ${args[0]}`);
+    },
+    head(args){
+      if (!args[0]){ print('head: butuh nama file', 'term-err'); return; }
+      const n = findNode(absSegs(args[0]));
+      if (!n || n.type !== 'file'){ print(`head: file tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const count = parseInt(args[1]) || 10;
+      print((n.content||'').split('\n').slice(0, count).join('\n') || '(kosong)');
+    },
+    tail(args){
+      if (!args[0]){ print('tail: butuh nama file', 'term-err'); return; }
+      const n = findNode(absSegs(args[0]));
+      if (!n || n.type !== 'file'){ print(`tail: file tidak ditemukan: ${args[0]}`, 'term-err'); return; }
+      const count = parseInt(args[1]) || 10;
+      const lines = (n.content||'').split('\n');
+      print(lines.slice(Math.max(0, lines.length - count)).join('\n') || '(kosong)');
+    },
+    exit(){
+      const win = body.closest('.os-window');
+      if (win) win.querySelector('.win-close')?.click();
     }
   };
+
+  function runEcho(raw){
+    const appendMatch = raw.match(/^(.*)>>\s*(\S+)$/);
+    const overwriteMatch = !appendMatch && raw.match(/^(.*)>\s*(\S+)$/);
+    if (appendMatch || overwriteMatch){
+      const m = appendMatch || overwriteMatch;
+      const text = m[1].trim().replace(/^["']|["']$/g,'');
+      const filePath = m[2].trim();
+      const r = resolveParent(filePath);
+      if (!r){ print(`echo: path tidak valid: ${filePath}`, 'term-err'); return; }
+      let f = r.parent.children.find(c => c.name === r.name && c.type === 'file');
+      if (!f){ f = { name: r.name, type:'file', content:'' }; r.parent.children.push(f); }
+      f.content = appendMatch ? (f.content ? f.content + '\n' + text : text) : text;
+      saveFS();
+      print(`${appendMatch ? 'ditambahkan ke' : 'ditulis ke'} "${r.name}"`, 'term-ok');
+    } else {
+      print(raw.replace(/^["']|["']$/g,''));
+    }
+  }
 
   function run(raw){
     const trimmed = raw.trim();
@@ -787,9 +969,33 @@ function renderTerminal(body){
     print(`${user}@lynnzz${pathStr()}$ ${trimmed}`, 'term-echo');
     const sp = trimmed.indexOf(' ');
     const cmd = sp === -1 ? trimmed : trimmed.slice(0, sp);
-    const arg = sp === -1 ? '' : trimmed.slice(sp + 1);
-    if (COMMANDS[cmd]) COMMANDS[cmd](arg);
+    const rest = sp === -1 ? '' : trimmed.slice(sp + 1);
+
+    if (cmd === 'echo'){ runEcho(rest); return; }
+    if (COMMANDS[cmd]) COMMANDS[cmd](tokenize(rest));
     else print(`command not found: ${cmd} (ketik "help")`, 'term-err');
+  }
+
+  // ---- Tab completion ----
+  function handleTab(){
+    const val = input.value;
+    const upToCursor = val;
+    const parts = upToCursor.split(' ');
+    const last = parts[parts.length - 1];
+
+    let candidates;
+    if (parts.length === 1){
+      candidates = Object.keys(COMMANDS).concat('echo').filter(c => c.startsWith(last));
+    } else {
+      const n = findNode(cwd);
+      candidates = (n && n.children ? n.children.map(c => c.name) : []).filter(c => c.startsWith(last));
+    }
+    if (candidates.length === 1){
+      parts[parts.length - 1] = candidates[0];
+      input.value = parts.join(' ');
+    } else if (candidates.length > 1){
+      print(candidates.join('   '));
+    }
   }
 
   input.addEventListener('keydown', (e) => {
@@ -804,18 +1010,22 @@ function renderTerminal(body){
     } else if (e.key === 'ArrowDown'){
       if (histIdx < history.length){ histIdx++; input.value = history[histIdx] || ''; }
       e.preventDefault();
+    } else if (e.key === 'Tab'){
+      e.preventDefault();
+      handleTab();
     }
   });
 
   body.querySelector('.term-wrap').addEventListener('click', () => input.focus());
 
-  print('LynnZz OS Terminal — ketik "help" buat mulai.', 'term-ok');
+  print('LynnZz OS Terminal — ketik "help" buat mulai. Tab buat autocomplete.', 'term-ok');
   updatePrompt();
   setTimeout(()=> input.focus(), 50);
 }
 
+
 /* ============================================================
-   APP REGISTRY
+   9. LYNN AI — chat assistant powered by Gemini API
 ============================================================ */
 function renderLynnAI(body){
   ensureStyle('lynnai', `
@@ -837,7 +1047,7 @@ function renderLynnAI(body){
     .ai-send:disabled{opacity:.5;}
   `);
 
-  const NEEDS_SETUP = false;
+  const NEEDS_SETUP = !GROQ_API_KEY || GROQ_API_KEY.startsWith('GANTI');
   let messages = []; // {role:'user'|'assistant', text}
 
   body.innerHTML = '';
@@ -892,12 +1102,14 @@ function renderLynnAI(body){
   }
 
   async function callGroq(){
-    const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
       },
       body: JSON.stringify({
+        model: GROQ_MODEL,
         messages: [
           { role: 'system', content: 'Kamu adalah Lynn AI, asisten yang terpasang di dalam LynnZz OS. Jawab singkat, jelas, dan pakai Bahasa Indonesia kecuali diminta lain.' },
           ...messages.map(m => ({ role: m.role, content: m.text }))
@@ -959,6 +1171,6 @@ LZ.APPS = [
   { id:'music',        name:'Music Player', icon:'🎵', width:340, height:420, render: renderMusicPlayer },
   { id:'gallery',      name:'Gallery',      icon:'🖼️', width:400, height:380, render: renderGallery },
   { id:'settings',     name:'Settings',     icon:'⚙️', width:380, height:440, render: renderSettings },
-  { id:'terminal',     name:'Terminal',     icon:'💻', width:460, height:360, render: renderTerminal },
+  { id:'terminal',     name:'Terminal',     icon:'💻', width:480, height:420, render: renderTerminal },
   { id:'lynnai',       name:'Lynn AI',      icon:'🤖', width:400, height:460, render: renderLynnAI },
 ];
