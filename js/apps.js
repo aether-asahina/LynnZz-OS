@@ -938,6 +938,38 @@ let histIdx = history.length;
       const lines = (n.content||'').split('\n');
       print(lines.slice(Math.max(0, lines.length - count)).join('\n') || '(kosong)');
     },
+    grep(args){
+      if (!args[0]){
+        print('grep: butuh kata kunci', 'term-err');
+        return;
+      }
+
+      const pattern = args[0].toLowerCase();
+      const results = [];
+
+      function search(node, path){
+        if (node.type === 'file'){
+          const lines = (node.content || '').split('\\n');
+
+          lines.forEach((line, i) => {
+            if (line.toLowerCase().includes(pattern)){
+              results.push(`${path}:${i + 1}:${line}`);
+            }
+          });
+        }
+
+        if (node.children){
+          node.children.forEach(child => {
+            search(child, path ? `${path}/${child.name}` : child.name);
+          });
+        }
+      }
+
+      search(fs, '');
+
+      print(results.length ? results.join('\\n') : '(tidak ditemukan)');
+    },
+
     exit(){
       const win = body.closest('.os-window');
       if (win) win.querySelector('.win-close')?.click();
@@ -967,6 +999,78 @@ let histIdx = history.length;
     const trimmed = raw.trim();
     if (!trimmed) return;
     print(`${user}@lynnzz${pathStr()}$ ${trimmed}`, 'term-echo');
+
+    // ---- Pipe support: command1 | command2 ----
+    if (trimmed.includes('|')){
+      const pipeParts = trimmed.split('|').map(s => s.trim()).filter(Boolean);
+
+      if (pipeParts.length < 2){
+        print('lzsh: pipe tidak valid', 'term-err');
+        return;
+      }
+
+      let pipeInput = '';
+
+      for (let i = 0; i < pipeParts.length; i++){
+        const part = pipeParts[i];
+        const tokens = tokenize(part);
+
+        if (!tokens.length) continue;
+
+        const pipeCmd = tokens[0];
+        const pipeArgs = tokens.slice(1);
+
+        if (pipeCmd === 'echo'){
+          pipeInput = pipeArgs.join(' ');
+          continue;
+        }
+
+        if (pipeCmd === 'cat'){
+          const node = findNode(resolvePath(pipeArgs[0] || ''));
+          if (!node || node.type !== 'file'){
+            print(`cat: file tidak ditemukan: ${pipeArgs[0] || ''}`, 'term-err');
+            return;
+          }
+          pipeInput = node.content || '';
+          continue;
+        }
+
+        if (pipeCmd === 'grep'){
+          if (!pipeArgs[0]){
+            print('grep: butuh kata kunci', 'term-err');
+            return;
+          }
+
+          const pattern = pipeArgs[0].toLowerCase();
+          pipeInput = pipeInput
+            .split('\\n')
+            .filter(line => line.toLowerCase().includes(pattern))
+            .join('\\n');
+          continue;
+        }
+
+        if (pipeCmd === 'sort'){
+          pipeInput = pipeInput
+            .split('\\n')
+            .filter(Boolean)
+            .sort()
+            .join('\\n');
+          continue;
+        }
+
+        if (pipeCmd === 'uniq'){
+          const lines = pipeInput.split('\\n');
+          pipeInput = lines.filter((line, i) => i === 0 || line !== lines[i - 1]).join('\\n');
+          continue;
+        }
+
+        print(`lzsh: pipe command not supported: ${pipeCmd}`, 'term-err');
+        return;
+      }
+
+      if (pipeInput) print(pipeInput);
+      return;
+    }
     const sp = trimmed.indexOf(' ');
     const cmd = sp === -1 ? trimmed : trimmed.slice(0, sp);
     const rest = sp === -1 ? '' : trimmed.slice(sp + 1);
