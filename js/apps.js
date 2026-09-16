@@ -656,8 +656,8 @@ function renderTerminal(body){
 
   let fs = VFS.load();
   let cwd = [];
-  let history = [];
-  let histIdx = -1;
+  let history = JSON.parse(localStorage.getItem('lynnzz_terminal_history') || '[]');
+let histIdx = history.length;
 
   function saveFS(){ VFS.save(fs); }
   function pathStr(){ return '/' + cwd.join('/'); }
@@ -1000,11 +1000,27 @@ function renderTerminal(body){
 
   input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter'){
-      const val = input.value;
-      run(val);
-      if (val.trim()){ history.push(val); histIdx = history.length; }
-      input.value = '';
-    } else if (e.key === 'ArrowUp'){
+  const val = input.value;
+  run(val);
+
+  if (val.trim()){
+    history.push(val);
+
+    // Simpan maksimal 100 command terakhir
+    if (history.length > 100){
+      history = history.slice(-100);
+    }
+
+    localStorage.setItem(
+      'lynnzz_terminal_history',
+      JSON.stringify(history)
+    );
+
+    histIdx = history.length;
+  }
+
+  input.value = '';
+} else if (e.key === 'ArrowUp'){
       if (histIdx > 0){ histIdx--; input.value = history[histIdx] || ''; }
       e.preventDefault();
     } else if (e.key === 'ArrowDown'){
