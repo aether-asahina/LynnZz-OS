@@ -984,6 +984,27 @@ let histIdx = history.length;
       print(results.length ? results.join('\n') : '(tidak ditemukan)');
     },
 
+    open(args){
+      if (!args[0]){
+        print('open: butuh nama aplikasi', 'term-err');
+        return;
+      }
+
+      const query = args.join(' ').toLowerCase();
+
+      const app = LZ.APPS.find(a =>
+        a.id.toLowerCase() === query ||
+        a.name.toLowerCase() === query
+      );
+
+      if (!app){
+        print(`open: aplikasi tidak ditemukan: ${args.join(' ')}`, 'term-err');
+        return;
+      }
+
+      LZ.win.open(app.id);
+    },
+
     exit(){
       const win = body.closest('.os-window');
       if (win) win.querySelector('.win-close')?.click();
