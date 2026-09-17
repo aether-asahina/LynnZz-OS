@@ -2290,6 +2290,8 @@ function renderLynnAI(body){
 
     msgsEl.appendChild(el);
 
+    updateLynnEmptyState();
+
     if (role !== 'assistant' || !animate){
 
       if (role === 'assistant'){
