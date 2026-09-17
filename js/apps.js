@@ -1264,12 +1264,6 @@ function renderLynnAI(body){
   // Greeting UI-only — tidak masuk history / messages
   // ========================================================
 
-  const lynnEmptyState =
-    body.querySelector('.lynn-empty-state');
-
-  const lynnEmptyTitle =
-    body.querySelector('.lynn-empty-title');
-
   function getLynnGreeting(){
     const hour = new Date().getHours();
 
@@ -1988,6 +1982,11 @@ function renderLynnAI(body){
         </button>
       </div>
 
+      <div class="lynn-empty-state">
+        <div class="lynn-empty-title"></div>
+        <div class="lynn-empty-subtitle">Mau nanya apa hari ini?</div>
+      </div>
+
       <div class="ai-messages"></div>
 
       <div class="ai-inputbar">
@@ -2004,6 +2003,12 @@ function renderLynnAI(body){
 
     </div>
   `));
+
+  const lynnEmptyState =
+    body.querySelector('.lynn-empty-state');
+
+  const lynnEmptyTitle =
+    body.querySelector('.lynn-empty-title');
 
   const drawer = body.querySelector('.ai-drawer');
   const overlay = body.querySelector('.ai-overlay');
@@ -2257,6 +2262,8 @@ function renderLynnAI(body){
       );
     });
 
+    updateLynnEmptyState();
+
     msgsEl.scrollTop = msgsEl.scrollHeight;
   }
 
@@ -2267,12 +2274,7 @@ function renderLynnAI(body){
 
     msgsEl.innerHTML = '';
 
-    addMessage(
-      'system',
-      NEEDS_SETUP
-        ? 'Lynn AI belum aktif. Isi API key Groq lo di js/groq-config.js lalu push ulang.'
-        : 'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.'
-    );
+    updateLynnEmptyState();
   }
 
   /*
@@ -2390,21 +2392,7 @@ function renderLynnAI(body){
 
   };
 
-  if (NEEDS_SETUP){
-
-    addMessage(
-      'system',
-      'Lynn AI belum aktif.'
-    );
-
-  }else{
-
-    addMessage(
-      'system',
-      'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.'
-    );
-
-  }
+  updateLynnEmptyState();
 
   async function callGroq(){
 
