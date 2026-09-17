@@ -1167,7 +1167,7 @@ function renderLynnAI(body){
     .ai-send:disabled{opacity:.5;}
   `);
 
-  const NEEDS_SETUP = !GROQ_API_KEY || GROQ_API_KEY.startsWith('GANTI');
+  const NEEDS_SETUP = false;
   let messages = []; // {role:'user'|'assistant', text}
 
   body.innerHTML = '';
@@ -1222,27 +1222,35 @@ function renderLynnAI(body){
   }
 
   async function callGroq(){
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: GROQ_MODEL,
-        messages: [
-          { role: 'system', content: 'Kamu adalah Lynn AI, asisten yang terpasang di dalam LynnZz OS. Jawab singkat, jelas, dan pakai Bahasa Indonesia kecuali diminta lain.' },
-          ...messages.map(m => ({ role: m.role, content: m.text }))
-        ]
-      })
-    });
-    if (!res.ok){
-      const errBody = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
-    }
-    const data = await res.json();
-    return data?.choices?.[0]?.message?.content || '(respons kosong)';
+  const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      messages: [
+        {
+          role: 'system',
+          content: 'Kamu adalah Lynn AI, asisten LynnZz OS. Jawab singkat dan jelas.'
+        },
+        ...messages.map(m => ({
+          role: m.role,
+          content: m.text
+        }))
+      ]
+    })
+  });
+
+  if (!res.ok){
+    const errBody = await res.text();
+    throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
   }
+
+  const data = await res.json();
+
+  return data?.choices?.[0]?.message?.content
+      || '(respons kosong)';
+}
 
   async function send(){
     const text = input.value.trim();
