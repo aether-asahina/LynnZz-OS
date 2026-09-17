@@ -1228,42 +1228,398 @@ if (trimmed.includes('|')){
 ============================================================ */
 function renderLynnAI(body){
   ensureStyle('lynnai', `
-    .ai-wrap{display:flex; flex-direction:column; height:100%; background:var(--void);}
-    .ai-header{display:flex; align-items:center; gap:8px; padding:10px 12px; border-bottom:1px solid var(--border); flex-shrink:0;}
-    .ai-avatar{width:26px; height:26px; border-radius:8px; background:var(--grad); display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0;}
-    .ai-header-text{font-size:12.5px; color:var(--text-muted);}
-    .ai-messages{flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px;}
-    .ai-msg{max-width:85%; padding:9px 12px; border-radius:14px; font-size:13px; line-height:1.5; white-space:pre-wrap; word-break:break-word;}
-    .ai-msg.user{align-self:flex-end; background:var(--grad); color:#fff; border-bottom-right-radius:4px;}
-    .ai-msg.assistant{align-self:flex-start; background:var(--surface-2); border:1px solid var(--border); border-bottom-left-radius:4px;}
-    .ai-msg.system{align-self:center; background:transparent; color:var(--text-muted); font-size:11.5px; text-align:center; max-width:100%;}
-    .ai-msg pre{background:#08080d; border:1px solid var(--border); border-radius:8px; padding:10px; overflow-x:auto; margin:6px 0; font-family:var(--font-mono); font-size:11.5px; white-space:pre;}
-    .ai-msg code{font-family:var(--font-mono);}
-    .ai-typing{align-self:flex-start; color:var(--text-muted); font-size:12px; padding:0 4px;}
-    .ai-inputbar{display:flex; gap:6px; padding:8px; border-top:1px solid var(--border); flex-shrink:0;}
-    .ai-input{flex:1; background:var(--surface-2); border:1px solid var(--border); color:var(--text); padding:9px 12px; border-radius:20px; font-size:13px; outline:none; resize:none; max-height:80px; font-family:inherit;}
-    .ai-send{width:36px; height:36px; border-radius:50%; border:none; background:var(--grad); color:#fff; font-size:15px; cursor:pointer; flex-shrink:0;}
-    .ai-send:disabled{opacity:.5;}
+    .ai-wrap{
+      display:flex;
+      flex-direction:column;
+      height:100%;
+      background:var(--void);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .ai-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 12px;
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;
+      position:relative;
+      z-index:5;
+    }
+
+    .ai-menu{
+      width:32px;
+      height:32px;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      border-radius:9px;
+      cursor:pointer;
+      font-size:17px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .ai-menu:hover{
+      background:var(--surface);
+    }
+
+    .ai-avatar{
+      width:26px;
+      height:26px;
+      border-radius:8px;
+      background:var(--grad);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13px;
+      flex-shrink:0;
+    }
+
+    .ai-header-text{
+      font-size:12.5px;
+      color:var(--text-muted);
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .ai-messages{
+      flex:1;
+      overflow-y:auto;
+      padding:12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .ai-msg{
+      max-width:85%;
+      padding:9px 12px;
+      border-radius:14px;
+      font-size:13px;
+      line-height:1.5;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .ai-msg.user{
+      align-self:flex-end;
+      background:var(--grad);
+      color:#fff;
+      border-bottom-right-radius:4px;
+    }
+
+    .ai-msg.assistant{
+      align-self:flex-start;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-bottom-left-radius:4px;
+    }
+
+    .ai-msg.system{
+      align-self:center;
+      background:transparent;
+      color:var(--text-muted);
+      font-size:11.5px;
+      text-align:center;
+      max-width:100%;
+    }
+
+    .ai-msg pre{
+      background:#08080d;
+      border:1px solid var(--border);
+      border-radius:8px;
+      padding:10px;
+      overflow-x:auto;
+      margin:6px 0;
+      font-family:var(--font-mono);
+      font-size:11.5px;
+      white-space:pre;
+    }
+
+    .ai-msg code{
+      font-family:var(--font-mono);
+    }
+
+    .ai-typing{
+      align-self:flex-start;
+      color:var(--text-muted);
+      font-size:12px;
+      padding:0 4px;
+    }
+
+    .ai-inputbar{
+      display:flex;
+      gap:6px;
+      padding:8px;
+      border-top:1px solid var(--border);
+      flex-shrink:0;
+    }
+
+    .ai-input{
+      flex:1;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      color:var(--text);
+      padding:9px 12px;
+      border-radius:20px;
+      font-size:13px;
+      outline:none;
+      resize:none;
+      max-height:80px;
+      font-family:inherit;
+    }
+
+    .ai-send{
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      border:none;
+      background:var(--grad);
+      color:#fff;
+      font-size:15px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+
+    .ai-send:disabled{
+      opacity:.5;
+    }
+
+    /* DRAWER */
+    .ai-drawer{
+      position:absolute;
+      inset:0 auto 0 0;
+      width:245px;
+      background:var(--surface);
+      border-right:1px solid var(--border);
+      z-index:20;
+      transform:translateX(-100%);
+      transition:transform .2s ease;
+      display:flex;
+      flex-direction:column;
+      box-shadow:12px 0 30px rgba(0,0,0,.25);
+    }
+
+    .ai-drawer.open{
+      transform:translateX(0);
+    }
+
+    .ai-drawer-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px;
+      border-bottom:1px solid var(--border);
+    }
+
+    .ai-drawer-title{
+      font-weight:700;
+      font-size:13px;
+    }
+
+    .ai-close{
+      width:28px;
+      height:28px;
+      border:0;
+      background:transparent;
+      color:var(--text-muted);
+      cursor:pointer;
+      border-radius:7px;
+      font-size:17px;
+    }
+
+    .ai-new-chat{
+      margin:10px;
+      padding:9px 11px;
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text);
+      border-radius:9px;
+      cursor:pointer;
+      text-align:left;
+      font-size:12px;
+    }
+
+    .ai-new-chat:hover{
+      background:var(--surface);
+    }
+
+    .ai-history-label{
+      padding:5px 12px;
+      color:var(--text-muted);
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    .ai-history{
+      flex:1;
+      overflow-y:auto;
+      padding:4px 8px;
+    }
+
+    .ai-history-item{
+      padding:9px 10px;
+      border-radius:8px;
+      cursor:pointer;
+      margin-bottom:2px;
+      font-size:12px;
+      color:var(--text);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .ai-history-item:hover{
+      background:var(--surface-2);
+    }
+
+    .ai-history-empty{
+      padding:10px;
+      color:var(--text-muted);
+      font-size:11px;
+    }
+
+    .ai-settings{
+      border-top:1px solid var(--border);
+      padding:8px;
+    }
+
+    .ai-setting-btn{
+      width:100%;
+      padding:9px 10px;
+      border:0;
+      background:transparent;
+      color:var(--text);
+      text-align:left;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:12px;
+    }
+
+    .ai-setting-btn:hover{
+      background:var(--surface-2);
+    }
+
+    .ai-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.18);
+      z-index:15;
+      display:none;
+    }
+
+    .ai-overlay.show{
+      display:block;
+    }
+
+    .ai-settings-panel{
+      position:absolute;
+      left:50%;
+      top:50%;
+      transform:translate(-50%,-50%);
+      width:min(310px,85%);
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      z-index:30;
+      padding:14px;
+      box-shadow:0 15px 50px rgba(0,0,0,.35);
+      display:none;
+    }
+
+    .ai-settings-panel.show{
+      display:block;
+    }
+
+    .ai-settings-panel h3{
+      margin:0 0 12px;
+      font-size:14px;
+    }
+
+    .ai-setting-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 0;
+      border-bottom:1px solid var(--border);
+      font-size:12px;
+    }
+
+    .ai-setting-row:last-child{
+      border-bottom:0;
+    }
   `);
 
   const NEEDS_SETUP = false;
-  let messages = []; // {role:'user'|'assistant', text}
+  const HISTORY_KEY = 'lynnai:conversations';
+
+  let messages = [];
+  let currentChatId = null;
 
   body.innerHTML = '';
   body.appendChild(h(`
     <div class="ai-wrap">
-      <div class="ai-header">
-        <div class="ai-avatar">🤖</div>
-        <div class="ai-header-text">Lynn AI ${NEEDS_SETUP ? '— belum dikonfigurasi' : '— ditenagai Groq (Llama 3.3)'}</div>
+
+      <div class="ai-drawer">
+        <div class="ai-drawer-head">
+          <div class="ai-drawer-title">Lynn AI</div>
+          <button class="ai-close">×</button>
+        </div>
+
+        <button class="ai-new-chat">＋ Chat Baru</button>
+
+        <div class="ai-history-label">Riwayat</div>
+        <div class="ai-history"></div>
+
+        <div class="ai-settings">
+          <button class="ai-setting-btn">⚙ Pengaturan AI</button>
+        </div>
       </div>
+
+      <div class="ai-overlay"></div>
+
+      <div class="ai-settings-panel">
+        <h3>Pengaturan Lynn AI</h3>
+
+        <div class="ai-setting-row">
+          <span>Simpan histori chat</span>
+          <input class="ai-save-history" type="checkbox" checked>
+        </div>
+
+        <div class="ai-setting-row">
+          <span>Enter untuk mengirim</span>
+          <input class="ai-enter-send" type="checkbox" checked>
+        </div>
+      </div>
+
+      <div class="ai-header">
+        <button class="ai-menu">☰</button>
+        <div class="ai-avatar">🤖</div>
+        <div class="ai-header-text">
+          Lynn AI ${NEEDS_SETUP ? '— belum dikonfigurasi' : '— ditenagai Groq (Llama 3.3)'}
+        </div>
+      </div>
+
       <div class="ai-messages"></div>
+
       <div class="ai-inputbar">
         <textarea class="ai-input" rows="1" placeholder="Tanya apa aja, mis. 'Buatkan kode Java CRUD mahasiswa'…"></textarea>
         <button class="ai-send">➤</button>
       </div>
+
     </div>
   `));
 
+  const wrap = body.querySelector('.ai-wrap');
+  const drawer = body.querySelector('.ai-drawer');
+  const overlay = body.querySelector('.ai-overlay');
+  const settingsPanel = body.querySelector('.ai-settings-panel');
+  const historyEl = body.querySelector('.ai-history');
   const msgsEl = body.querySelector('.ai-messages');
   const input = body.querySelector('.ai-input');
   const sendBtn = body.querySelector('.ai-send');
@@ -1272,99 +1628,250 @@ function renderLynnAI(body){
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  // very small markdown-lite: turns ```code``` fences into <pre>, keeps rest as plain text
   function renderMarkdownLite(text){
     const parts = text.split(/```(\w*)\n?([\s\S]*?)```/g);
     let out = '';
+
     for (let i = 0; i < parts.length; i++){
-      if (i % 3 === 0){ out += escapeHtml(parts[i]); }
-      else if (i % 3 === 2){ out += `<pre><code>${escapeHtml(parts[i])}</code></pre>`; }
-      // i % 3 === 1 is the language tag, skip rendering it visibly
+      if (i % 3 === 0) out += escapeHtml(parts[i]);
+      else if (i % 3 === 2){
+        out += `<pre><code>${escapeHtml(parts[i])}</code></pre>`;
+      }
     }
+
     return out;
   }
 
   function addMessage(role, text){
     const el = h(`<div class="ai-msg ${role}"></div>`);
+
     if (role === 'assistant') el.innerHTML = renderMarkdownLite(text);
     else el.textContent = text;
+
     msgsEl.appendChild(el);
     msgsEl.scrollTop = msgsEl.scrollHeight;
+
     return el;
   }
 
-  if (NEEDS_SETUP){
-    addMessage('system',
-      'Lynn AI belum aktif. Isi API key Groq lo di js/groq-config.js (gratis, ambil di console.groq.com/keys), lalu push ulang.');
-  } else {
-    addMessage('system', 'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.');
+  function getHistory(){
+    try{
+      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    }catch(e){
+      return [];
+    }
+  }
+
+  function saveHistory(list){
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+  }
+
+  function makeTitle(text){
+    const clean = text.replace(/\s+/g,' ').trim();
+    return clean.length > 32 ? clean.slice(0,32) + '…' : clean || 'Chat Baru';
+  }
+
+  function renderHistory(){
+    const history = getHistory();
+    historyEl.innerHTML = '';
+
+    if (!history.length){
+      historyEl.innerHTML = '<div class="ai-history-empty">Belum ada percakapan.</div>';
+      return;
+    }
+
+    history.forEach(chat => {
+      const item = h(`<div class="ai-history-item"></div>`);
+      item.textContent = chat.title || 'Chat Baru';
+
+      item.onclick = () => {
+        loadChat(chat.id);
+        drawer.classList.remove('open');
+        overlay.classList.remove('show');
+      };
+
+      historyEl.appendChild(item);
+    });
+  }
+
+  function saveCurrentChat(){
+    if (!messages.length || !localStorage) return;
+
+    const history = getHistory();
+    const firstUser = messages.find(m => m.role === 'user');
+
+    if (!firstUser) return;
+
+    if (!currentChatId){
+      currentChatId = Date.now().toString();
+    }
+
+    const existingIndex = history.findIndex(c => c.id === currentChatId);
+
+    const chat = {
+      id: currentChatId,
+      title: makeTitle(firstUser.text),
+      updatedAt: Date.now(),
+      messages
+    };
+
+    if (existingIndex >= 0) history[existingIndex] = chat;
+    else history.unshift(chat);
+
+    history.sort((a,b) => b.updatedAt - a.updatedAt);
+    saveHistory(history.slice(0,50));
+    renderHistory();
+  }
+
+  function loadChat(id){
+    const chat = getHistory().find(c => c.id === id);
+
+    if (!chat) return;
+
+    currentChatId = chat.id;
+    messages = Array.isArray(chat.messages) ? chat.messages : [];
+
+    msgsEl.innerHTML = '';
+
+    if (!messages.length){
+      addMessage('system','Chat kosong.');
+      return;
+    }
+
+    messages.forEach(m => addMessage(m.role, m.text));
+  }
+
+  function newChat(){
+    currentChatId = null;
+    messages = [];
+    msgsEl.innerHTML = '';
+
+    addMessage(
+      'system',
+      'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.'
+    );
   }
 
   async function callGroq(){
-  const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      messages: [
-        {
-          role: 'system',
-          content: 'Kamu adalah Lynn AI, asisten LynnZz OS. Jawab singkat dan jelas.'
-        },
-        ...messages.map(m => ({
-          role: m.role,
-          content: m.text
-        }))
-      ]
-    })
-  });
+    const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({
+        messages:[
+          {
+            role:'system',
+            content:'Kamu adalah Lynn AI, asisten LynnZz OS. Jawab singkat dan jelas.'
+          },
+          ...messages.map(m => ({
+            role:m.role,
+            content:m.text
+          }))
+        ]
+      })
+    });
 
-  if (!res.ok){
-    const errBody = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
+    if (!res.ok){
+      const errBody = await res.text();
+      throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
+    }
+
+    const data = await res.json();
+
+    return data?.choices?.[0]?.message?.content || '(respons kosong)';
   }
-
-  const data = await res.json();
-
-  return data?.choices?.[0]?.message?.content
-      || '(respons kosong)';
-}
 
   async function send(){
     const text = input.value.trim();
+
     if (!text || NEEDS_SETUP) return;
+
     input.value = '';
     input.style.height = 'auto';
-    messages.push({ role:'user', text });
+
+    messages.push({
+      role:'user',
+      text
+    });
+
     addMessage('user', text);
+    saveCurrentChat();
 
     const typing = h(`<div class="ai-typing">Lynn AI sedang mengetik…</div>`);
     msgsEl.appendChild(typing);
     msgsEl.scrollTop = msgsEl.scrollHeight;
+
     sendBtn.disabled = true;
 
     try{
       const reply = await callGroq();
-      messages.push({ role:'assistant', text: reply });
+
+      messages.push({
+        role:'assistant',
+        text:reply
+      });
+
       typing.remove();
       addMessage('assistant', reply);
+      saveCurrentChat();
+
     }catch(err){
       typing.remove();
       addMessage('system', `Gagal menghubungi Groq: ${err.message}`);
-    } finally {
+
+    }finally{
       sendBtn.disabled = false;
     }
   }
 
+  body.querySelector('.ai-menu').onclick = () => {
+    drawer.classList.add('open');
+    overlay.classList.add('show');
+  };
+
+  body.querySelector('.ai-close').onclick = () => {
+    drawer.classList.remove('open');
+    overlay.classList.remove('show');
+  };
+
+  overlay.onclick = () => {
+    drawer.classList.remove('open');
+    overlay.classList.remove('show');
+    settingsPanel.classList.remove('show');
+  };
+
+  body.querySelector('.ai-new-chat').onclick = () => {
+    newChat();
+    drawer.classList.remove('open');
+    overlay.classList.remove('show');
+  };
+
+  body.querySelector('.ai-setting-btn').onclick = () => {
+    settingsPanel.classList.toggle('show');
+    overlay.classList.toggle('show');
+  };
+
   sendBtn.onclick = send;
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); send(); }
+
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey){
+      const enterSend = body.querySelector('.ai-enter-send').checked;
+
+      if (enterSend){
+        e.preventDefault();
+        send();
+      }
+    }
   });
+
   input.addEventListener('input', () => {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, 80) + 'px';
   });
+
+  renderHistory();
+  newChat();
 }
 
 /* ============================================================
