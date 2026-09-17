@@ -1001,76 +1001,91 @@ let histIdx = history.length;
     print(`${user}@lynnzz${pathStr()}$ ${trimmed}`, 'term-echo');
 
     // ---- Pipe support: command1 | command2 ----
-    if (trimmed.includes('|')){
-      const pipeParts = trimmed.split('|').map(s => s.trim()).filter(Boolean);
+    // ---- Pipe support: command1 | command2 ----
+if (trimmed.includes('|')){
+  const pipeParts = trimmed.split('|').map(s => s.trim()).filter(Boolean);
 
-      if (pipeParts.length < 2){
-        print('lzsh: pipe tidak valid', 'term-err');
-        return;
-      }
+  if (pipeParts.length < 2){
+    print('lzsh: pipe tidak valid', 'term-err');
+    return;
+  }
 
-      let pipeInput = '';
+  let pipeInput = '';
 
-      for (let i = 0; i < pipeParts.length; i++){
-        const part = pipeParts[i];
-        const tokens = tokenize(part);
+  for (let i = 0; i < pipeParts.length; i++){
+    const part = pipeParts[i];
+    const tokens = tokenize(part);
 
-        if (!tokens.length) continue;
+    if (!tokens.length) continue;
 
-        const pipeCmd = tokens[0];
-        const pipeArgs = tokens.slice(1);
+    const pipeCmd = tokens[0];
+    const pipeArgs = tokens.slice(1);
 
-        if (pipeCmd === 'echo'){
-          pipeInput = pipeArgs.join(' ');
-          continue;
-        }
-
-        if (pipeCmd === 'cat'){
-          const node = findNode(resolvePath(pipeArgs[0] || ''));
-          if (!node || node.type !== 'file'){
-            print(`cat: file tidak ditemukan: ${pipeArgs[0] || ''}`, 'term-err');
-            return;
-          }
-          pipeInput = node.content || '';
-          continue;
-        }
-
-        if (pipeCmd === 'grep'){
-          if (!pipeArgs[0]){
-            print('grep: butuh kata kunci', 'term-err');
-            return;
-          }
-
-          const pattern = pipeArgs[0].toLowerCase();
-          pipeInput = pipeInput
-            .split('\\n')
-            .filter(line => line.toLowerCase().includes(pattern))
-            .join('\\n');
-          continue;
-        }
-
-        if (pipeCmd === 'sort'){
-          pipeInput = pipeInput
-            .split('\\n')
-            .filter(Boolean)
-            .sort()
-            .join('\\n');
-          continue;
-        }
-
-        if (pipeCmd === 'uniq'){
-          const lines = pipeInput.split('\\n');
-          pipeInput = lines.filter((line, i) => i === 0 || line !== lines[i - 1]).join('\\n');
-          continue;
-        }
-
-        print(`lzsh: pipe command not supported: ${pipeCmd}`, 'term-err');
-        return;
-      }
-
-      if (pipeInput) print(pipeInput);
-      return;
+    if (pipeCmd === 'echo'){
+      pipeInput = pipeArgs.join(' ');
+      continue;
     }
+
+    if (pipeCmd === 'cat'){
+      if (!pipeArgs[0]){
+        print('cat: butuh nama file', 'term-err');
+        return;
+      }
+
+      const node = findNode(absSegs(pipeArgs[0]));
+
+      if (!node || node.type !== 'file'){
+        print(`cat: file tidak ditemukan: ${pipeArgs[0]}`, 'term-err');
+        return;
+      }
+
+      pipeInput = node.content || '';
+      continue;
+    }
+
+    if (pipeCmd === 'grep'){
+      if (!pipeArgs[0]){
+        print('grep: butuh kata kunci', 'term-err');
+        return;
+      }
+
+      const pattern = pipeArgs[0].toLowerCase();
+
+      pipeInput = pipeInput
+        .split('\n')
+        .filter(line => line.toLowerCase().includes(pattern))
+        .join('\n');
+
+      continue;
+    }
+
+    if (pipeCmd === 'sort'){
+      pipeInput = pipeInput
+        .split('\n')
+        .filter(line => line.trim() !== '')
+        .sort((a, b) => a.localeCompare(b))
+        .join('\n');
+
+      continue;
+    }
+
+    if (pipeCmd === 'uniq'){
+      const lines = pipeInput.split('\n');
+
+      pipeInput = lines
+        .filter((line, i) => i === 0 || line !== lines[i - 1])
+        .join('\n');
+
+      continue;
+    }
+
+    print(`lzsh: pipe command not supported: ${pipeCmd}`, 'term-err');
+    return;
+  }
+
+  if (pipeInput !== '') print(pipeInput);
+  return;
+}
     const sp = trimmed.indexOf(' ');
     const cmd = sp === -1 ? trimmed : trimmed.slice(0, sp);
     const rest = sp === -1 ? '' : trimmed.slice(sp + 1);
