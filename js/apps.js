@@ -914,6 +914,20 @@ let histIdx = history.length;
       })(start, '');
       print(lines.join('\n'));
     },
+    sort(args){
+      if (!args[0]){
+        print('sort: butuh nama file', 'term-err');
+        return;
+      }
+      const n = findNode(absSegs(args[0]));
+      if (!n || n.type !== 'file'){
+        print(`sort: file tidak ditemukan: ${args[0]}`, 'term-err');
+        return;
+      }
+      const lines = (n.content || '').split('\n');
+      print(lines.sort((a,b) => a.localeCompare(b)).join('\n') || '(kosong)');
+    },
+
     wc(args){
       if (!args[0]){ print('wc: butuh nama file', 'term-err'); return; }
       const n = findNode(absSegs(args[0]));
@@ -949,7 +963,7 @@ let histIdx = history.length;
 
       function search(node, path){
         if (node.type === 'file'){
-          const lines = (node.content || '').split('\\n');
+          const lines = (node.content || '').split('\n');
 
           lines.forEach((line, i) => {
             if (line.toLowerCase().includes(pattern)){
@@ -967,7 +981,7 @@ let histIdx = history.length;
 
       search(fs, '');
 
-      print(results.length ? results.join('\\n') : '(tidak ditemukan)');
+      print(results.length ? results.join('\n') : '(tidak ditemukan)');
     },
 
     exit(){
