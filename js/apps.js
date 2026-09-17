@@ -1227,6 +1227,37 @@ if (trimmed.includes('|')){
    9. LYNN AI — chat assistant powered by Gemini API
 ============================================================ */
 function renderLynnAI(body){
+  // ========================================================
+  // LYNN AI MODEL
+  // ========================================================
+  const LYNN_MODELS = {
+    "gpt-oss-120b": {
+      id: "openai/gpt-oss-120b",
+      name: "GPT-OSS 120B",
+      provider: "OpenAI · Groq",
+      category: "Penalaran & Coding",
+      description: "Lebih kuat untuk tugas kompleks",
+      speed: "Cepat"
+    },
+
+    "gpt-oss-20b": {
+      id: "openai/gpt-oss-20b",
+      name: "GPT-OSS 20B",
+      provider: "OpenAI · Groq",
+      category: "Chat & Quick Tasks",
+      description: "Sangat cepat untuk chat harian",
+      speed: "Sangat cepat"
+    }
+  };
+
+  let selectedLynnModel =
+    localStorage.getItem('lynnzz:ai-model') || 'gpt-oss-120b';
+
+  if (!LYNN_MODELS[selectedLynnModel]){
+    selectedLynnModel = 'gpt-oss-120b';
+  }
+
+
 
   // ========================================================
   // LYNN AI EMPTY STATE
@@ -1308,6 +1339,100 @@ function renderLynnAI(body){
       .lynn-empty-subtitle{
         font-size:14px;
       }
+    }
+
+
+    .ai-header{
+      position:relative;
+      z-index:20;
+    }
+
+    .ai-model-trigger{
+      border:0;
+      background:transparent;
+      color:var(--text);
+      font:inherit;
+      font-weight:650;
+      font-size:15px;
+      cursor:pointer;
+      padding:8px 10px;
+      border-radius:9px;
+    }
+
+    .ai-model-trigger:hover{
+      background:var(--surface);
+    }
+
+    .ai-model-arrow{
+      margin-left:3px;
+      opacity:.7;
+    }
+
+    .ai-model-picker{
+      position:absolute;
+      top:52px;
+      left:52px;
+      width:285px;
+      padding:10px;
+      background:var(--surface);
+      border:1px solid var(--border);
+      border-radius:14px;
+      box-shadow:0 12px 35px rgba(0,0,0,.25);
+      z-index:100;
+      display:none;
+    }
+
+    .ai-model-picker.open{
+      display:block;
+    }
+
+    .ai-model-picker-title{
+      padding:6px 8px 10px;
+      font-size:12px;
+      font-weight:700;
+      color:var(--muted);
+    }
+
+    .ai-model-option{
+      width:100%;
+      display:flex;
+      gap:8px;
+      text-align:left;
+      border:0;
+      background:transparent;
+      color:var(--text);
+      padding:10px 8px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+
+    .ai-model-option:hover{
+      background:var(--hover);
+    }
+
+    .ai-model-check{
+      width:16px;
+      flex-shrink:0;
+      opacity:0;
+    }
+
+    .ai-model-option.selected .ai-model-check{
+      opacity:1;
+    }
+
+    .ai-model-info{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .ai-model-info strong{
+      font-size:13px;
+    }
+
+    .ai-model-info small{
+      font-size:11px;
+      color:var(--muted);
     }
 
     .ai-wrap{
@@ -1832,14 +1957,35 @@ function renderLynnAI(body){
 
         <button class="ai-menu">☰</button>
 
-        <div class="ai-avatar">🤖</div>
+        <button class="ai-model-trigger" type="button">
+          <span class="ai-model-title">Lynn AI</span>
+          <span class="ai-model-arrow">▾</span>
+        </button>
 
-        <div class="ai-header-text">
-          Lynn AI ${NEEDS_SETUP
-            ? '— belum dikonfigurasi'
-            : '— ditenagai Groq (Llama 3.3)'}
-        </div>
+      </div>
 
+      <div class="ai-model-picker">
+        <div class="ai-model-picker-title">Model AI</div>
+
+        <button class="ai-model-option" data-model="gpt-oss-120b">
+          <span class="ai-model-check">✓</span>
+          <span class="ai-model-info">
+            <strong>GPT-OSS 120B</strong>
+            <small>OpenAI · Groq</small>
+            <small>Penalaran & Coding</small>
+            <small>Lebih kuat untuk tugas kompleks</small>
+          </span>
+        </button>
+
+        <button class="ai-model-option" data-model="gpt-oss-20b">
+          <span class="ai-model-check">✓</span>
+          <span class="ai-model-info">
+            <strong>GPT-OSS 20B</strong>
+            <small>OpenAI · Groq</small>
+            <small>Chat & Quick Tasks</small>
+            <small>Sangat cepat untuk chat harian</small>
+          </span>
+        </button>
       </div>
 
       <div class="ai-messages"></div>
@@ -1865,6 +2011,72 @@ function renderLynnAI(body){
   const closeBtn = body.querySelector('.ai-close');
   const newChatBtn = body.querySelector('.ai-new-chat');
   const historyEl = body.querySelector('.ai-history');
+
+  const modelTrigger =
+    body.querySelector('.ai-model-trigger');
+
+  const modelPicker =
+    body.querySelector('.ai-model-picker');
+
+  const modelOptions =
+    body.querySelectorAll('.ai-model-option');
+
+  function updateLynnModelUI(){
+    const model = LYNN_MODELS[selectedLynnModel];
+
+    if (modelTrigger){
+      const title =
+        modelTrigger.querySelector('.ai-model-title');
+
+      if (title){
+        title.textContent = 'Lynn AI';
+      }
+    }
+
+    modelOptions.forEach(option => {
+      option.classList.toggle(
+        'selected',
+        option.dataset.model === selectedLynnModel
+      );
+    });
+  }
+
+  modelTrigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    modelPicker?.classList.toggle('open');
+  });
+
+  modelOptions.forEach(option => {
+    option.addEventListener('click', () => {
+      const key = option.dataset.model;
+
+      if (!LYNN_MODELS[key]) return;
+
+      selectedLynnModel = key;
+
+      localStorage.setItem(
+        'lynnzz:ai-model',
+        selectedLynnModel
+      );
+
+      updateLynnModelUI();
+      modelPicker?.classList.remove('open');
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (
+      modelPicker &&
+      !modelPicker.contains(e.target) &&
+      !modelTrigger?.contains(e.target)
+    ){
+      modelPicker.classList.remove('open');
+    }
+  });
+
+  updateLynnModelUI();
+
+
 
   const settingsBtn = body.querySelector('.ai-setting-btn');
   const settingsPanel = body.querySelector('.ai-settings-panel');
@@ -2204,6 +2416,8 @@ function renderLynnAI(body){
         },
 
         body:JSON.stringify({
+
+          model: LYNN_MODELS[selectedLynnModel].id,
 
           messages:[
             {
