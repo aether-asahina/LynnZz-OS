@@ -1005,6 +1005,35 @@ let histIdx = history.length;
       LZ.win.open(app.id);
     },
 
+    errors(args){
+      if (!LZ.errorLog){
+        print('errors: diagnostics belum tersedia', 'term-err');
+        return;
+      }
+
+      if (args[0] === 'clear'){
+        LZ.errorLog.clear();
+        print('Error log dibersihkan.', 'term-ok');
+        return;
+      }
+
+      const limit = Math.max(1, Math.min(parseInt(args[0]) || 20, 50));
+      const logs = LZ.errorLog.get();
+
+      if (!logs.length){
+        print('(tidak ada error tersimpan)');
+        return;
+      }
+
+      const output = logs.slice(0, limit).map((e, i) => {
+        const time = new Date(e.time).toLocaleTimeString('id-ID');
+
+        return `[${time}] ${e.file || '?'}:${e.line || 0}:${e.column || 0}\n${e.message || '(tanpa pesan)'}`;
+      }).join('\n\n');
+
+      print(output);
+    },
+
     exit(){
       const win = body.closest('.os-window');
       if (win) win.querySelector('.win-close')?.click();

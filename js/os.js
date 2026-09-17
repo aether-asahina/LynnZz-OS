@@ -9,11 +9,83 @@ const LZ = {}; // global namespace to avoid polluting window
    DIAGNOSTICS — surfaces silent JS errors as visible toasts
    since there's no devtools/console access on mobile.
 --------------------------------------------------------- */
+/* ---------------------------------------------------------
+   ERROR LOGGER — persistent diagnostics
+--------------------------------------------------------- */
+LZ.errorLog = {
+  key: 'lynnzz:error-log',
+  max: 50,
+
+  add(error){
+    try{
+      const logs = JSON.parse(localStorage.getItem(this.key) || '[]');
+
+      logs.unshift({
+        time: new Date().toISOString(),
+        message: error.message || String(error),
+        file: error.file || '?',
+        line: error.line || 0,
+        column: error.column || 0
+      });
+
+      localStorage.setItem(
+        this.key,
+        JSON.stringify(logs.slice(0, this.max))
+      );
+    }catch(e){
+      console.error('[LynnZz OS] gagal menyimpan error log:', e);
+    }
+  },
+
+  get(){
+    try{
+      return JSON.parse(localStorage.getItem(this.key) || '[]');
+    }catch(e){
+      return [];
+    }
+  },
+
+  clear(){
+    localStorage.removeItem(this.key);
+  }
+};
+
+/* ---------------------------------------------------------
+   DIAGNOSTICS — surfaces and stores silent JS errors
+--------------------------------------------------------- */
 window.addEventListener('error', (e) => {
   console.error('[LynnZz OS error]', e);
-  const msg = `${e.message} — ${(e.filename||'?').split('/').pop()}:${e.lineno}`;
+
+  const file = (e.filename || '?').split('/').pop();
+  const msg = `${e.message} — ${file}:${e.lineno || 0}`;
+
+  LZ.errorLog.add({
+    message: e.message || 'Unknown error',
+    file,
+    line: e.lineno || 0,
+    column: e.colno || 0
+  });
+
   if (LZ.notify) LZ.notify('⚠️ Error terdeteksi', msg, '⚠️', 12000);
   else alert('Error sebelum OS siap: ' + msg);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  const reason = e.reason;
+  const message = reason?.message || String(reason || 'Unknown rejection');
+
+  console.error('[LynnZz OS unhandled rejection]', reason);
+
+  LZ.errorLog.add({
+    message,
+    file: 'Promise',
+    line: 0,
+    column: 0
+  });
+
+  if (LZ.notify) {
+    LZ.notify('⚠️ Promise Error', message, '⚠️', 12000);
+  }
 });
 
 // Self-test: can we actually inject a <style> tag and have it take effect?
