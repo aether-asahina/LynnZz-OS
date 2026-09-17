@@ -1244,26 +1244,24 @@ function renderLynnAI(body){
       padding:10px 12px;
       border-bottom:1px solid var(--border);
       flex-shrink:0;
-      position:relative;
-      z-index:5;
     }
 
     .ai-menu{
       width:32px;
       height:32px;
       border:1px solid var(--border);
+      border-radius:9px;
       background:var(--surface-2);
       color:var(--text);
-      border-radius:9px;
       cursor:pointer;
-      font-size:17px;
+      font-size:16px;
       display:flex;
       align-items:center;
       justify-content:center;
     }
 
-    .ai-menu:hover{
-      background:var(--surface);
+    .ai-menu:active{
+      transform:scale(.94);
     }
 
     .ai-avatar{
@@ -1281,9 +1279,6 @@ function renderLynnAI(body){
     .ai-header-text{
       font-size:12.5px;
       color:var(--text-muted);
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
     }
 
     .ai-messages{
@@ -1390,18 +1385,33 @@ function renderLynnAI(body){
     }
 
     /* DRAWER */
+
+    .ai-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.45);
+      z-index:15;
+      display:none;
+    }
+
+    .ai-overlay.open{
+      display:block;
+    }
+
     .ai-drawer{
       position:absolute;
-      inset:0 auto 0 0;
-      width:245px;
+      top:0;
+      left:0;
+      bottom:0;
+      width:min(290px,82%);
       background:var(--surface);
       border-right:1px solid var(--border);
       z-index:20;
-      transform:translateX(-100%);
-      transition:transform .2s ease;
       display:flex;
       flex-direction:column;
-      box-shadow:12px 0 30px rgba(0,0,0,.25);
+      transform:translateX(-100%);
+      transition:transform .22s ease;
+      box-shadow:10px 0 30px rgba(0,0,0,.25);
     }
 
     .ai-drawer.open{
@@ -1412,46 +1422,46 @@ function renderLynnAI(body){
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:12px;
+      padding:13px 12px;
       border-bottom:1px solid var(--border);
     }
 
     .ai-drawer-title{
-      font-weight:700;
-      font-size:13px;
+      font-size:14px;
+      font-weight:600;
     }
 
     .ai-close{
-      width:28px;
-      height:28px;
-      border:0;
-      background:transparent;
-      color:var(--text-muted);
+      width:30px;
+      height:30px;
+      border:1px solid var(--border);
+      border-radius:8px;
+      background:var(--surface-2);
+      color:var(--text);
       cursor:pointer;
-      border-radius:7px;
-      font-size:17px;
+      font-size:18px;
     }
 
     .ai-new-chat{
       margin:10px;
-      padding:9px 11px;
+      padding:10px 12px;
       border:1px solid var(--border);
+      border-radius:9px;
       background:var(--surface-2);
       color:var(--text);
-      border-radius:9px;
       cursor:pointer;
       text-align:left;
-      font-size:12px;
+      font-size:12.5px;
     }
 
-    .ai-new-chat:hover{
-      background:var(--surface);
+    .ai-new-chat:active{
+      transform:scale(.98);
     }
 
     .ai-history-label{
-      padding:5px 12px;
-      color:var(--text-muted);
+      padding:3px 12px 7px;
       font-size:10px;
+      color:var(--text-muted);
       text-transform:uppercase;
       letter-spacing:.08em;
     }
@@ -1459,16 +1469,15 @@ function renderLynnAI(body){
     .ai-history{
       flex:1;
       overflow-y:auto;
-      padding:4px 8px;
+      padding:0 7px;
     }
 
     .ai-history-item{
       padding:9px 10px;
       border-radius:8px;
-      cursor:pointer;
-      margin-bottom:2px;
       font-size:12px;
       color:var(--text);
+      cursor:pointer;
       white-space:nowrap;
       overflow:hidden;
       text-overflow:ellipsis;
@@ -1479,25 +1488,25 @@ function renderLynnAI(body){
     }
 
     .ai-history-empty{
-      padding:10px;
+      padding:12px 10px;
       color:var(--text-muted);
       font-size:11px;
     }
 
     .ai-settings{
-      border-top:1px solid var(--border);
       padding:8px;
+      border-top:1px solid var(--border);
     }
 
     .ai-setting-btn{
       width:100%;
-      padding:9px 10px;
+      padding:10px;
       border:0;
+      border-radius:8px;
       background:transparent;
       color:var(--text);
-      text-align:left;
-      border-radius:8px;
       cursor:pointer;
+      text-align:left;
       font-size:12px;
     }
 
@@ -1505,53 +1514,113 @@ function renderLynnAI(body){
       background:var(--surface-2);
     }
 
-    .ai-overlay{
-      position:absolute;
-      inset:0;
-      background:rgba(0,0,0,.18);
-      z-index:15;
-      display:none;
-    }
-
-    .ai-overlay.show{
-      display:block;
-    }
+    /* SETTINGS PAGE */
 
     .ai-settings-panel{
       position:absolute;
-      left:50%;
-      top:50%;
-      transform:translate(-50%,-50%);
-      width:min(310px,85%);
-      background:var(--surface);
-      border:1px solid var(--border);
-      border-radius:14px;
+      inset:0;
       z-index:30;
-      padding:14px;
-      box-shadow:0 15px 50px rgba(0,0,0,.35);
+      background:var(--void);
       display:none;
+      flex-direction:column;
+      overflow-y:auto;
     }
 
-    .ai-settings-panel.show{
-      display:block;
+    .ai-settings-panel.open{
+      display:flex;
     }
 
-    .ai-settings-panel h3{
-      margin:0 0 12px;
+    .ai-settings-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:12px;
+      border-bottom:1px solid var(--border);
+      flex-shrink:0;
+    }
+
+    .ai-settings-back{
+      width:34px;
+      height:34px;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      font-size:18px;
+    }
+
+    .ai-settings-back:active{
+      transform:scale(.94);
+    }
+
+    .ai-settings-title{
       font-size:14px;
+      font-weight:600;
     }
 
-    .ai-setting-row{
+    .ai-settings-content{
+      padding:18px 14px 30px;
+    }
+
+    .ai-settings-section{
+      margin-bottom:24px;
+    }
+
+    .ai-settings-section-title{
+      font-size:10px;
+      color:var(--text-muted);
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      margin:0 0 8px 4px;
+    }
+
+    .ai-setting-item{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:10px 0;
-      border-bottom:1px solid var(--border);
-      font-size:12px;
+      gap:15px;
+      padding:14px 12px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-bottom:0;
     }
 
-    .ai-setting-row:last-child{
-      border-bottom:0;
+    .ai-setting-item:first-of-type{
+      border-radius:10px 10px 0 0;
+    }
+
+    .ai-setting-item:last-of-type{
+      border-bottom:1px solid var(--border);
+      border-radius:0 0 10px 10px;
+    }
+
+    .ai-setting-item:only-of-type{
+      border-bottom:1px solid var(--border);
+      border-radius:10px;
+    }
+
+    .ai-setting-info{
+      min-width:0;
+    }
+
+    .ai-setting-name{
+      font-size:13px;
+      color:var(--text);
+    }
+
+    .ai-setting-desc{
+      font-size:11px;
+      color:var(--text-muted);
+      margin-top:3px;
+      line-height:1.4;
+    }
+
+    .ai-setting-item input[type="checkbox"]{
+      width:18px;
+      height:18px;
+      flex-shrink:0;
+      accent-color:#8b5cf6;
     }
   `);
 
@@ -1562,10 +1631,13 @@ function renderLynnAI(body){
   let currentChatId = null;
 
   body.innerHTML = '';
+
   body.appendChild(h(`
     <div class="ai-wrap">
 
+      <!-- DRAWER -->
       <div class="ai-drawer">
+
         <div class="ai-drawer-head">
           <div class="ai-drawer-title">Lynn AI</div>
           <button class="ai-close">×</button>
@@ -1574,218 +1646,527 @@ function renderLynnAI(body){
         <button class="ai-new-chat">＋ Chat Baru</button>
 
         <div class="ai-history-label">Riwayat</div>
+
         <div class="ai-history"></div>
 
         <div class="ai-settings">
           <button class="ai-setting-btn">⚙ Pengaturan AI</button>
         </div>
+
       </div>
 
       <div class="ai-overlay"></div>
 
+      <!-- SETTINGS PAGE -->
       <div class="ai-settings-panel">
-        <h3>Pengaturan Lynn AI</h3>
 
-        <div class="ai-setting-row">
-          <span>Simpan histori chat</span>
-          <input class="ai-save-history" type="checkbox" checked>
+        <div class="ai-settings-head">
+          <button class="ai-settings-back">←</button>
+          <div class="ai-settings-title">Pengaturan AI</div>
         </div>
 
-        <div class="ai-setting-row">
-          <span>Enter untuk mengirim</span>
-          <input class="ai-enter-send" type="checkbox" checked>
+        <div class="ai-settings-content">
+
+          <div class="ai-settings-section">
+
+            <div class="ai-settings-section-title">
+              Percakapan
+            </div>
+
+            <div class="ai-setting-item">
+
+              <div class="ai-setting-info">
+                <div class="ai-setting-name">
+                  Simpan histori chat
+                </div>
+
+                <div class="ai-setting-desc">
+                  Simpan percakapan Lynn AI di perangkat ini.
+                </div>
+              </div>
+
+              <input
+                class="ai-save-history"
+                type="checkbox"
+                checked
+              >
+
+            </div>
+
+            <div class="ai-setting-item">
+
+              <div class="ai-setting-info">
+                <div class="ai-setting-name">
+                  Enter untuk mengirim
+                </div>
+
+                <div class="ai-setting-desc">
+                  Tekan Enter untuk langsung mengirim pesan.
+                </div>
+              </div>
+
+              <input
+                class="ai-enter-send"
+                type="checkbox"
+                checked
+              >
+
+            </div>
+
+          </div>
+
+          <div class="ai-settings-section">
+
+            <div class="ai-settings-section-title">
+              Tentang
+            </div>
+
+            <div class="ai-setting-item">
+
+              <div class="ai-setting-info">
+                <div class="ai-setting-name">
+                  Lynn AI
+                </div>
+
+                <div class="ai-setting-desc">
+                  AI assistant bawaan LynnZz OS.
+                </div>
+              </div>
+
+              <div style="font-size:11px;color:var(--text-muted)">
+                v1.0
+              </div>
+
+            </div>
+
+          </div>
+
         </div>
+
       </div>
 
+      <!-- MAIN CHAT -->
       <div class="ai-header">
+
         <button class="ai-menu">☰</button>
+
         <div class="ai-avatar">🤖</div>
+
         <div class="ai-header-text">
-          Lynn AI ${NEEDS_SETUP ? '— belum dikonfigurasi' : '— ditenagai Groq (Llama 3.3)'}
+          Lynn AI ${NEEDS_SETUP
+            ? '— belum dikonfigurasi'
+            : '— ditenagai Groq (Llama 3.3)'}
         </div>
+
       </div>
 
       <div class="ai-messages"></div>
 
       <div class="ai-inputbar">
-        <textarea class="ai-input" rows="1" placeholder="Tanya apa aja, mis. 'Buatkan kode Java CRUD mahasiswa'…"></textarea>
+
+        <textarea
+          class="ai-input"
+          rows="1"
+          placeholder="Tanya apa aja, mis. 'Buatkan kode Java CRUD mahasiswa'…"
+        ></textarea>
+
         <button class="ai-send">➤</button>
+
       </div>
 
     </div>
   `));
 
-  const wrap = body.querySelector('.ai-wrap');
   const drawer = body.querySelector('.ai-drawer');
   const overlay = body.querySelector('.ai-overlay');
-  const settingsPanel = body.querySelector('.ai-settings-panel');
+  const menuBtn = body.querySelector('.ai-menu');
+  const closeBtn = body.querySelector('.ai-close');
+  const newChatBtn = body.querySelector('.ai-new-chat');
   const historyEl = body.querySelector('.ai-history');
+
+  const settingsBtn = body.querySelector('.ai-setting-btn');
+  const settingsPanel = body.querySelector('.ai-settings-panel');
+  const settingsBack = body.querySelector('.ai-settings-back');
+
+  const saveHistoryToggle = body.querySelector('.ai-save-history');
+  const enterSendToggle = body.querySelector('.ai-enter-send');
+
   const msgsEl = body.querySelector('.ai-messages');
   const input = body.querySelector('.ai-input');
   const sendBtn = body.querySelector('.ai-send');
 
   function escapeHtml(s){
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return s
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
   }
 
   function renderMarkdownLite(text){
     const parts = text.split(/```(\w*)\n?([\s\S]*?)```/g);
+
     let out = '';
 
     for (let i = 0; i < parts.length; i++){
-      if (i % 3 === 0) out += escapeHtml(parts[i]);
+
+      if (i % 3 === 0){
+        out += escapeHtml(parts[i]);
+      }
+
       else if (i % 3 === 2){
         out += `<pre><code>${escapeHtml(parts[i])}</code></pre>`;
       }
+
     }
 
     return out;
   }
 
-  function addMessage(role, text){
-    const el = h(`<div class="ai-msg ${role}"></div>`);
-
-    if (role === 'assistant') el.innerHTML = renderMarkdownLite(text);
-    else el.textContent = text;
-
-    msgsEl.appendChild(el);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
-
-    return el;
-  }
-
   function getHistory(){
     try{
-      return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+      return JSON.parse(
+        localStorage.getItem(HISTORY_KEY) || '[]'
+      );
     }catch(e){
       return [];
     }
   }
 
   function saveHistory(list){
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(list));
+    try{
+      localStorage.setItem(
+        HISTORY_KEY,
+        JSON.stringify(list)
+      );
+    }catch(e){
+      console.warn('[Lynn AI] gagal menyimpan history:', e);
+    }
   }
 
   function makeTitle(text){
-    const clean = text.replace(/\s+/g,' ').trim();
-    return clean.length > 32 ? clean.slice(0,32) + '…' : clean || 'Chat Baru';
+    const clean = text
+      .replace(/\s+/g,' ')
+      .trim();
+
+    return clean.length > 32
+      ? clean.slice(0,32) + '…'
+      : clean || 'Chat Baru';
   }
 
   function renderHistory(){
-    const history = getHistory();
+
+    const list = getHistory();
+
     historyEl.innerHTML = '';
 
-    if (!history.length){
-      historyEl.innerHTML = '<div class="ai-history-empty">Belum ada percakapan.</div>';
+    if (!list.length){
+      historyEl.innerHTML = `
+        <div class="ai-history-empty">
+          Belum ada percakapan.
+        </div>
+      `;
       return;
     }
 
-    history.forEach(chat => {
-      const item = h(`<div class="ai-history-item"></div>`);
-      item.textContent = chat.title || 'Chat Baru';
+    list
+      .sort((a,b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+      .forEach(chat => {
 
-      item.onclick = () => {
-        loadChat(chat.id);
-        drawer.classList.remove('open');
-        overlay.classList.remove('show');
-      };
+        const item = h(`
+          <div class="ai-history-item"></div>
+        `);
 
-      historyEl.appendChild(item);
-    });
+        item.textContent = chat.title || 'Chat';
+
+        item.onclick = () => {
+          loadChat(chat.id);
+          closeDrawer();
+        };
+
+        historyEl.appendChild(item);
+
+      });
   }
 
   function saveCurrentChat(){
-    if (!messages.length || !localStorage) return;
 
-    const history = getHistory();
-    const firstUser = messages.find(m => m.role === 'user');
-
-    if (!firstUser) return;
-
-    if (!currentChatId){
-      currentChatId = Date.now().toString();
+    if (!saveHistoryToggle.checked){
+      return;
     }
 
-    const existingIndex = history.findIndex(c => c.id === currentChatId);
+    if (!messages.length){
+      return;
+    }
+
+    const firstUser = messages.find(
+      m => m.role === 'user'
+    );
+
+    if (!firstUser){
+      return;
+    }
+
+    const list = getHistory();
+
+    if (!currentChatId){
+      currentChatId =
+        Date.now().toString(36) +
+        Math.random().toString(36).slice(2,7);
+    }
+
+    const existingIndex = list.findIndex(
+      chat => chat.id === currentChatId
+    );
 
     const chat = {
       id: currentChatId,
       title: makeTitle(firstUser.text),
       updatedAt: Date.now(),
-      messages
+      messages: messages
     };
 
-    if (existingIndex >= 0) history[existingIndex] = chat;
-    else history.unshift(chat);
+    if (existingIndex >= 0){
+      list[existingIndex] = chat;
+    }else{
+      list.unshift(chat);
+    }
 
-    history.sort((a,b) => b.updatedAt - a.updatedAt);
-    saveHistory(history.slice(0,50));
+    saveHistory(list.slice(0,50));
+
     renderHistory();
   }
 
   function loadChat(id){
-    const chat = getHistory().find(c => c.id === id);
 
-    if (!chat) return;
+    const list = getHistory();
 
-    currentChatId = chat.id;
-    messages = Array.isArray(chat.messages) ? chat.messages : [];
+    const chat = list.find(
+      item => item.id === id
+    );
 
-    msgsEl.innerHTML = '';
-
-    if (!messages.length){
-      addMessage('system','Chat kosong.');
+    if (!chat){
       return;
     }
 
-    messages.forEach(m => addMessage(m.role, m.text));
+    currentChatId = chat.id;
+    messages = Array.isArray(chat.messages)
+      ? chat.messages
+      : [];
+
+    msgsEl.innerHTML = '';
+
+    messages.forEach(m => {
+      addMessage(
+        m.role,
+        m.text,
+        false
+      );
+    });
+
+    msgsEl.scrollTop = msgsEl.scrollHeight;
   }
 
   function newChat(){
+
     currentChatId = null;
     messages = [];
+
     msgsEl.innerHTML = '';
+
+    addMessage(
+      'system',
+      NEEDS_SETUP
+        ? 'Lynn AI belum aktif. Isi API key Groq lo di js/groq-config.js lalu push ulang.'
+        : 'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.'
+    );
+  }
+
+  /*
+   * addMessage
+   *
+   * animate=true hanya digunakan untuk respons AI baru.
+   * Markdown TIDAK dirender setiap karakter.
+   * Ini mencegah flicker.
+   */
+  function addMessage(role, text, animate = false){
+
+    const el = h(
+      `<div class="ai-msg ${role}"></div>`
+    );
+
+    msgsEl.appendChild(el);
+
+    if (role !== 'assistant' || !animate){
+
+      if (role === 'assistant'){
+        el.innerHTML =
+          renderMarkdownLite(text);
+      }else{
+        el.textContent = text;
+      }
+
+      msgsEl.scrollTop =
+        msgsEl.scrollHeight;
+
+      return el;
+    }
+
+    /*
+     * Typing animation
+     */
+    let i = 0;
+
+    const speed = 12;
+
+    function typeNext(){
+
+      if (i >= text.length){
+
+        // Render markdown SATU KALI setelah selesai
+        el.innerHTML =
+          renderMarkdownLite(text);
+
+        msgsEl.scrollTop =
+          msgsEl.scrollHeight;
+
+        return;
+      }
+
+      i++;
+
+      el.textContent =
+        text.slice(0, i);
+
+      msgsEl.scrollTop =
+        msgsEl.scrollHeight;
+
+      setTimeout(typeNext, speed);
+    }
+
+    typeNext();
+
+    return el;
+  }
+
+  function openDrawer(){
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+  }
+
+  function closeDrawer(){
+    drawer.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+
+  menuBtn.onclick = openDrawer;
+  closeBtn.onclick = closeDrawer;
+  overlay.onclick = closeDrawer;
+
+  newChatBtn.onclick = () => {
+    newChat();
+    closeDrawer();
+    input.focus();
+  };
+
+  settingsBtn.onclick = () => {
+
+    closeDrawer();
+
+    settingsPanel.classList.add('open');
+
+  };
+
+  settingsBack.onclick = () => {
+
+    settingsPanel.classList.remove('open');
+
+  };
+
+  saveHistoryToggle.onchange = () => {
+
+    if (!saveHistoryToggle.checked){
+      return;
+    }
+
+    saveCurrentChat();
+
+  };
+
+  if (NEEDS_SETUP){
+
+    addMessage(
+      'system',
+      'Lynn AI belum aktif.'
+    );
+
+  }else{
 
     addMessage(
       'system',
       'Halo! Gue Lynn AI. Tanya apa aja — bisa bikinin kode, jelasin konsep, atau bantu tugas.'
     );
+
   }
 
   async function callGroq(){
-    const res = await fetch('https://polished-smoke-e31c.naufaldzakiy777.workers.dev/', {
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json'
-      },
-      body:JSON.stringify({
-        messages:[
-          {
-            role:'system',
-            content:'Kamu adalah Lynn AI, asisten LynnZz OS. Jawab singkat dan jelas.'
-          },
-          ...messages.map(m => ({
-            role:m.role,
-            content:m.text
-          }))
-        ]
-      })
-    });
+
+    const res = await fetch(
+      'https://polished-smoke-e31c.naufaldzakiy777.workers.dev/',
+      {
+        method:'POST',
+
+        headers:{
+          'Content-Type':'application/json'
+        },
+
+        body:JSON.stringify({
+
+          messages:[
+            {
+              role:'system',
+
+              content:
+                'Kamu adalah Lynn AI, asisten LynnZz OS. Jawab singkat dan jelas.'
+            },
+
+            ...messages.map(m => ({
+              role:m.role,
+              content:m.text
+            }))
+
+          ]
+
+        })
+
+      }
+    );
 
     if (!res.ok){
-      const errBody = await res.text();
-      throw new Error(`HTTP ${res.status}: ${errBody.slice(0,200)}`);
+
+      const errBody =
+        await res.text();
+
+      throw new Error(
+        `HTTP ${res.status}: ${errBody.slice(0,200)}`
+      );
+
     }
 
-    const data = await res.json();
+    const data =
+      await res.json();
 
-    return data?.choices?.[0]?.message?.content || '(respons kosong)';
+    return data?.choices?.[0]?.message?.content
+      || '(respons kosong)';
   }
 
   async function send(){
-    const text = input.value.trim();
 
-    if (!text || NEEDS_SETUP) return;
+    const text =
+      input.value.trim();
+
+    if (!text || NEEDS_SETUP){
+      return;
+    }
 
     input.value = '';
     input.style.height = 'auto';
@@ -1795,17 +2176,27 @@ function renderLynnAI(body){
       text
     });
 
-    addMessage('user', text);
+    addMessage(
+      'user',
+      text
+    );
+
     saveCurrentChat();
 
-    const typing = h(`<div class="ai-typing">Lynn AI sedang mengetik…</div>`);
+    const typing =
+      h(`<div class="ai-typing">Lynn AI sedang mengetik…</div>`);
+
     msgsEl.appendChild(typing);
-    msgsEl.scrollTop = msgsEl.scrollHeight;
+
+    msgsEl.scrollTop =
+      msgsEl.scrollHeight;
 
     sendBtn.disabled = true;
 
     try{
-      const reply = await callGroq();
+
+      const reply =
+        await callGroq();
 
       messages.push({
         role:'assistant',
@@ -1813,62 +2204,72 @@ function renderLynnAI(body){
       });
 
       typing.remove();
-      addMessage('assistant', reply);
+
+      /*
+       * Animasi karakter demi karakter
+       */
+      addMessage(
+        'assistant',
+        reply,
+        true
+      );
+
+      /*
+       * History menyimpan respons FULL,
+       * bukan hasil animasi.
+       */
       saveCurrentChat();
 
     }catch(err){
+
       typing.remove();
-      addMessage('system', `Gagal menghubungi Groq: ${err.message}`);
+
+      addMessage(
+        'system',
+        `Gagal menghubungi Groq: ${err.message}`
+      );
 
     }finally{
+
       sendBtn.disabled = false;
+
     }
   }
 
-  body.querySelector('.ai-menu').onclick = () => {
-    drawer.classList.add('open');
-    overlay.classList.add('show');
-  };
-
-  body.querySelector('.ai-close').onclick = () => {
-    drawer.classList.remove('open');
-    overlay.classList.remove('show');
-  };
-
-  overlay.onclick = () => {
-    drawer.classList.remove('open');
-    overlay.classList.remove('show');
-    settingsPanel.classList.remove('show');
-  };
-
-  body.querySelector('.ai-new-chat').onclick = () => {
-    newChat();
-    drawer.classList.remove('open');
-    overlay.classList.remove('show');
-  };
-
-  body.querySelector('.ai-setting-btn').onclick = () => {
-    settingsPanel.classList.toggle('show');
-    overlay.classList.toggle('show');
-  };
-
   sendBtn.onclick = send;
 
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey){
-      const enterSend = body.querySelector('.ai-enter-send').checked;
+  input.addEventListener(
+    'keydown',
+    (e) => {
 
-      if (enterSend){
+      if (
+        e.key === 'Enter' &&
+        !e.shiftKey &&
+        enterSendToggle.checked
+      ){
+
         e.preventDefault();
         send();
-      }
-    }
-  });
 
-  input.addEventListener('input', () => {
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 80) + 'px';
-  });
+      }
+
+    }
+  );
+
+  input.addEventListener(
+    'input',
+    () => {
+
+      input.style.height = 'auto';
+
+      input.style.height =
+        Math.min(
+          input.scrollHeight,
+          80
+        ) + 'px';
+
+    }
+  );
 
   renderHistory();
   newChat();
