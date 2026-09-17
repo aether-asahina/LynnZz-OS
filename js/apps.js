@@ -1227,7 +1227,89 @@ if (trimmed.includes('|')){
    9. LYNN AI — chat assistant powered by Gemini API
 ============================================================ */
 function renderLynnAI(body){
+
+  // ========================================================
+  // LYNN AI EMPTY STATE
+  // Greeting UI-only — tidak masuk history / messages
+  // ========================================================
+
+  const lynnEmptyState =
+    body.querySelector('.lynn-empty-state');
+
+  const lynnEmptyTitle =
+    body.querySelector('.lynn-empty-title');
+
+  function getLynnGreeting(){
+    const hour = new Date().getHours();
+
+    if (hour >= 5 && hour < 11){
+      return 'Selamat pagi, Ketua.';
+    }
+
+    if (hour >= 11 && hour < 15){
+      return 'Selamat siang, Ketua.';
+    }
+
+    if (hour >= 15 && hour < 18){
+      return 'Selamat sore, Ketua.';
+    }
+
+    return 'Selamat malam, Ketua.';
+  }
+
+  function updateLynnEmptyState(){
+    if (!lynnEmptyState || !lynnEmptyTitle) return;
+
+    lynnEmptyTitle.textContent =
+      getLynnGreeting();
+
+    const hasMessages =
+      Array.isArray(messages) &&
+      messages.length > 0;
+
+    lynnEmptyState.style.display =
+      hasMessages ? 'none' : 'flex';
+  }
+
+
   ensureStyle('lynnai', `
+
+    .lynn-empty-state{
+      position:absolute;
+      inset:0;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      text-align:center;
+      pointer-events:none;
+      z-index:1;
+    }
+
+    .lynn-empty-title{
+      font-size:26px;
+      font-weight:650;
+      letter-spacing:-.5px;
+      color:var(--text);
+    }
+
+    .lynn-empty-subtitle{
+      margin-top:8px;
+      font-size:15px;
+      color:var(--muted);
+    }
+
+    @media(max-width:600px){
+      .lynn-empty-title{
+        font-size:23px;
+      }
+
+      .lynn-empty-subtitle{
+        font-size:14px;
+      }
+    }
+
     .ai-wrap{
       display:flex;
       flex-direction:column;
@@ -2047,6 +2129,8 @@ function renderLynnAI(body){
 
     return el;
   }
+
+  updateLynnEmptyState();
 
   function openDrawer(){
     drawer.classList.add('open');
