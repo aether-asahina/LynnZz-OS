@@ -146,11 +146,21 @@ button,input,textarea{font-family:inherit;}
 /* ===================== WINDOWS ===================== */
 .os-window{
   position:absolute; min-width:260px; min-height:180px;
-  background:rgba(21,21,31,.75);
-  border:1px solid rgba(255,255,255,.08);
-  border-radius:18px;
+  background:rgba(21,21,31,0.92); border:1px solid var(--border-strong); border-radius:12px;
   box-shadow:0 25px 60px rgba(0,0,0,.55); backdrop-filter:blur(16px);
   display:flex; flex-direction:column; overflow:hidden;
+  animation:winOpen .18s ease;
+}
+
+@keyframes winOpen{
+  from{
+    opacity:0;
+    transform:scale(.96);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
 }
 .os-window.focused{border-color:rgba(168,85,247,0.5); box-shadow:0 25px 70px rgba(123,47,247,.25);}
 .win-titlebar{
