@@ -1055,7 +1055,6 @@ function renderSettings(body){
     </div>
 
     <!-- PERSONALIZATION -->
-          </div>
 
     <div class="st-detail" data-detail="personalization">
 
@@ -1405,6 +1404,8 @@ function renderSettings(body){
         </div>
 
       </div>
+
+    </div>
 
     </div>
 
