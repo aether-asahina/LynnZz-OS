@@ -1,4 +1,8 @@
 :root{
+  --lz-accent:#a855f7;
+  --lz-accent-dim:#7b2ff7;
+  --lz-blur:24px;
+  --lz-scale:1;
   --void:#0a0a12;
   --surface:#15151f;
   --surface-2:#1c1c29;
@@ -6,8 +10,8 @@
   --border-strong:rgba(255,255,255,0.16);
   --text:#eceaf5;
   --text-muted:#9491ac;
-  --violet:#a855f7;
-  --violet-dim:#7b2ff7;
+  --violet:var(--lz-accent);
+  --violet-dim:var(--lz-accent-dim);
   --crimson:#ff2e63;
   --grad:linear-gradient(135deg,var(--violet-dim),var(--crimson));
   --font-ui:'Space Grotesk',system-ui,sans-serif;
@@ -434,4 +438,56 @@ button,input,textarea{font-family:inherit;}
 /* Window animation toggle */
 .no-window-animation .os-window{
   animation:none !important;
+}
+
+
+/* =========================================================
+   LYNNZZ PERSONALIZATION ENGINE
+========================================================= */
+
+:root{
+  --lz-scale:1;
+}
+
+/* UI SCALE */
+html{
+  font-size:calc(16px * var(--lz-scale));
+}
+
+body{
+  zoom:var(--lz-scale);
+}
+
+/* BLUR PRESETS */
+html[data-blur="off"]{
+  --lz-blur:0px;
+}
+
+html[data-blur="normal"]{
+  --lz-blur:24px;
+}
+
+html[data-blur="high"]{
+  --lz-blur:38px;
+}
+
+/* Accent presets */
+html[data-accent="violet"]{
+  --lz-accent:#a855f7;
+  --lz-accent-dim:#7b2ff7;
+}
+
+html[data-accent="blue"]{
+  --lz-accent:#3b82f6;
+  --lz-accent-dim:#2563eb;
+}
+
+html[data-accent="emerald"]{
+  --lz-accent:#10b981;
+  --lz-accent-dim:#059669;
+}
+
+html[data-accent="crimson"]{
+  --lz-accent:#ff2e63;
+  --lz-accent-dim:#e11d48;
 }

@@ -101,6 +101,37 @@ window.addEventListener('unhandledrejection', (e) => {
   }
 })();
 
+/* =========================================================
+   LYNNZZ PERSONALIZATION ENGINE
+========================================================= */
+
+LZ.applyPersonalization = function(){
+  const settings = LZ.storage.get('settings', {});
+
+  const accent = settings.accentColor || 'violet';
+  const blur = settings.blurStrength || 'normal';
+  const scale = settings.uiScale || '100';
+
+  document.documentElement.dataset.accent = accent;
+  document.documentElement.dataset.blur = blur;
+
+  const scaleMap = {
+    '90': 0.90,
+    '100': 1,
+    '110': 1.10
+  };
+
+  document.documentElement.style.setProperty(
+    '--lz-scale',
+    scaleMap[String(scale)] || 1
+  );
+};
+
+/* Apply once DOM is available. */
+document.addEventListener('DOMContentLoaded', () => {
+  LZ.applyPersonalization();
+});
+
 /* ---------------------------------------------------------
    STORAGE HELPERS (namespaced by logged-in user)
 --------------------------------------------------------- */

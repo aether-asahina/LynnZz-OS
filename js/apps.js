@@ -551,167 +551,884 @@ function renderGallery(body){
 ============================================================ */
 function renderSettings(body){
   ensureStyle('settings', `
-    .st-wrap{padding:16px; overflow-y:auto; height:100%;}
-    .st-section{margin-bottom:22px;}
-    .st-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:10px;}
-    .st-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
-    .st-account{display:flex; align-items:center; gap:12px;}
-    .st-wallpaper-head{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-bottom:10px;}
-    .st-wallpaper-title{font-size:13px; font-weight:600; color:var(--text);}
-    .st-wallpaper-subtitle{font-size:10.5px; color:var(--text-muted); margin-top:3px;}
-    .st-themes{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
-    .st-theme{height:82px; border-radius:14px; border:1px solid rgba(255,255,255,.08); cursor:pointer; position:relative; overflow:hidden; display:flex; align-items:flex-end; padding:10px; font-size:11.5px; font-weight:600; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.75); transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;}
-    .st-theme:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.2);}
-    .st-theme.active{border-color:var(--violet); box-shadow:0 0 0 2px rgba(168,85,247,.22), 0 8px 24px rgba(0,0,0,.25);}
-    .st-theme::after{content:'✓'; position:absolute; top:8px; right:9px; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.35); color:#fff; font-size:11px; opacity:0; transform:scale(.7); transition:.18s ease;}
-    .st-theme.active::after{opacity:1; transform:scale(1);}
-    .st-theme-name{position:relative; z-index:1;}
-    .st-theme-glow{position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.5),transparent 65%); pointer-events:none;}
-    .st-danger{background:rgba(255,46,99,0.12); border:1px solid var(--crimson); color:var(--crimson); padding:9px 14px; border-radius:9px; cursor:pointer; font-size:12.5px;}
-    .st-switch{display:flex; align-items:center; gap:6px; cursor:pointer;}
-    .st-switch input{display:none;}
-    .st-switch-track{width:34px; height:19px; border-radius:10px; background:var(--surface-2); border:1px solid var(--border); position:relative; transition:background .15s; display:inline-block;}
-    .st-switch-thumb{position:absolute; top:1px; left:1px; width:15px; height:15px; border-radius:50%; background:var(--text-muted); transition:transform .15s, background .15s;}
-    .st-switch input:checked + .st-switch-track{background:rgba(168,85,247,.3); border-color:var(--violet);}
-    .st-switch input:checked + .st-switch-track .st-switch-thumb{transform:translateX(15px); background:var(--violet);}
-    .st-switch-label{font-size:11.5px; color:var(--text-muted);}
+    .st-wrap{
+      height:100%;
+      overflow-y:auto;
+      padding:14px;
+    }
 
-    .st-size-options{
+    .st-page-head{
+      margin-bottom:18px;
+    }
+
+    .st-page-title{
+      font-size:18px;
+      font-weight:700;
+      color:var(--text);
+    }
+
+    .st-page-subtitle{
+      margin-top:4px;
+      font-size:11px;
+      color:var(--text-muted);
+    }
+
+    .st-account-card{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:13px;
+      margin-bottom:18px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+
+    .st-account-info{
+      min-width:0;
+    }
+
+    .st-account-name{
+      font-size:13px;
+      font-weight:600;
+      color:var(--text);
+    }
+
+    .st-account-email{
+      margin-top:3px;
+      font-size:10.5px;
+      color:var(--text-muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .st-menu{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .st-menu-item{
+      width:100%;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:13px 12px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      text-align:left;
+      transition:transform .16s ease, border-color .16s ease, background .16s ease;
+    }
+
+    .st-menu-item:hover{
+      border-color:var(--violet);
+      transform:translateY(-1px);
+    }
+
+    .st-menu-item:active{
+      transform:scale(.98);
+    }
+
+    .st-menu-icon{
+      width:36px;
+      height:36px;
+      flex:0 0 36px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:10px;
+      background:rgba(168,85,247,.12);
+      font-size:17px;
+    }
+
+    .st-menu-info{
+      flex:1;
+      min-width:0;
+    }
+
+    .st-menu-title{
+      font-size:12.5px;
+      font-weight:600;
+    }
+
+    .st-menu-desc{
+      margin-top:3px;
+      font-size:10.5px;
+      color:var(--text-muted);
+      line-height:1.35;
+    }
+
+    .st-menu-arrow{
+      color:var(--text-muted);
+      font-size:16px;
+    }
+
+    .st-detail{
+      display:none;
+      height:100%;
+      overflow-y:auto;
+      padding:14px;
+    }
+
+    .st-detail.active{
+      display:block;
+    }
+
+    .st-detail-head{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .st-back{
+      width:34px;
+      height:34px;
+      border:1px solid var(--border);
+      border-radius:9px;
+      background:var(--surface-2);
+      color:var(--text);
+      cursor:pointer;
+      font-size:17px;
+    }
+
+    .st-back:active{
+      transform:scale(.94);
+    }
+
+    .st-detail-title{
+      font-size:14px;
+      font-weight:600;
+    }
+
+    .st-section{
+      margin-bottom:22px;
+    }
+
+    .st-label{
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      color:var(--text-muted);
+      margin:0 0 8px 3px;
+    }
+
+    .st-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+      padding:13px 12px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-bottom:0;
+    }
+
+    .st-item:first-of-type{
+      border-radius:10px 10px 0 0;
+    }
+
+    .st-item:last-of-type{
+      border-bottom:1px solid var(--border);
+      border-radius:0 0 10px 10px;
+    }
+
+    .st-item:only-of-type{
+      border-bottom:1px solid var(--border);
+      border-radius:10px;
+    }
+
+    .st-item-info{
+      min-width:0;
+    }
+
+    .st-item-name{
+      font-size:12.5px;
+      color:var(--text);
+    }
+
+    .st-item-desc{
+      margin-top:3px;
+      font-size:10.5px;
+      line-height:1.4;
+      color:var(--text-muted);
+    }
+
+    .st-switch{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+
+    .st-switch input{
+      display:none;
+    }
+
+    .st-switch-track{
+      width:34px;
+      height:19px;
+      border-radius:10px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      position:relative;
+      transition:background .15s;
+    }
+
+    .st-switch-thumb{
+      position:absolute;
+      top:1px;
+      left:1px;
+      width:15px;
+      height:15px;
+      border-radius:50%;
+      background:var(--text-muted);
+      transition:transform .15s, background .15s;
+    }
+
+    .st-switch input:checked + .st-switch-track{
+      background:rgba(168,85,247,.25);
+      border-color:var(--violet);
+    }
+
+    .st-switch input:checked + .st-switch-track .st-switch-thumb{
+      transform:translateX(15px);
+      background:var(--violet);
+    }
+
+    .st-options{
       display:grid;
       grid-template-columns:repeat(3,1fr);
       gap:7px;
     }
 
-    .st-size-btn{
+    .st-option{
       border:1px solid var(--border);
       background:var(--surface-2);
       color:var(--text-muted);
-      padding:8px 5px;
+      padding:9px 5px;
       border-radius:8px;
       cursor:pointer;
       font-size:11px;
+      transition:.16s ease;
+    }
+
+    .st-option:hover{
+      border-color:var(--violet);
+      color:var(--text);
+    }
+
+    .st-option.active{
+      background:rgba(168,85,247,.14);
+      border-color:var(--violet);
+      color:var(--text);
+      box-shadow:0 0 0 1px rgba(168,85,247,.12);
+    }
+
+    .st-colors{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:8px;
+    }
+
+    .st-color{
+      height:52px;
+      border:1px solid var(--border);
+      border-radius:11px;
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .st-color span{
+      position:absolute;
+      left:7px;
+      bottom:6px;
+      font-size:9.5px;
+      color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.8);
+    }
+
+    .st-color.active{
+      border-color:#fff;
+      box-shadow:0 0 0 2px var(--violet);
+    }
+
+    .st-themes{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:10px;
+    }
+
+    .st-theme{
+      height:82px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.08);
+      cursor:pointer;
+      position:relative;
+      overflow:hidden;
+      display:flex;
+      align-items:flex-end;
+      padding:10px;
+      font-size:11.5px;
+      font-weight:600;
+      color:#fff;
+      text-shadow:0 1px 4px rgba(0,0,0,.75);
+      transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .st-theme:hover{
+      transform:translateY(-2px);
+      border-color:rgba(255,255,255,.2);
+    }
+
+    .st-theme.active{
+      border-color:var(--violet);
+      box-shadow:0 0 0 2px rgba(168,85,247,.22), 0 8px 24px rgba(0,0,0,.25);
+    }
+
+    .st-theme::after{
+      content:'✓';
+      position:absolute;
+      top:8px;
+      right:9px;
+      width:20px;
+      height:20px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,.35);
+      color:#fff;
+      font-size:11px;
+      opacity:0;
+      transform:scale(.7);
       transition:.18s ease;
     }
 
-    .st-size-btn:hover{
-      border-color:var(--violet);
-      color:var(--text);
+    .st-theme.active::after{
+      opacity:1;
+      transform:scale(1);
     }
 
-    .st-size-btn.active{
-      background:rgba(168,85,247,.16);
-      border-color:var(--violet);
-      color:var(--text);
-      box-shadow:0 0 0 1px rgba(168,85,247,.15);
+    .st-theme-name{
+      position:relative;
+      z-index:1;
+    }
+
+    .st-theme-glow{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(to top,rgba(0,0,0,.5),transparent 65%);
+      pointer-events:none;
+    }
+
+    .st-danger{
+      width:100%;
+      background:rgba(255,46,99,.12);
+      border:1px solid var(--crimson);
+      color:var(--crimson);
+      padding:11px 14px;
+      border-radius:9px;
+      cursor:pointer;
+      font-size:12px;
+      text-align:left;
+    }
+
+    .st-about{
+      padding:14px;
+      background:var(--surface-2);
+      border:1px solid var(--border);
+      border-radius:10px;
+      font-size:11px;
+      color:var(--text-muted);
+      line-height:1.6;
     }
   `);
 
-  const saved = LZ.storage.get('settings', { theme:'nebula', wallpaperAnim:true });
+  const saved = LZ.storage.get('settings', {
+    theme:'nebula',
+    wallpaperAnim:true,
+    windowAnim:true,
+    widgets:true,
+    iconSize:'medium',
+    accentColor:'violet',
+    uiScale:'100',
+    blurStrength:'normal'
+  });
+
   const u = LZ.auth.currentUser;
 
   body.innerHTML = '';
+
+  /* =======================================================
+     MAIN SETTINGS PAGE
+  ======================================================= */
+
   body.appendChild(h(`
     <div class="st-wrap">
-      <div class="st-section">
-        <div class="st-label">Akun</div>
-        <div class="st-account">
-          <div class="user-avatar">${(u.displayName||'P')[0].toUpperCase()}</div>
-          <div><div style="font-weight:600; font-size:13px;">${u.displayName || 'Pengguna'}</div>
-          <div style="font-size:11.5px; color:var(--text-muted);">${u.email}${u.isGuest ? ' (mode tamu — data tidak sinkron cloud)' : ''}</div></div>
-        </div>
+
+      <div class="st-page-head">
+        <div class="st-page-title">Pengaturan</div>
+        <div class="st-page-subtitle">Atur tampilan dan perilaku LynnZz OS</div>
       </div>
-      <div class="st-section">
-        <div class="st-wallpaper-head">
-          <div>
-            <div class="st-wallpaper-title">Wallpaper</div>
-            <div class="st-wallpaper-subtitle">Pilih suasana desktop LynnZz OS</div>
+
+      <div class="st-account-card">
+        <div class="user-avatar">
+          ${(u.displayName||'P')[0].toUpperCase()}
+        </div>
+
+        <div class="st-account-info">
+          <div class="st-account-name">
+            ${u.displayName || 'Pengguna'}
           </div>
-          <label class="st-switch">
-            <input type="checkbox" class="st-anim-toggle" ${saved.wallpaperAnim !== false ? 'checked' : ''}>
-            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
-            <span class="st-switch-label">Animasi</span>
-          </label>
-        </div>
-        <div class="st-themes"></div>
-      </div>
-      <div class="st-section">
-        <div class="st-label">Desktop</div>
 
-        <div class="st-row">
-          <span style="font-size:12px;">Animasi Window</span>
-          <label class="st-switch">
-            <input type="checkbox" class="st-window-anim" ${saved.windowAnim !== false ? 'checked' : ''}>
-            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
-          </label>
-        </div>
-
-        <div class="st-row">
-          <span style="font-size:12px;">Desktop Widgets</span>
-          <label class="st-switch">
-            <input type="checkbox" class="st-widget-toggle" ${saved.widgets !== false ? 'checked' : ''}>
-            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
-          </label>
-        </div>
-
-        <div style="margin-top:14px;">
-          <div style="font-size:12px; margin-bottom:8px;">Ukuran Ikon Desktop</div>
-
-          <div class="st-size-options">
-            <button class="st-size-btn ${saved.iconSize==='small'?'active':''}" data-size="small">Kecil</button>
-            <button class="st-size-btn ${saved.iconSize==='medium' || !saved.iconSize?'active':''}" data-size="medium">Sedang</button>
-            <button class="st-size-btn ${saved.iconSize==='large'?'active':''}" data-size="large">Besar</button>
+          <div class="st-account-email">
+            ${u.email}${u.isGuest ? ' (mode tamu — data tidak sinkron cloud)' : ''}
           </div>
         </div>
+      </div>
+
+      <div class="st-menu">
+
+        <button class="st-menu-item" data-page="personalization">
+          <div class="st-menu-icon">🎨</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">Personalization</div>
+            <div class="st-menu-desc">Warna, skala UI, blur dan wallpaper</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+        <button class="st-menu-item" data-page="desktop">
+          <div class="st-menu-icon">🖥️</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">Desktop</div>
+            <div class="st-menu-desc">Ikon, widget dan animasi window</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+        <button class="st-menu-item" data-page="notifications">
+          <div class="st-menu-icon">🔔</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">Notifications</div>
+            <div class="st-menu-desc">Pengaturan notifikasi LynnZz OS</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+        <button class="st-menu-item" data-page="privacy">
+          <div class="st-menu-icon">🔒</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">Privacy</div>
+            <div class="st-menu-desc">Data lokal dan penyimpanan OS</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+        <button class="st-menu-item" data-page="account">
+          <div class="st-menu-icon">👤</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">Account</div>
+            <div class="st-menu-desc">Informasi akun LynnZz</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+        <button class="st-menu-item" data-page="about">
+          <div class="st-menu-icon">ℹ️</div>
+          <div class="st-menu-info">
+            <div class="st-menu-title">About</div>
+            <div class="st-menu-desc">Informasi LynnZz OS</div>
+          </div>
+          <div class="st-menu-arrow">›</div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- PERSONALIZATION -->
+    <div class="st-detail" data-detail="personalization">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">Personalization</div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Accent Color</div>
+
+        <div class="st-colors">
+
+          <button class="st-color ${saved.accentColor==='violet'?'active':''}"
+            data-accent="violet"
+            style="background:linear-gradient(135deg,#a855f7,#7b2ff7)">
+            <span>Violet</span>
+          </button>
+
+          <button class="st-color ${saved.accentColor==='blue'?'active':''}"
+            data-accent="blue"
+            style="background:linear-gradient(135deg,#3b82f6,#2563eb)">
+            <span>Blue</span>
+          </button>
+
+          <button class="st-color ${saved.accentColor==='emerald'?'active':''}"
+            data-accent="emerald"
+            style="background:linear-gradient(135deg,#10b981,#059669)">
+            <span>Emerald</span>
+          </button>
+
+          <button class="st-color ${saved.accentColor==='crimson'?'active':''}"
+            data-accent="crimson"
+            style="background:linear-gradient(135deg,#ff2e63,#e11d48)">
+            <span>Crimson</span>
+          </button>
+
+        </div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">UI Scale</div>
+
+        <div class="st-options">
+          <button class="st-option ${String(saved.uiScale||'100')==='90'?'active':''}" data-scale="90">90%</button>
+          <button class="st-option ${String(saved.uiScale||'100')==='100'?'active':''}" data-scale="100">100%</button>
+          <button class="st-option ${String(saved.uiScale||'100')==='110'?'active':''}" data-scale="110">110%</button>
+        </div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Blur Effect</div>
+
+        <div class="st-options">
+          <button class="st-option ${saved.blurStrength==='off'?'active':''}" data-blur="off">Off</button>
+          <button class="st-option ${!saved.blurStrength || saved.blurStrength==='normal'?'active':''}" data-blur="normal">Normal</button>
+          <button class="st-option ${saved.blurStrength==='high'?'active':''}" data-blur="high">High</button>
+        </div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Wallpaper</div>
+
+        <div class="st-item">
+          <div class="st-item-info">
+            <div class="st-item-name">Wallpaper Animation</div>
+            <div class="st-item-desc">Gerakkan background secara perlahan</div>
+          </div>
+
+          <label class="st-switch">
+            <input type="checkbox" class="st-wallpaper-anim"
+              ${saved.wallpaperAnim !== false ? 'checked' : ''}>
+            <span class="st-switch-track">
+              <span class="st-switch-thumb"></span>
+            </span>
+          </label>
+        </div>
+
+        <div class="st-themes" style="margin-top:10px;"></div>
+      </div>
+
+    </div>
+
+    <!-- DESKTOP -->
+    <div class="st-detail" data-detail="desktop">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">Desktop</div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Behavior</div>
+
+        <div class="st-item">
+          <div class="st-item-info">
+            <div class="st-item-name">Window Animation</div>
+            <div class="st-item-desc">Animasi saat aplikasi dibuka</div>
+          </div>
+
+          <label class="st-switch">
+            <input type="checkbox" class="st-window-anim"
+              ${saved.windowAnim !== false ? 'checked' : ''}>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="st-item">
+          <div class="st-item-info">
+            <div class="st-item-name">Desktop Widgets</div>
+            <div class="st-item-desc">Tampilkan System Monitor di desktop</div>
+          </div>
+
+          <label class="st-switch">
+            <input type="checkbox" class="st-widget-toggle"
+              ${saved.widgets !== false ? 'checked' : ''}>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Icon Size</div>
+
+        <div class="st-options">
+          <button class="st-option ${saved.iconSize==='small'?'active':''}" data-size="small">Kecil</button>
+          <button class="st-option ${saved.iconSize==='medium' || !saved.iconSize?'active':''}" data-size="medium">Sedang</button>
+          <button class="st-option ${saved.iconSize==='large'?'active':''}" data-size="large">Besar</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="st-detail" data-detail="notifications">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">Notifications</div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">System</div>
+
+        <div class="st-item">
+          <div class="st-item-info">
+            <div class="st-item-name">Notifications</div>
+            <div class="st-item-desc">Izinkan LynnZz menampilkan notifikasi</div>
+          </div>
+
+          <label class="st-switch">
+            <input type="checkbox" checked disabled>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PRIVACY -->
+    <div class="st-detail" data-detail="privacy">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">Privacy</div>
       </div>
 
       <div class="st-section">
         <div class="st-label">Data</div>
-        <button class="st-danger">🗑 Hapus Semua Data Lokal</button>
+
+        <button class="st-danger st-clear-data">
+          🗑 Hapus Semua Data Lokal
+        </button>
       </div>
-      <div class="st-section">
-        <div class="st-label">Tentang</div>
-        <div style="font-size:12px; color:var(--text-muted); line-height:1.6;">LynnZz OS v1.0<br>Dibangun dengan HTML, CSS, JS & Firebase.</div>
+
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="st-detail" data-detail="account">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">Account</div>
       </div>
+
+      <div class="st-account-card">
+        <div class="user-avatar">
+          ${(u.displayName||'P')[0].toUpperCase()}
+        </div>
+
+        <div class="st-account-info">
+          <div class="st-account-name">
+            ${u.displayName || 'Pengguna'}
+          </div>
+
+          <div class="st-account-email">
+            ${u.email}
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ABOUT -->
+    <div class="st-detail" data-detail="about">
+
+      <div class="st-detail-head">
+        <button class="st-back">←</button>
+        <div class="st-detail-title">About</div>
+      </div>
+
+      <div class="st-about">
+        <strong style="color:var(--text);">LynnZz OS v1.0</strong><br>
+        Personal operating environment built with
+        HTML, CSS, JavaScript & Firebase.
+        <br><br>
+        LynnZz OS — built for experimentation, learning
+        and the future of personal computing.
+      </div>
+
     </div>
   `));
 
-  const themeGrid = body.querySelector('.st-themes');
-  LZ.THEMES.forEach(t => {
-    const el = h(`
-      <div class="st-theme ${saved.theme===t.id?'active':''}">
-        <div class="st-theme-glow"></div>
-        <span class="st-theme-name">${t.label}</span>
-      </div>
-    `);
-    el.style.background = t.grad;
-    el.onclick = () => {
-      const settings = { ...LZ.storage.get('settings', {}), theme: t.id };
-      LZ.storage.set('settings', settings);
-      LZ.applyWallpaper();
-      body.querySelectorAll('.st-theme').forEach(x=>x.classList.remove('active'));
-      el.classList.add('active');
-      LZ.notify('Settings', `Wallpaper diganti ke ${t.label}.`, '🎨', 2000);
-    };
-    themeGrid.appendChild(el);
+  const menu = body.querySelector('.st-wrap');
+  const details = body.querySelectorAll('.st-detail');
+
+  function openDetail(page){
+    menu.style.display = 'none';
+
+    details.forEach(detail => {
+      detail.classList.toggle(
+        'active',
+        detail.dataset.detail === page
+      );
+    });
+  }
+
+  function closeDetail(){
+    details.forEach(detail => detail.classList.remove('active'));
+    menu.style.display = '';
+  }
+
+  body.querySelectorAll('.st-menu-item').forEach(btn => {
+    btn.onclick = () => openDetail(btn.dataset.page);
   });
 
-  LZ.applyWallpaper(); // reflect current saved state whenever Settings is opened
+  body.querySelectorAll('.st-back').forEach(btn => {
+    btn.onclick = closeDetail;
+  });
 
-  body.querySelector('.st-anim-toggle').onchange = (e) => {
-    const settings = { ...LZ.storage.get('settings', {}), wallpaperAnim: e.target.checked };
-    LZ.storage.set('settings', settings);
-    LZ.applyWallpaper();
-  };
+  /* =======================================================
+     PERSONALIZATION
+  ======================================================= */
 
-  /* Desktop settings */
-  const windowAnim = body.querySelector('.st-window-anim');
-  const widgetToggle = body.querySelector('.st-widget-toggle');
+  body.querySelectorAll('.st-color').forEach(btn => {
+    btn.onclick = () => {
+      const accent = btn.dataset.accent;
 
-  if (windowAnim){
-    windowAnim.onchange = (e) => {
       const settings = {
         ...LZ.storage.get('settings', {}),
-        windowAnim: e.target.checked
+        accentColor: accent
+      };
+
+      LZ.storage.set('settings', settings);
+      LZ.applyPersonalization();
+
+      body.querySelectorAll('.st-color').forEach(x =>
+        x.classList.remove('active')
+      );
+
+      btn.classList.add('active');
+    };
+  });
+
+  body.querySelectorAll('[data-scale]').forEach(btn => {
+    btn.onclick = () => {
+      const scale = btn.dataset.scale;
+
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        uiScale: scale
+      };
+
+      LZ.storage.set('settings', settings);
+      LZ.applyPersonalization();
+
+      body.querySelectorAll('[data-scale]').forEach(x =>
+        x.classList.remove('active')
+      );
+
+      btn.classList.add('active');
+    };
+  });
+
+  body.querySelectorAll('[data-blur]').forEach(btn => {
+    btn.onclick = () => {
+      const blur = btn.dataset.blur;
+
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        blurStrength: blur
+      };
+
+      LZ.storage.set('settings', settings);
+      LZ.applyPersonalization();
+
+      body.querySelectorAll('[data-blur]').forEach(x =>
+        x.classList.remove('active')
+      );
+
+      btn.classList.add('active');
+    };
+  });
+
+  /* Wallpaper */
+  const themeGrid = body.querySelector('.st-themes');
+
+  if (themeGrid){
+    LZ.THEMES.forEach(t => {
+      const el = h(`
+        <div class="st-theme ${saved.theme===t.id?'active':''}">
+          <div class="st-theme-glow"></div>
+          <span class="st-theme-name">${t.label}</span>
+        </div>
+      `);
+
+      el.style.background = t.grad;
+
+      el.onclick = () => {
+        const settings = {
+          ...LZ.storage.get('settings', {}),
+          theme:t.id
+        };
+
+        LZ.storage.set('settings', settings);
+        LZ.applyWallpaper();
+
+        themeGrid.querySelectorAll('.st-theme')
+          .forEach(x => x.classList.remove('active'));
+
+        el.classList.add('active');
+
+        LZ.notify(
+          'Settings',
+          `Wallpaper diganti ke ${t.label}.`,
+          '🎨',
+          2000
+        );
+      };
+
+      themeGrid.appendChild(el);
+    });
+  }
+
+  const wallpaperAnim = body.querySelector('.st-wallpaper-anim');
+
+  if (wallpaperAnim){
+    wallpaperAnim.onchange = e => {
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        wallpaperAnim:e.target.checked
+      };
+
+      LZ.storage.set('settings', settings);
+      LZ.applyWallpaper();
+    };
+  }
+
+  /* Desktop */
+  const windowAnim = body.querySelector('.st-window-anim');
+
+  if (windowAnim){
+    windowAnim.onchange = e => {
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        windowAnim:e.target.checked
       };
 
       LZ.storage.set('settings', settings);
@@ -723,11 +1440,13 @@ function renderSettings(body){
     };
   }
 
+  const widgetToggle = body.querySelector('.st-widget-toggle');
+
   if (widgetToggle){
-    widgetToggle.onchange = (e) => {
+    widgetToggle.onchange = e => {
       const settings = {
         ...LZ.storage.get('settings', {}),
-        widgets: e.target.checked
+        widgets:e.target.checked
       };
 
       LZ.storage.set('settings', settings);
@@ -740,13 +1459,13 @@ function renderSettings(body){
     };
   }
 
-  body.querySelectorAll('.st-size-btn').forEach(btn => {
+  body.querySelectorAll('[data-size]').forEach(btn => {
     btn.onclick = () => {
       const size = btn.dataset.size;
 
       const settings = {
         ...LZ.storage.get('settings', {}),
-        iconSize: size
+        iconSize:size
       };
 
       LZ.storage.set('settings', settings);
@@ -757,20 +1476,39 @@ function renderSettings(body){
         desktop.dataset.iconSize = size;
       }
 
-      body.querySelectorAll('.st-size-btn')
-        .forEach(x => x.classList.remove('active'));
+      body.querySelectorAll('[data-size]').forEach(x =>
+        x.classList.remove('active')
+      );
 
       btn.classList.add('active');
     };
   });
 
-  body.querySelector('.st-danger').onclick = () => {
-    if (confirm('Yakin mau hapus semua data lokal LynnZz OS? Ini tidak bisa dibatalkan.')){
-      Object.keys(localStorage).filter(k => k.startsWith('lynnzz')).forEach(k => localStorage.removeItem(k));
-      LZ.notify('Settings', 'Data lokal dihapus. Reload halaman untuk efek penuh.', '🗑');
-    }
-  };
+  /* Clear local data */
+  const clearData = body.querySelector('.st-clear-data');
+
+  if (clearData){
+    clearData.onclick = () => {
+      if (confirm(
+        'Yakin mau hapus semua data lokal LynnZz OS? Ini tidak bisa dibatalkan.'
+      )){
+        Object.keys(localStorage)
+          .filter(k => k.startsWith('lynnzz'))
+          .forEach(k => localStorage.removeItem(k));
+
+        LZ.notify(
+          'Settings',
+          'Data lokal dihapus. Reload halaman untuk efek penuh.',
+          '🗑'
+        );
+      }
+    };
+  }
+
+  LZ.applyWallpaper();
+  LZ.applyPersonalization();
 }
+
 
 /* ============================================================
    8. TERMINAL — commands + shared virtual filesystem (VFS)
