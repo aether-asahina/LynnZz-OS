@@ -60,8 +60,8 @@
 
 /* ===================== START MENU ===================== */
 #start-menu{
-  position:absolute; left:10px; bottom:64px; width:280px; z-index:41;
-  background:rgba(21,21,31,0.95); border:1px solid var(--border-strong); border-radius:16px;
+  position:absolute; left:10px; bottom:64px; width:320px; z-index:41;
+  background:rgba(21,21,31,0.95); border:1px solid var(--border-strong); border-radius:22px;
   box-shadow:0 25px 60px rgba(0,0,0,.55); backdrop-filter:blur(20px);
   overflow:hidden; animation:startIn .18s ease;
 }
