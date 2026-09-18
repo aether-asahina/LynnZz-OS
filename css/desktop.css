@@ -400,3 +400,38 @@ button,input,textarea{font-family:inherit;}
     width:150px;
   }
 }
+
+/* ===================== DESKTOP SETTINGS ===================== */
+
+#desktop-icons[data-icon-size="small"] .desktop-icon{
+  width:64px;
+  padding:6px 3px;
+}
+
+#desktop-icons[data-icon-size="small"] .desktop-icon .icon-glyph{
+  width:40px;
+  height:40px;
+}
+
+#desktop-icons[data-icon-size="small"] .desktop-icon .icon-label{
+  font-size:10px;
+}
+
+#desktop-icons[data-icon-size="large"] .desktop-icon{
+  width:92px;
+  padding:10px 4px;
+}
+
+#desktop-icons[data-icon-size="large"] .desktop-icon .icon-glyph{
+  width:58px;
+  height:58px;
+}
+
+#desktop-icons[data-icon-size="large"] .desktop-icon .icon-label{
+  font-size:12px;
+}
+
+/* Window animation toggle */
+.no-window-animation .os-window{
+  animation:none !important;
+}

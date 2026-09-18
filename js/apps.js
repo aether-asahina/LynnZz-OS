@@ -575,6 +575,35 @@ function renderSettings(body){
     .st-switch input:checked + .st-switch-track{background:rgba(168,85,247,.3); border-color:var(--violet);}
     .st-switch input:checked + .st-switch-track .st-switch-thumb{transform:translateX(15px); background:var(--violet);}
     .st-switch-label{font-size:11.5px; color:var(--text-muted);}
+
+    .st-size-options{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:7px;
+    }
+
+    .st-size-btn{
+      border:1px solid var(--border);
+      background:var(--surface-2);
+      color:var(--text-muted);
+      padding:8px 5px;
+      border-radius:8px;
+      cursor:pointer;
+      font-size:11px;
+      transition:.18s ease;
+    }
+
+    .st-size-btn:hover{
+      border-color:var(--violet);
+      color:var(--text);
+    }
+
+    .st-size-btn.active{
+      background:rgba(168,85,247,.16);
+      border-color:var(--violet);
+      color:var(--text);
+      box-shadow:0 0 0 1px rgba(168,85,247,.15);
+    }
   `);
 
   const saved = LZ.storage.get('settings', { theme:'nebula', wallpaperAnim:true });
@@ -605,6 +634,36 @@ function renderSettings(body){
         </div>
         <div class="st-themes"></div>
       </div>
+      <div class="st-section">
+        <div class="st-label">Desktop</div>
+
+        <div class="st-row">
+          <span style="font-size:12px;">Animasi Window</span>
+          <label class="st-switch">
+            <input type="checkbox" class="st-window-anim" ${saved.windowAnim !== false ? 'checked' : ''}>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div class="st-row">
+          <span style="font-size:12px;">Desktop Widgets</span>
+          <label class="st-switch">
+            <input type="checkbox" class="st-widget-toggle" ${saved.widgets !== false ? 'checked' : ''}>
+            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
+          </label>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div style="font-size:12px; margin-bottom:8px;">Ukuran Ikon Desktop</div>
+
+          <div class="st-size-options">
+            <button class="st-size-btn ${saved.iconSize==='small'?'active':''}" data-size="small">Kecil</button>
+            <button class="st-size-btn ${saved.iconSize==='medium' || !saved.iconSize?'active':''}" data-size="medium">Sedang</button>
+            <button class="st-size-btn ${saved.iconSize==='large'?'active':''}" data-size="large">Besar</button>
+          </div>
+        </div>
+      </div>
+
       <div class="st-section">
         <div class="st-label">Data</div>
         <button class="st-danger">🗑 Hapus Semua Data Lokal</button>
@@ -643,6 +702,67 @@ function renderSettings(body){
     LZ.storage.set('settings', settings);
     LZ.applyWallpaper();
   };
+
+  /* Desktop settings */
+  const windowAnim = body.querySelector('.st-window-anim');
+  const widgetToggle = body.querySelector('.st-widget-toggle');
+
+  if (windowAnim){
+    windowAnim.onchange = (e) => {
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        windowAnim: e.target.checked
+      };
+
+      LZ.storage.set('settings', settings);
+
+      document.documentElement.classList.toggle(
+        'no-window-animation',
+        !e.target.checked
+      );
+    };
+  }
+
+  if (widgetToggle){
+    widgetToggle.onchange = (e) => {
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        widgets: e.target.checked
+      };
+
+      LZ.storage.set('settings', settings);
+
+      const widgets = document.getElementById('desktop-widgets');
+
+      if (widgets){
+        widgets.style.display = e.target.checked ? '' : 'none';
+      }
+    };
+  }
+
+  body.querySelectorAll('.st-size-btn').forEach(btn => {
+    btn.onclick = () => {
+      const size = btn.dataset.size;
+
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        iconSize: size
+      };
+
+      LZ.storage.set('settings', settings);
+
+      const desktop = document.getElementById('desktop-icons');
+
+      if (desktop){
+        desktop.dataset.iconSize = size;
+      }
+
+      body.querySelectorAll('.st-size-btn')
+        .forEach(x => x.classList.remove('active'));
+
+      btn.classList.add('active');
+    };
+  });
 
   body.querySelector('.st-danger').onclick = () => {
     if (confirm('Yakin mau hapus semua data lokal LynnZz OS? Ini tidak bisa dibatalkan.')){

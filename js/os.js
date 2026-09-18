@@ -479,6 +479,29 @@ document.addEventListener('DOMContentLoaded', () => {
     screenEl.textContent = `${window.innerWidth} × ${window.innerHeight}`;
   }
 
+  /* Apply saved desktop settings */
+  function applyDesktopSettings(){
+    const settings = LZ.storage.get('settings', {});
+
+    const desktop = document.getElementById('desktop-icons');
+    const widgets = document.getElementById('desktop-widgets');
+
+    if (desktop){
+      desktop.dataset.iconSize = settings.iconSize || 'medium';
+    }
+
+    if (widgets){
+      widgets.style.display = settings.widgets === false ? 'none' : '';
+    }
+
+    document.documentElement.classList.toggle(
+      'no-window-animation',
+      settings.windowAnim === false
+    );
+  }
+
+  applyDesktopSettings();
+
   updateSystemWidget();
   setInterval(updateSystemWidget, 1000);
 
