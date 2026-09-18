@@ -199,3 +199,132 @@
 .taskbar-app:hover{
   transform:translateY(-2px);
 }
+
+/* ===================== MOBILE MODE ===================== */
+@media (max-width:600px){
+
+  /* Taskbar */
+  #taskbar{
+    height:58px;
+    left:8px;
+    right:8px;
+    bottom:8px;
+    border-radius:16px;
+    padding:7px;
+    gap:5px;
+  }
+
+  #start-btn{
+    min-width:48px;
+    height:44px;
+    padding:0 10px;
+    border-radius:12px;
+  }
+
+  #start-btn .start-label{
+    display:none;
+  }
+
+  #taskbar-apps{
+    gap:4px;
+    height:44px;
+  }
+
+  .taskbar-app{
+    min-width:42px;
+    height:42px;
+    border-radius:11px;
+  }
+
+  #tray{
+    gap:3px;
+  }
+
+  #tray button,
+  #tray-clock{
+    height:42px;
+  }
+
+  #tray-clock{
+    min-width:48px;
+    padding:0 7px;
+  }
+
+  #tray-time{
+    font-size:10px;
+  }
+
+  /* Desktop icons → grid */
+  #desktop-icons{
+    top:14px;
+    left:10px;
+    right:10px;
+    max-height:none;
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:10px;
+    align-content:start;
+  }
+
+  .desktop-icon{
+    width:auto;
+    min-width:0;
+    padding:7px 3px;
+  }
+
+  .desktop-icon .icon-glyph{
+    width:48px;
+    height:48px;
+  }
+
+  .desktop-icon .icon-label{
+    max-width:72px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  /* System widget */
+  #desktop-widgets{
+    top:auto;
+    right:10px;
+    bottom:76px;
+    left:10px;
+  }
+
+  .system-widget{
+    width:auto;
+    max-width:none;
+  }
+
+  /* Start menu */
+  #start-menu{
+    left:8px;
+    right:8px;
+    bottom:74px;
+    width:auto;
+    max-height:calc(100vh - 90px);
+    border-radius:18px;
+  }
+
+  .start-menu-apps{
+    grid-template-columns:repeat(3, 1fr);
+  }
+
+  /* Windows */
+  .os-window{
+    left:6px !important;
+    top:6px !important;
+    width:calc(100% - 12px) !important;
+    height:calc(100% - 78px) !important;
+    min-width:0;
+    min-height:0;
+    border-radius:16px;
+  }
+
+  .win-titlebar{
+    height:44px;
+  }
+
+}
+
