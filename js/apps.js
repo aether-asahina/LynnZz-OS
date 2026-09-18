@@ -556,9 +556,17 @@ function renderSettings(body){
     .st-label{font-size:11px; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); margin-bottom:10px;}
     .st-row{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
     .st-account{display:flex; align-items:center; gap:12px;}
-    .st-themes{display:grid; grid-template-columns:repeat(2,1fr); gap:8px;}
-    .st-theme{height:56px; border-radius:10px; border:2px solid var(--border); cursor:pointer; position:relative; display:flex; align-items:flex-end; padding:6px 8px; font-size:11px; font-weight:500; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.6);}
-    .st-theme.active{border-color:var(--violet); box-shadow:0 0 0 2px rgba(168,85,247,.25);}
+    .st-wallpaper-head{display:flex; align-items:flex-end; justify-content:space-between; gap:10px; margin-bottom:10px;}
+    .st-wallpaper-title{font-size:13px; font-weight:600; color:var(--text);}
+    .st-wallpaper-subtitle{font-size:10.5px; color:var(--text-muted); margin-top:3px;}
+    .st-themes{display:grid; grid-template-columns:repeat(2,1fr); gap:10px;}
+    .st-theme{height:82px; border-radius:14px; border:1px solid rgba(255,255,255,.08); cursor:pointer; position:relative; overflow:hidden; display:flex; align-items:flex-end; padding:10px; font-size:11.5px; font-weight:600; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,.75); transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;}
+    .st-theme:hover{transform:translateY(-2px); border-color:rgba(255,255,255,.2);}
+    .st-theme.active{border-color:var(--violet); box-shadow:0 0 0 2px rgba(168,85,247,.22), 0 8px 24px rgba(0,0,0,.25);}
+    .st-theme::after{content:'✓'; position:absolute; top:8px; right:9px; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.35); color:#fff; font-size:11px; opacity:0; transform:scale(.7); transition:.18s ease;}
+    .st-theme.active::after{opacity:1; transform:scale(1);}
+    .st-theme-name{position:relative; z-index:1;}
+    .st-theme-glow{position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.5),transparent 65%); pointer-events:none;}
     .st-danger{background:rgba(255,46,99,0.12); border:1px solid var(--crimson); color:var(--crimson); padding:9px 14px; border-radius:9px; cursor:pointer; font-size:12.5px;}
     .st-switch{display:flex; align-items:center; gap:6px; cursor:pointer;}
     .st-switch input{display:none;}
@@ -584,8 +592,11 @@ function renderSettings(body){
         </div>
       </div>
       <div class="st-section">
-        <div class="st-row">
-          <div class="st-label" style="margin-bottom:0;">Wallpaper</div>
+        <div class="st-wallpaper-head">
+          <div>
+            <div class="st-wallpaper-title">Wallpaper</div>
+            <div class="st-wallpaper-subtitle">Pilih suasana desktop LynnZz OS</div>
+          </div>
           <label class="st-switch">
             <input type="checkbox" class="st-anim-toggle" ${saved.wallpaperAnim !== false ? 'checked' : ''}>
             <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
@@ -607,7 +618,12 @@ function renderSettings(body){
 
   const themeGrid = body.querySelector('.st-themes');
   LZ.THEMES.forEach(t => {
-    const el = h(`<div class="st-theme ${saved.theme===t.id?'active':''}">${t.label}</div>`);
+    const el = h(`
+      <div class="st-theme ${saved.theme===t.id?'active':''}">
+        <div class="st-theme-glow"></div>
+        <span class="st-theme-name">${t.label}</span>
+      </div>
+    `);
     el.style.background = t.grad;
     el.onclick = () => {
       const settings = { ...LZ.storage.get('settings', {}), theme: t.id };
