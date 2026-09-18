@@ -440,30 +440,45 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   /* ---------------------------------------------------------
-     DESKTOP CLOCK WIDGET
+     DESKTOP SYSTEM MONITOR
   --------------------------------------------------------- */
-  function updateDesktopClock(){
-    const timeEl = document.getElementById('widget-time');
-    const dateEl = document.getElementById('widget-date');
+  const systemStartTime = Date.now();
 
-    if (!timeEl || !dateEl) return;
+  function updateSystemWidget(){
+    const ramEl = document.getElementById('system-ram');
+    const uptimeEl = document.getElementById('system-uptime');
+    const deviceEl = document.getElementById('system-device');
+    const screenEl = document.getElementById('system-screen');
 
-    const now = new Date();
+    if (!ramEl || !uptimeEl || !deviceEl || !screenEl) return;
 
-    timeEl.textContent = now.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
+    // RAM — tersedia di beberapa browser Chromium
+    if (performance.memory){
+      const used = performance.memory.usedJSHeapSize / 1024 / 1024;
+      ramEl.textContent = `${used.toFixed(0)} MB`;
+    }else{
+      ramEl.textContent = 'N/A';
+    }
 
-    dateEl.textContent = now.toLocaleDateString('id-ID', {
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    });
+    // Uptime LynnZz OS
+    const elapsed = Math.floor((Date.now() - systemStartTime) / 1000);
+    const hours = Math.floor(elapsed / 3600);
+    const minutes = Math.floor((elapsed % 3600) / 60);
+    const seconds = elapsed % 60;
+
+    uptimeEl.textContent =
+      `${String(hours).padStart(2,'0')}:` +
+      `${String(minutes).padStart(2,'0')}:` +
+      `${String(seconds).padStart(2,'0')}`;
+
+    // Device / browser platform
+    const platform = navigator.platform || navigator.userAgentData?.platform || 'Unknown';
+    deviceEl.textContent = platform;
+
+    // Screen
+    screenEl.textContent = `${window.innerWidth} × ${window.innerHeight}`;
   }
 
-  updateDesktopClock();
-  setInterval(updateDesktopClock, 1000);
+  updateSystemWidget();
+  setInterval(updateSystemWidget, 1000);
 });

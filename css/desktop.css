@@ -256,3 +256,73 @@ button,input,textarea{font-family:inherit;}
   color:var(--text-muted);
 }
 
+
+/* ===================== SYSTEM WIDGET ===================== */
+.system-widget{
+  width:220px;
+}
+
+.system-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.system-title{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text);
+  margin-top:2px;
+}
+
+.system-status{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  padding:4px 7px;
+  border-radius:8px;
+  background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.14);
+  color:#86efac;
+  font-size:9px;
+  font-weight:700;
+}
+
+.system-dot{
+  width:6px;
+  height:6px;
+  border-radius:50%;
+  background:#4ade80;
+  box-shadow:0 0 8px rgba(74,222,128,.7);
+}
+
+.system-info{
+  margin-top:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.system-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  font-size:10.5px;
+}
+
+.system-row span{
+  color:var(--text-muted);
+}
+
+.system-row strong{
+  color:var(--text);
+  font-size:10.5px;
+  font-weight:600;
+  max-width:125px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
