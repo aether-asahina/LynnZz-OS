@@ -328,3 +328,57 @@
 
 }
 
+
+/* ===================== MOBILE TASKBAR FIX ===================== */
+@media (max-width:600px){
+
+  #taskbar{
+    z-index:100;
+    bottom:8px;
+    height:58px;
+    min-height:58px;
+    display:flex;
+    align-items:center;
+  }
+
+  #start-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 48px;
+    width:48px;
+    min-width:48px;
+    height:44px;
+    min-height:44px;
+    padding:0;
+    visibility:visible;
+    opacity:1;
+  }
+
+  #start-btn .start-mark{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    visibility:visible;
+    opacity:1;
+  }
+
+  #taskbar-apps{
+    min-width:0;
+    overflow:hidden;
+  }
+
+  #tray{
+    flex-shrink:0;
+  }
+
+  #window-layer{
+    bottom:72px;
+  }
+
+  .os-window{
+    height:calc(100% - 84px) !important;
+  }
+
+}
+
