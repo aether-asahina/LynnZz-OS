@@ -41,7 +41,12 @@
   background:var(--surface-2); border:1px solid transparent; color:var(--text); font-size:12px;
   cursor:pointer; white-space:nowrap; flex-shrink:0;
 }
-.taskbar-app.active{border-color:var(--violet); background:rgba(168,85,247,.15);}
+.taskbar-app.active{
+  border-color:rgba(168,85,247,.45);
+  background:rgba(168,85,247,.12);
+  box-shadow:
+    0 0 20px rgba(168,85,247,.15);
+}
 
 #tray{display:flex; align-items:center; gap:12px; flex-shrink:0;}
 #tray-notif{
@@ -88,3 +93,14 @@
 }
 .start-menu-footer button:active{background:var(--surface-2); color:var(--text);}
 #btn-logout:active{color:var(--crimson);}
+
+.taskbar-app{
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    border-color .18s ease;
+}
+
+.taskbar-app:hover{
+  transform:translateY(-2px);
+}
