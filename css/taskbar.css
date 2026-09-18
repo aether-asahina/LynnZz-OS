@@ -200,24 +200,45 @@
   transform:translateY(-2px);
 }
 
+
 /* ===================== MOBILE MODE ===================== */
 @media (max-width:600px){
 
-  /* Taskbar */
   #taskbar{
-    height:58px;
+    position:absolute;
     left:8px;
     right:8px;
     bottom:8px;
-    border-radius:16px;
-    padding:7px;
+    transform:none;
+
+    width:auto;
+    max-width:none;
+
+    height:58px;
+    min-height:58px;
+
+    display:flex;
+    align-items:center;
     gap:5px;
+    padding:7px;
+
+    z-index:100;
+    border-radius:16px;
   }
 
   #start-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex:0 0 48px;
+    width:48px;
     min-width:48px;
+
     height:44px;
-    padding:0 10px;
+    min-height:44px;
+
+    padding:0;
     border-radius:12px;
   }
 
@@ -225,19 +246,32 @@
     display:none;
   }
 
+  #start-btn .start-mark{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
   #taskbar-apps{
-    gap:4px;
+    flex:1;
+    min-width:0;
     height:44px;
+    gap:4px;
+    overflow-x:auto;
+    overflow-y:hidden;
   }
 
   .taskbar-app{
     min-width:42px;
+    width:42px;
     height:42px;
     border-radius:11px;
+    flex-shrink:0;
   }
 
   #tray{
     gap:3px;
+    flex-shrink:0;
   }
 
   #tray button,
@@ -254,14 +288,15 @@
     font-size:10px;
   }
 
-  /* Desktop icons → grid */
+  /* Desktop icons */
   #desktop-icons{
     top:14px;
     left:10px;
     right:10px;
     max-height:none;
+
     display:grid;
-    grid-template-columns:repeat(4, 1fr);
+    grid-template-columns:repeat(4,1fr);
     gap:10px;
     align-content:start;
   }
@@ -308,15 +343,19 @@
   }
 
   .start-menu-apps{
-    grid-template-columns:repeat(3, 1fr);
+    grid-template-columns:repeat(3,1fr);
   }
 
   /* Windows */
+  #window-layer{
+    bottom:72px;
+  }
+
   .os-window{
     left:6px !important;
     top:6px !important;
     width:calc(100% - 12px) !important;
-    height:calc(100% - 78px) !important;
+    height:calc(100% - 84px) !important;
     min-width:0;
     min-height:0;
     border-radius:16px;
@@ -327,58 +366,3 @@
   }
 
 }
-
-
-/* ===================== MOBILE TASKBAR FIX ===================== */
-@media (max-width:600px){
-
-  #taskbar{
-    z-index:100;
-    bottom:8px;
-    height:58px;
-    min-height:58px;
-    display:flex;
-    align-items:center;
-  }
-
-  #start-btn{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex:0 0 48px;
-    width:48px;
-    min-width:48px;
-    height:44px;
-    min-height:44px;
-    padding:0;
-    visibility:visible;
-    opacity:1;
-  }
-
-  #start-btn .start-mark{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    visibility:visible;
-    opacity:1;
-  }
-
-  #taskbar-apps{
-    min-width:0;
-    overflow:hidden;
-  }
-
-  #tray{
-    flex-shrink:0;
-  }
-
-  #window-layer{
-    bottom:72px;
-  }
-
-  .os-window{
-    height:calc(100% - 84px) !important;
-  }
-
-}
-
