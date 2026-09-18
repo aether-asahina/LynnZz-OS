@@ -481,4 +481,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateSystemWidget();
   setInterval(updateSystemWidget, 1000);
+
+  /* ---------------------------------------------------------
+     SYSTEM WIDGET TOGGLE
+  --------------------------------------------------------- */
+  const systemWidget = document.getElementById('system-widget');
+  const systemToggle = document.getElementById('system-widget-toggle');
+
+  if (systemWidget && systemToggle){
+    systemToggle.addEventListener('click', ()=>{
+      const minimized = systemWidget.classList.toggle('minimized');
+
+      systemToggle.textContent = minimized ? '+' : '−';
+      systemToggle.title = minimized ? 'Expand' : 'Minimize';
+    });
+  }
 });

@@ -326,3 +326,77 @@ button,input,textarea{font-family:inherit;}
   white-space:nowrap;
 }
 
+
+/* ===================== SYSTEM WIDGET TOGGLE ===================== */
+
+.system-widget{
+  transition:
+    width .25s ease,
+    height .25s ease,
+    padding .25s ease,
+    transform .25s ease,
+    opacity .25s ease;
+}
+
+.system-actions{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.system-toggle{
+  width:22px;
+  height:22px;
+  padding:0;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:7px;
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+  font-size:14px;
+  line-height:20px;
+  cursor:pointer;
+  transition:
+    background .2s ease,
+    transform .2s ease;
+}
+
+.system-toggle:hover{
+  background:rgba(255,255,255,.12);
+}
+
+.system-toggle:active{
+  transform:scale(.88);
+}
+
+.system-widget .system-info{
+  max-height:300px;
+  opacity:1;
+  overflow:hidden;
+  transition:
+    max-height .3s ease,
+    opacity .2s ease,
+    margin-top .3s ease,
+    transform .3s ease;
+}
+
+.system-widget.minimized{
+  width:150px;
+  padding:10px 12px;
+}
+
+.system-widget.minimized .system-info{
+  max-height:0;
+  opacity:0;
+  margin-top:0;
+  transform:translateY(-6px);
+}
+
+.system-widget.minimized .system-toggle{
+  transform:rotate(180deg);
+}
+
+@media (max-width:600px){
+  .system-widget.minimized{
+    width:150px;
+  }
+}
