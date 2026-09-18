@@ -285,6 +285,27 @@ LZ.toggleStartMenu = function(force){
 };
 
 /* ---------------------------------------------------------
+   START MENU SEARCH
+--------------------------------------------------------- */
+function initStartMenuSearch(){
+  const search = document.getElementById('start-menu-search');
+  const apps = document.getElementById('start-menu-apps');
+
+  if (!search || !apps) return;
+
+  search.addEventListener('input', ()=>{
+    const query = search.value.trim().toLowerCase();
+
+    apps.querySelectorAll('.sm-app').forEach(item=>{
+      const name = item.textContent.trim().toLowerCase();
+      item.style.display = !query || name.includes(query) ? '' : 'none';
+    });
+  });
+}
+
+initStartMenuSearch();
+
+/* ---------------------------------------------------------
    SCREEN TRANSITIONS
 --------------------------------------------------------- */
 LZ.showScreen = function(id){
