@@ -438,4 +438,32 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('tray-notif').onclick = ()=>{
     LZ.notify('Pusat Notifikasi', 'Belum ada notifikasi baru.', '🔔', 3000);
   };
+
+  /* ---------------------------------------------------------
+     DESKTOP CLOCK WIDGET
+  --------------------------------------------------------- */
+  function updateDesktopClock(){
+    const timeEl = document.getElementById('widget-time');
+    const dateEl = document.getElementById('widget-date');
+
+    if (!timeEl || !dateEl) return;
+
+    const now = new Date();
+
+    timeEl.textContent = now.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+
+    dateEl.textContent = now.toLocaleDateString('id-ID', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  }
+
+  updateDesktopClock();
+  setInterval(updateDesktopClock, 1000);
 });
