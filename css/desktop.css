@@ -491,3 +491,97 @@ html[data-accent="crimson"]{
   --lz-accent:#ff2e63;
   --lz-accent-dim:#e11d48;
 }
+
+/* =========================================================
+   LYNNZZ SETTINGS — DETAIL PANEL POLISH
+========================================================= */
+
+.st-detail{
+  position:absolute;
+  inset:0;
+  display:none;
+  flex-direction:column;
+  height:100%;
+  overflow-y:auto;
+  background:var(--void);
+  animation:stDetailIn .18s ease;
+}
+
+.st-detail.active{
+  display:flex;
+}
+
+.st-detail-head{
+  position:sticky;
+  top:0;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:12px 14px;
+  background:rgba(10,10,18,.88);
+  backdrop-filter:blur(var(--lz-blur));
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+
+.st-back{
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid var(--border);
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--text);
+  cursor:pointer;
+  font-size:18px;
+}
+
+.st-back:active{
+  transform:scale(.94);
+}
+
+.st-detail-title{
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+}
+
+.st-detail > .st-section,
+.st-detail > .st-about{
+  margin-left:14px;
+  margin-right:14px;
+}
+
+.st-detail > .st-section:first-of-type{
+  margin-top:18px;
+}
+
+@keyframes stDetailIn{
+  from{
+    opacity:0;
+    transform:translateX(12px);
+  }
+  to{
+    opacity:1;
+    transform:translateX(0);
+  }
+}
+
+@media (max-width:600px){
+  .st-detail-head{
+    padding:10px 12px;
+  }
+
+  .st-detail > .st-section,
+  .st-detail > .st-about{
+    margin-left:12px;
+    margin-right:12px;
+  }
+
+  .st-detail > .st-section:first-of-type{
+    margin-top:14px;
+  }
+}

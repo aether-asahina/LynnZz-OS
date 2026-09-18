@@ -972,6 +972,7 @@ function renderSettings(body){
 
   body.appendChild(h(`
     <div class="st-wrap">
+      <div class="st-main">
 
       <div class="st-page-head">
         <div class="st-page-title">Pengaturan</div>
@@ -1054,6 +1055,8 @@ function renderSettings(body){
     </div>
 
     <!-- PERSONALIZATION -->
+          </div>
+
     <div class="st-detail" data-detail="personalization">
 
       <div class="st-detail-head">
@@ -1195,24 +1198,56 @@ function renderSettings(body){
       </div>
 
       <div class="st-section">
-        <div class="st-label">System</div>
+        <div class="st-label">Notifikasi</div>
 
-        <div class="st-item">
-          <div class="st-item-info">
-            <div class="st-item-name">Notifications</div>
-            <div class="st-item-desc">Izinkan LynnZz menampilkan notifikasi</div>
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">System Notifications</div>
+            <div class="ai-setting-desc">
+              Izinkan LynnZz OS menampilkan notifikasi sistem.
+            </div>
           </div>
-
-          <label class="st-switch">
-            <input type="checkbox" checked disabled>
-            <span class="st-switch-track"><span class="st-switch-thumb"></span></span>
-          </label>
+          <input
+            type="checkbox"
+            class="st-notify-toggle"
+            data-notify="system"
+            ${saved.notifications?.system !== false ? 'checked' : ''}
+          >
         </div>
-      </div>
 
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Notification Sound</div>
+            <div class="ai-setting-desc">
+              Aktifkan suara ketika notifikasi masuk.
+            </div>
+          </div>
+          <input
+            type="checkbox"
+            class="st-notify-toggle"
+            data-notify="sound"
+            ${saved.notifications?.sound !== false ? 'checked' : ''}
+          >
+        </div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Show Preview</div>
+            <div class="ai-setting-desc">
+              Tampilkan isi singkat notifikasi.
+            </div>
+          </div>
+          <input
+            type="checkbox"
+            class="st-notify-toggle"
+            data-notify="preview"
+            ${saved.notifications?.preview !== false ? 'checked' : ''}
+          >
+        </div>
+
+      </div>
     </div>
 
-    <!-- PRIVACY -->
     <div class="st-detail" data-detail="privacy">
 
       <div class="st-detail-head">
@@ -1221,16 +1256,47 @@ function renderSettings(body){
       </div>
 
       <div class="st-section">
+        <div class="st-label">Penyimpanan</div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Local Storage</div>
+            <div class="ai-setting-desc">
+              Pengaturan LynnZz OS disimpan secara lokal pada perangkat ini.
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--text-muted);">Aktif</span>
+        </div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Cloud Sync</div>
+            <div class="ai-setting-desc">
+              Data aplikasi dapat disinkronkan ke akun Firebase ketika login.
+            </div>
+          </div>
+          <span style="font-size:11px;color:var(--text-muted);">
+            ${u.isGuest ? 'Tamu' : 'Aktif'}
+          </span>
+        </div>
+
+      </div>
+
+      <div class="st-section">
         <div class="st-label">Data</div>
 
-        <button class="st-danger st-clear-data">
-          🗑 Hapus Semua Data Lokal
+        <button class="st-danger" id="st-clear-data">
+          Hapus seluruh data lokal
         </button>
+
+        <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.5;">
+          Ini akan menghapus pengaturan dan data aplikasi yang tersimpan
+          di browser perangkat ini. Tindakan ini tidak dapat dibatalkan.
+        </div>
       </div>
 
     </div>
 
-    <!-- ACCOUNT -->
     <div class="st-detail" data-detail="account">
 
       <div class="st-detail-head">
@@ -1238,25 +1304,59 @@ function renderSettings(body){
         <div class="st-detail-title">Account</div>
       </div>
 
-      <div class="st-account-card">
-        <div class="user-avatar">
-          ${(u.displayName||'P')[0].toUpperCase()}
-        </div>
+      <div class="st-section">
+        <div class="st-label">Akun LynnZz</div>
 
-        <div class="st-account-info">
-          <div class="st-account-name">
-            ${u.displayName || 'Pengguna'}
+        <div class="st-account-card">
+          <div class="user-avatar">
+            ${(u.displayName||'P')[0].toUpperCase()}
           </div>
 
-          <div class="st-account-email">
-            ${u.email}
+          <div class="st-account-info">
+            <div class="st-account-name">
+              ${u.displayName || 'Pengguna'}
+            </div>
+            <div class="st-account-email">
+              ${u.email || 'Tidak ada email'}
+            </div>
           </div>
         </div>
+
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">Status</div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Mode Akun</div>
+            <div class="ai-setting-desc">
+              Status akun yang sedang digunakan LynnZz OS.
+            </div>
+          </div>
+
+          <span style="font-size:11px;color:var(--text-muted);">
+            ${u.isGuest ? 'Tamu' : 'Terhubung'}
+          </span>
+        </div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Cloud Sync</div>
+            <div class="ai-setting-desc">
+              Sinkronisasi data aplikasi dengan akun LynnZz.
+            </div>
+          </div>
+
+          <span style="font-size:11px;color:var(--text-muted);">
+            ${u.isGuest ? 'OFF' : 'ON'}
+          </span>
+        </div>
+
       </div>
 
     </div>
 
-    <!-- ABOUT -->
     <div class="st-detail" data-detail="about">
 
       <div class="st-detail-head">
@@ -1264,19 +1364,53 @@ function renderSettings(body){
         <div class="st-detail-title">About</div>
       </div>
 
-      <div class="st-about">
-        <strong style="color:var(--text);">LynnZz OS v1.0</strong><br>
-        Personal operating environment built with
-        HTML, CSS, JavaScript & Firebase.
-        <br><br>
-        LynnZz OS — built for experimentation, learning
-        and the future of personal computing.
+      <div class="st-section">
+        <div class="st-label">LynnZz OS</div>
+
+        <div class="st-about">
+          <div style="font-size:16px;font-weight:700;color:var(--text);">
+            LynnZz OS
+          </div>
+
+          <div style="margin-top:4px;color:var(--violet);font-weight:600;">
+            Version 1.0
+          </div>
+
+          <div style="margin-top:12px;">
+            Personal operating environment built with
+            HTML, CSS, JavaScript & Firebase.
+          </div>
+
+          <div style="margin-top:12px;">
+            LynnZz OS — built for experimentation, learning
+            and the future of personal computing.
+          </div>
+        </div>
+      </div>
+
+      <div class="st-section">
+        <div class="st-label">System</div>
+
+        <div class="ai-setting-item">
+          <div class="ai-setting-info">
+            <div class="ai-setting-name">Platform</div>
+            <div class="ai-setting-desc">
+              Browser-based personal operating environment.
+            </div>
+          </div>
+
+          <span style="font-size:11px;color:var(--text-muted);">
+            Web
+          </span>
+        </div>
+
       </div>
 
     </div>
+
   `));
 
-  const menu = body.querySelector('.st-wrap');
+  const menu = body.querySelector('.st-main');
   const details = body.querySelectorAll('.st-detail');
 
   function openDetail(page){
@@ -1301,6 +1435,53 @@ function renderSettings(body){
 
   body.querySelectorAll('.st-back').forEach(btn => {
     btn.onclick = closeDetail;
+  });
+
+  /* =======================================================
+     PRIVACY
+  ======================================================= */
+
+  const clearDataBtn = body.querySelector('#st-clear-data');
+
+  if (clearDataBtn) {
+    clearDataBtn.onclick = () => {
+      const ok = confirm(
+        'Hapus seluruh data lokal LynnZz OS?\\n\\nPengaturan dan data aplikasi lokal akan dihapus.'
+      );
+
+      if (!ok) return;
+
+      const prefix = `lynnzz:${LZ.auth.currentUser?.uid || 'guest'}:`;
+
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(prefix)) {
+          localStorage.removeItem(key);
+        }
+      });
+
+      alert('Data lokal LynnZz OS telah dihapus.');
+      location.reload();
+    };
+  }
+
+  /* =======================================================
+     NOTIFICATION SETTINGS
+  ======================================================= */
+
+  body.querySelectorAll('.st-notify-toggle').forEach(toggle => {
+    toggle.onchange = () => {
+      const key = toggle.dataset.notify;
+
+      const settings = {
+        ...LZ.storage.get('settings', {}),
+        notifications: {
+          ...(LZ.storage.get('settings', {}).notifications || {}),
+          [key]: toggle.checked
+        }
+      };
+
+      LZ.storage.set('settings', settings);
+    };
   });
 
   /* =======================================================
