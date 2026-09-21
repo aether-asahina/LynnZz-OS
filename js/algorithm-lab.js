@@ -3,6 +3,215 @@
 // LYNNZZ OS — ALGORITHM LAB
 // ============================================================
 
+
+function renderDatasetManager(body){
+
+  body.innerHTML = `
+    <div class="dataset-wrap">
+
+      <div class="dataset-header">
+        <div>
+          <div class="dataset-eyebrow">LYNNZZ OS · ALGORITHM LAB</div>
+          <h2>Dataset Manager</h2>
+          <p>Upload dataset CSV untuk digunakan dalam eksperimen algoritma.</p>
+        </div>
+
+        <label class="dataset-upload">
+          <input id="dataset-file" type="file" accept=".csv,text/csv">
+          <span>＋ Upload CSV</span>
+        </label>
+      </div>
+
+      <div class="dataset-stats">
+        <div class="dataset-stat">
+          <span>Rows</span>
+          <strong id="dataset-rows">0</strong>
+        </div>
+
+        <div class="dataset-stat">
+          <span>Columns</span>
+          <strong id="dataset-cols">0</strong>
+        </div>
+
+        <div class="dataset-stat">
+          <span>Dataset</span>
+          <strong id="dataset-name">None</strong>
+        </div>
+      </div>
+
+      <div class="dataset-preview">
+        <div class="dataset-preview-head">
+          <strong>Data Preview</strong>
+          <span id="dataset-status">Waiting for dataset...</span>
+        </div>
+
+        <div class="dataset-table-wrap">
+          <table id="dataset-table">
+            <tbody>
+              <tr>
+                <td class="dataset-empty">
+                  Upload file CSV untuk melihat data.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  `;
+
+  const fileInput = body.querySelector('#dataset-file');
+  const table = body.querySelector('#dataset-table');
+  const rowsEl = body.querySelector('#dataset-rows');
+  const colsEl = body.querySelector('#dataset-cols');
+  const nameEl = body.querySelector('#dataset-name');
+  const statusEl = body.querySelector('#dataset-status');
+
+  fileInput.onchange = () => {
+
+    const file = fileInput.files?.[0];
+
+    if(!file){
+      return;
+    }
+
+    if(!file.name.toLowerCase().endsWith('.csv')){
+      statusEl.textContent = 'Invalid file';
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+      const text = String(reader.result || '');
+
+      const lines = text
+        .replace(/\r/g, '')
+        .split('\n')
+        .filter(line => line.trim() !== '');
+
+      if(lines.length < 2){
+        statusEl.textContent = 'Dataset kosong';
+        return;
+      }
+
+      const parseCSVLine = line => {
+
+        const result = [];
+        let current = '';
+        let quoted = false;
+
+        for(let i=0;i<line.length;i++){
+
+          const char = line[i];
+
+          if(char === '"'){
+
+            if(
+              quoted &&
+              line[i + 1] === '"'
+            ){
+              current += '"';
+              i++;
+              continue;
+            }
+
+            quoted = !quoted;
+            continue;
+          }
+
+          if(char === ',' && !quoted){
+            result.push(current.trim());
+            current = '';
+            continue;
+          }
+
+          current += char;
+        }
+
+        result.push(current.trim());
+
+        return result;
+      };
+
+      const headers = parseCSVLine(lines[0]);
+
+      const data = lines
+        .slice(1)
+        .map(parseCSVLine);
+
+      rowsEl.textContent = data.length;
+      colsEl.textContent = headers.length;
+      nameEl.textContent = file.name;
+      statusEl.textContent = 'Dataset loaded';
+
+      table.innerHTML = '';
+
+      const thead = document.createElement('thead');
+      const headRow = document.createElement('tr');
+
+      headers.forEach(header => {
+
+        const th = document.createElement('th');
+
+        th.textContent = header || 'Column';
+
+        headRow.appendChild(th);
+      });
+
+      thead.appendChild(headRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+
+      data.slice(0,50).forEach(row => {
+
+        const tr = document.createElement('tr');
+
+        headers.forEach((_, index) => {
+
+          const td = document.createElement('td');
+
+          td.textContent = row[index] ?? '';
+
+          tr.appendChild(td);
+        });
+
+        tbody.appendChild(tr);
+      });
+
+      table.appendChild(tbody);
+
+      const dataset = {
+        name: file.name,
+        headers,
+        data,
+        rows: data.length,
+        columns: headers.length,
+        uploadedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem(
+        'lynnzz_dataset',
+        JSON.stringify(dataset)
+      );
+
+      console.log(
+        '[LynnZz Dataset]',
+        dataset
+      );
+    };
+
+    reader.onerror = () => {
+      statusEl.textContent = 'Failed to read dataset';
+    };
+
+    reader.readAsText(file);
+  };
+}
+
 function renderAlgorithmLab(body){
   body.innerHTML = `
     <div class="algo-wrap">
@@ -62,6 +271,17 @@ function renderAlgorithmLab(body){
           <div>
             <strong>Sorting</strong>
             <small>Data Ordering</small>
+          </div>
+        </button>
+
+
+        <div class="algo-section-label dataset-section-label">DATA</div>
+
+        <button class="algo-item" data-algo="dataset">
+          <span>📂</span>
+          <div>
+            <strong>Dataset Manager</strong>
+            <small>CSV / Data</small>
           </div>
         </button>
       </aside>
@@ -274,6 +494,37 @@ function renderAlgorithmLab(body){
             ? '▶ Run A*'
             : '▶ Run Dijkstra';
 
+      }else if(btn.dataset.algo === 'dataset'){
+
+        config.innerHTML = `
+          <div class="algo-field">
+            <label>Dataset Source</label>
+            <div class="dataset-config-info">
+              <span>📂</span>
+              <div>
+                <strong>Local Dataset</strong>
+                <small>CSV disimpan di browser perangkat ini.</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="algo-field">
+            <label>Format</label>
+            <select disabled>
+              <option selected>CSV</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Preview Limit</label>
+            <select disabled>
+              <option selected>50 rows</option>
+            </select>
+          </div>
+        `;
+
+        runBtn.textContent = '📂 Open Dataset';
+
       }else{
 
         config.innerHTML = `
@@ -318,6 +569,11 @@ function renderAlgorithmLab(body){
 
     if(active.dataset.algo === 'compare'){
       runCompare();
+      return;
+    }
+
+    if(active.dataset.algo === 'dataset'){
+      renderDatasetManager(body);
       return;
     }
 
