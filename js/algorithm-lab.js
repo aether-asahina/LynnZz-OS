@@ -11,15 +11,22 @@ function renderDatasetManager(body){
 
       <div class="dataset-header">
         <div>
+          <button id="dataset-back" class="dataset-back">← Back</button>
           <div class="dataset-eyebrow">LYNNZZ OS · ALGORITHM LAB</div>
           <h2>Dataset Manager</h2>
           <p>Upload dataset CSV untuk digunakan dalam eksperimen algoritma.</p>
         </div>
 
-        <label class="dataset-upload">
-          <input id="dataset-file" type="file" accept=".csv,text/csv">
-          <span>＋ Upload CSV</span>
-        </label>
+        <div class="dataset-actions">
+          <button id="dataset-clear" class="dataset-clear">
+            🗑 Clear
+          </button>
+
+          <label class="dataset-upload">
+            <input id="dataset-file" type="file" accept=".csv,text/csv">
+            <span>＋ Upload CSV</span>
+          </label>
+        </div>
       </div>
 
       <div class="dataset-stats">
@@ -67,6 +74,37 @@ function renderDatasetManager(body){
   const colsEl = body.querySelector('#dataset-cols');
   const nameEl = body.querySelector('#dataset-name');
   const statusEl = body.querySelector('#dataset-status');
+  const backBtn = body.querySelector('#dataset-back');
+  const clearBtn = body.querySelector('#dataset-clear');
+
+  backBtn.onclick = () => {
+    const firstAlgo = body.querySelector('.algo-item');
+    if(firstAlgo){
+      firstAlgo.click();
+    }
+  };
+
+  clearBtn.onclick = () => {
+
+    localStorage.removeItem('lynnzz_dataset');
+
+    rowsEl.textContent = '0';
+    colsEl.textContent = '0';
+    nameEl.textContent = 'None';
+    statusEl.textContent = 'Dataset cleared';
+
+    table.innerHTML = `
+      <tbody>
+        <tr>
+          <td class="dataset-empty">
+            Upload file CSV untuk melihat data.
+          </td>
+        </tr>
+      </tbody>
+    `;
+
+    fileInput.value = '';
+  };
 
   fileInput.onchange = () => {
 

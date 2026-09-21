@@ -721,3 +721,61 @@
   }
 }
 
+
+/* Dataset Manager V2 */
+
+.dataset-back{
+  margin:0 0 8px 0;
+  padding:5px 9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:10px;
+  cursor:pointer;
+  transition:.15s ease;
+}
+
+.dataset-back:hover{
+  color:var(--text);
+  border-color:var(--violet);
+}
+
+.dataset-actions{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+
+.dataset-clear{
+  padding:10px 11px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition:.15s ease;
+}
+
+.dataset-clear:hover{
+  border-color:#ef4444;
+  color:#ef4444;
+}
+
+@media(max-width:600px){
+
+  .dataset-actions{
+    width:100%;
+  }
+
+  .dataset-actions > *{
+    flex:1;
+  }
+
+  .dataset-upload{
+    text-align:center;
+  }
+}
+
