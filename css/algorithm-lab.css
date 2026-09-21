@@ -1,0 +1,359 @@
+/* =========================================================
+   LYNNZZ OS — ALGORITHM LAB
+========================================================= */
+
+.algo-wrap{
+  display:flex;
+  width:100%;
+  height:100%;
+  min-height:0;
+  overflow:hidden;
+  background:var(--void);
+  color:var(--text);
+}
+
+.algo-sidebar{
+  width:205px;
+  flex-shrink:0;
+  padding:14px 10px;
+  border-right:1px solid var(--border);
+  background:rgba(10,10,18,.72);
+  overflow-y:auto;
+}
+
+.algo-brand{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:4px 6px 16px;
+}
+
+.algo-brand-icon{
+  width:38px;
+  height:38px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:11px;
+  background:rgba(168,85,247,.14);
+  border:1px solid rgba(168,85,247,.25);
+  font-size:20px;
+}
+
+.algo-brand-title{
+  font-size:13px;
+  font-weight:700;
+}
+
+.algo-brand-sub{
+  margin-top:2px;
+  font-size:9px;
+  color:var(--muted);
+}
+
+.algo-section-label{
+  padding:8px 8px 6px;
+  font-size:9px;
+  font-weight:700;
+  letter-spacing:.12em;
+  color:var(--muted);
+}
+
+.algo-item{
+  width:100%;
+  min-height:52px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:8px;
+  margin-bottom:4px;
+  border:1px solid transparent;
+  border-radius:10px;
+  background:transparent;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+  transition:.16s ease;
+}
+
+.algo-item > span{
+  width:30px;
+  height:30px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  background:var(--surface-2);
+  flex-shrink:0;
+}
+
+.algo-item strong{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+}
+
+.algo-item small{
+  display:block;
+  margin-top:3px;
+  font-size:9px;
+  color:var(--muted);
+}
+
+.algo-item:hover{
+  background:var(--surface-2);
+}
+
+.algo-item.active{
+  background:rgba(168,85,247,.13);
+  border-color:rgba(168,85,247,.28);
+}
+
+.algo-item.active > span{
+  background:rgba(168,85,247,.18);
+}
+
+.algo-content{
+  flex:1;
+  min-width:0;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px;
+  overflow-y:auto;
+}
+
+.algo-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.algo-kicker{
+  font-size:9px;
+  letter-spacing:.14em;
+  color:var(--violet);
+  font-weight:700;
+}
+
+.algo-header h2{
+  margin:3px 0 2px;
+  font-size:18px;
+}
+
+.algo-header p{
+  margin:0;
+  font-size:10px;
+  color:var(--muted);
+}
+
+.algo-run-btn{
+  flex-shrink:0;
+  border:0;
+  border-radius:10px;
+  padding:10px 14px;
+  background:var(--violet);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(168,85,247,.18);
+}
+
+.algo-run-btn:hover{
+  filter:brightness(1.08);
+}
+
+.algo-run-btn:active{
+  transform:scale(.96);
+}
+
+.algo-config-card,
+.algo-visual-card,
+.algo-log-card{
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:rgba(255,255,255,.025);
+  overflow:hidden;
+}
+
+.algo-card-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 12px;
+  border-bottom:1px solid var(--border);
+  font-size:10px;
+  font-weight:700;
+  color:var(--text);
+}
+
+.algo-card-title span{
+  font-size:9px;
+  color:var(--violet);
+}
+
+#algo-config{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  padding:12px;
+}
+
+.algo-field{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.algo-field label{
+  font-size:9px;
+  color:var(--muted);
+}
+
+.algo-field input{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  outline:none;
+  background:var(--surface-2);
+  color:var(--text);
+  font-size:11px;
+}
+
+.algo-field input:focus{
+  border-color:var(--violet);
+}
+
+#algo-visual{
+  min-height:170px;
+  padding:12px;
+}
+
+.algo-empty{
+  min-height:145px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:var(--text);
+}
+
+.algo-empty-icon{
+  margin-bottom:8px;
+  font-size:32px;
+}
+
+.algo-empty small{
+  margin-top:5px;
+  color:var(--muted);
+  font-size:9px;
+}
+
+.algo-result{
+  min-height:145px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.algo-result-label{
+  font-size:9px;
+  letter-spacing:.12em;
+  color:var(--muted);
+}
+
+.algo-result-value{
+  margin:4px 0;
+  font-size:38px;
+  font-weight:800;
+  color:var(--violet);
+}
+
+.algo-result-target{
+  font-size:10px;
+  color:var(--muted);
+}
+
+.algo-progress{
+  width:min(280px,80%);
+  height:5px;
+  margin-top:12px;
+  overflow:hidden;
+  border-radius:99px;
+  background:var(--surface-2);
+}
+
+.algo-progress > div{
+  height:100%;
+  border-radius:inherit;
+  background:var(--violet);
+  transition:width .35s ease;
+}
+
+.algo-log-card{
+  flex-shrink:0;
+}
+
+#algo-log{
+  max-height:100px;
+  margin:0;
+  padding:10px 12px;
+  overflow:auto;
+  white-space:pre-wrap;
+  font-family:monospace;
+  font-size:9px;
+  line-height:1.55;
+  color:var(--muted);
+}
+
+.algo-placeholder{
+  grid-column:1/-1;
+  padding:14px;
+  border-radius:9px;
+  background:var(--surface-2);
+  color:var(--muted);
+  font-size:10px;
+}
+
+@media(max-width:600px){
+
+  .algo-sidebar{
+    width:145px;
+  }
+
+  .algo-content{
+    padding:10px;
+  }
+
+  .algo-header{
+    align-items:flex-start;
+  }
+
+  .algo-header h2{
+    font-size:15px;
+  }
+
+  .algo-header p{
+    max-width:170px;
+  }
+
+  .algo-run-btn{
+    padding:9px 10px;
+    font-size:10px;
+  }
+
+  #algo-config{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .algo-item strong{
+    font-size:10px;
+  }
+}

@@ -3623,6 +3623,14 @@ function renderLynnAI(body){
    APP REGISTRY
 ============================================================ */
 LZ.APPS = [
+  {
+    id:'algolab',
+    name:'Algorithm Lab',
+    icon:'🧠',
+    width:760,
+    height:520,
+    render: renderAlgorithmLab
+  },
   { id:'filemanager', name:'File Manager', icon:'📁', width:420, height:380, render: renderFileManager },
   { id:'notes',        name:'Notes',        icon:'📝', width:440, height:360, render: renderNotes },
   { id:'calculator',   name:'Calculator',   icon:'🧮', width:280, height:400, render: renderCalculator },
