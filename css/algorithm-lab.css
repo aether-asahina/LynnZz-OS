@@ -481,3 +481,35 @@
   }
 }
 
+
+.algo-field select{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 9px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  outline:none;
+  background:var(--surface-2);
+  color:var(--text);
+  font-size:11px;
+  cursor:pointer;
+}
+
+.algo-field select:focus{
+  border-color:var(--violet);
+}
+
+
+.astar-maze-tools{
+  display:flex;
+  justify-content:center;
+  gap:6px;
+  margin-top:8px;
+}
+
+@media(max-width:600px){
+  .astar-maze-tools{
+    flex-wrap:wrap;
+  }
+}
+

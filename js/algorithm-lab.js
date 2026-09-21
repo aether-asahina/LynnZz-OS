@@ -198,46 +198,71 @@ function renderAlgorithmLab(body){
         btn.dataset.algo === 'dijkstra'
       ){
 
+        const isAStar = btn.dataset.algo === 'astar';
+
         config.innerHTML = `
           <div class="algo-field">
             <label>Grid Size</label>
-            <input
-              type="text"
-              value="12 × 12"
-              readonly
-            >
+            <select id="path-grid-size">
+              <option value="8">8 × 8</option>
+              <option value="12" selected>12 × 12</option>
+              <option value="16">16 × 16</option>
+              <option value="20">20 × 20</option>
+            </select>
           </div>
 
           <div class="algo-field">
             <label>Movement</label>
-            <input
-              type="text"
-              value="4 Directions"
-              readonly
-            >
+            <select id="path-movement">
+              <option value="4" selected>4 Directions</option>
+              <option value="8">8 Directions</option>
+            </select>
           </div>
 
           <div class="algo-field">
-            <label>Start</label>
-            <input
-              type="text"
-              value="Interactive"
-              readonly
-            >
+            <label>Animation</label>
+            <select id="path-speed">
+              <option value="0">Instant</option>
+              <option value="15">Fast</option>
+              <option value="30" selected>Normal</option>
+              <option value="80">Slow</option>
+            </select>
           </div>
 
+          ${
+            isAStar
+              ? `
+                <div class="algo-field">
+                  <label>Heuristic</label>
+                  <select id="astar-heuristic">
+                    <option value="manhattan" selected>Manhattan</option>
+                    <option value="euclidean">Euclidean</option>
+                  </select>
+                </div>
+              `
+              : `
+                <div class="algo-field">
+                  <label>Weight</label>
+                  <select id="dijkstra-weight">
+                    <option value="1" selected>Uniform Cost</option>
+                  </select>
+                </div>
+              `
+          }
+
           <div class="algo-field">
-            <label>Goal</label>
-            <input
-              type="text"
-              value="Interactive"
-              readonly
-            >
+            <label>Obstacles</label>
+            <select id="path-obstacle-density">
+              <option value="10">10%</option>
+              <option value="20" selected>20%</option>
+              <option value="30">30%</option>
+              <option value="40">40%</option>
+            </select>
           </div>
         `;
 
         runBtn.textContent =
-          btn.dataset.algo === 'astar'
+          isAStar
             ? '▶ Run A*'
             : '▶ Run Dijkstra';
 
@@ -295,12 +320,28 @@ function renderAlgorithmLab(body){
 
   function runDijkstra(){
 
-    const size = 12;
+    const size =
+      Number(body.querySelector('#path-grid-size')?.value) || 12;
 
-    let start = {r:1, c:1};
-    let end = {r:10, c:10};
+    const movement =
+      Number(body.querySelector('#path-movement')?.value) || 4;
+
+    const speed =
+      Number(body.querySelector('#path-speed')?.value) || 0;
+
+    let start = {
+      r:1,
+      c:1
+    };
+
+    let end = {
+      r:size - 2,
+      c:size - 2
+    };
 
     const obstacles = new Set();
+
+    const algoTitle = active?.textContent?.trim() || 'Pathfinding';
 
     let mode = 'obstacle';
 
@@ -438,9 +479,96 @@ function renderAlgorithmLab(body){
     visual.innerHTML = '';
 
     visual.appendChild(visualGrid);
+
+    const mazeTools = document.createElement('div');
+    mazeTools.className = 'astar-maze-tools';
+
+    mazeTools.innerHTML = `
+      <button class="astar-tool" id="astar-random">
+        ⚡ Random Obstacles
+      </button>
+
+      <button class="astar-tool" id="astar-clear">
+        🧹 Clear Obstacles
+      </button>
+    `;
+
+    visual.appendChild(mazeTools);
     visual.appendChild(controls);
 
     renderGrid();
+
+    mazeTools.querySelector('#astar-random').onclick = () => {
+
+      const density =
+        Number(
+          body.querySelector('#path-obstacle-density')?.value
+        ) || 20;
+
+      obstacles.clear();
+
+      const total =
+        size * size;
+
+      const amount =
+        Math.floor(total * density / 100);
+
+      const candidates = [];
+
+      for(let r=0;r<size;r++){
+        for(let c=0;c<size;c++){
+
+          if(
+            (r === start.r && c === start.c) ||
+            (r === end.r && c === end.c)
+          ){
+            continue;
+          }
+
+          candidates.push({r,c});
+        }
+      }
+
+      for(let i=candidates.length-1;i>0;i--){
+
+        const j =
+          Math.floor(Math.random() * (i + 1));
+
+        [candidates[i],candidates[j]] =
+          [candidates[j],candidates[i]];
+      }
+
+      candidates
+        .slice(0,amount)
+        .forEach(cell =>
+          obstacles.add(
+            key(cell.r,cell.c)
+          )
+        );
+
+      renderGrid();
+
+      status.textContent = 'Grid Generated';
+
+      log.textContent =
+        `${algoTitle}\\n\\n` +
+        `Grid       : ${size} × ${size}\\n` +
+        `Obstacles  : ${density}%\\n` +
+        'Status     : Ready';
+    };
+
+    mazeTools.querySelector('#astar-clear').onclick = () => {
+
+      obstacles.clear();
+
+      renderGrid();
+
+      status.textContent = 'Ready';
+
+      log.textContent =
+        `${algoTitle}\\n\\n` +
+        'All obstacles cleared.';
+    };
 
     log.textContent =
       'Dijkstra\n\n' +
@@ -545,12 +673,25 @@ function renderAlgorithmLab(body){
           break;
         }
 
-        const neighbors = [
-          {r:cr-1,c:cc},
-          {r:cr+1,c:cc},
-          {r:cr,c:cc-1},
-          {r:cr,c:cc+1}
-        ].filter(n =>
+        const neighbors = (
+          movement === 8
+            ? [
+                {r:cr-1,c:cc},
+                {r:cr+1,c:cc},
+                {r:cr,c:cc-1},
+                {r:cr,c:cc+1},
+                {r:cr-1,c:cc-1},
+                {r:cr-1,c:cc+1},
+                {r:cr+1,c:cc-1},
+                {r:cr+1,c:cc+1}
+              ]
+            : [
+                {r:cr-1,c:cc},
+                {r:cr+1,c:cc},
+                {r:cr,c:cc-1},
+                {r:cr,c:cc+1}
+              ]
+        ).filter(n =>
           n.r >= 0 &&
           n.r < size &&
           n.c >= 0 &&
@@ -567,8 +708,15 @@ function renderAlgorithmLab(body){
             continue;
           }
 
+          const diagonal =
+            neighbor.r !== cr &&
+            neighbor.c !== cc;
+
+          const moveCost =
+            diagonal ? Math.SQRT2 : 1;
+
           const newDistance =
-            currentDistance + 1;
+            currentDistance + moveCost;
 
           if(
             newDistance <
@@ -597,7 +745,7 @@ function renderAlgorithmLab(body){
         }
 
         await new Promise(resolve =>
-          setTimeout(resolve,30)
+          setTimeout(resolve,speed)
         );
       }
 
@@ -647,7 +795,7 @@ function renderAlgorithmLab(body){
           }
 
           await new Promise(resolve =>
-            setTimeout(resolve,40)
+            setTimeout(resolve,speed)
           );
         }
 
@@ -676,10 +824,27 @@ function renderAlgorithmLab(body){
 
   function runAStar(){
 
-    const size = 12;
+    const size =
+      Number(body.querySelector('#path-grid-size')?.value) || 12;
 
-    let start = {r:1, c:1};
-    let end = {r:10, c:10};
+    const movement =
+      Number(body.querySelector('#path-movement')?.value) || 4;
+
+    const speed =
+      Number(body.querySelector('#path-speed')?.value) || 0;
+
+    const heuristicType =
+      body.querySelector('#astar-heuristic')?.value || 'manhattan';
+
+    let start = {
+      r:1,
+      c:1
+    };
+
+    let end = {
+      r:size - 2,
+      c:size - 2
+    };
 
     const obstacles = new Set();
 
@@ -851,18 +1016,37 @@ function renderAlgorithmLab(body){
         });
 
       function heuristic(a,b){
+
+        if(heuristicType === 'euclidean'){
+          return Math.sqrt(
+            Math.pow(a.r-b.r,2) +
+            Math.pow(a.c-b.c,2)
+          );
+        }
+
         return Math.abs(a.r-b.r) +
                Math.abs(a.c-b.c);
       }
 
       function neighbors(node){
 
-        const dirs = [
-          [-1,0],
-          [1,0],
-          [0,-1],
-          [0,1]
-        ];
+        const dirs = movement === 8
+          ? [
+              [-1,0],
+              [1,0],
+              [0,-1],
+              [0,1],
+              [-1,-1],
+              [-1,1],
+              [1,-1],
+              [1,1]
+            ]
+          : [
+              [-1,0],
+              [1,0],
+              [0,-1],
+              [0,1]
+            ];
 
         return dirs
           .map(([dr,dc]) => ({
@@ -952,8 +1136,15 @@ function renderAlgorithmLab(body){
             continue;
           }
 
+          const diagonal =
+            neighbor.r !== current.r &&
+            neighbor.c !== current.c;
+
+          const moveCost =
+            diagonal ? Math.SQRT2 : 1;
+
           const tentative =
-            (gScore.get(currentKey) ?? Infinity) + 1;
+            (gScore.get(currentKey) ?? Infinity) + moveCost;
 
           if(
             tentative <
@@ -998,7 +1189,7 @@ function renderAlgorithmLab(body){
         }
 
         await new Promise(resolve =>
-          setTimeout(resolve,30)
+          setTimeout(resolve,speed)
         );
       }
 
@@ -1048,7 +1239,7 @@ function renderAlgorithmLab(body){
           }
 
           await new Promise(resolve =>
-            setTimeout(resolve,40)
+            setTimeout(resolve,speed)
           );
         }
 
