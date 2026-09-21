@@ -341,7 +341,7 @@ function renderAlgorithmLab(body){
 
     const obstacles = new Set();
 
-    const algoTitle = active?.textContent?.trim() || 'Pathfinding';
+    const algoTitle = 'Dijkstra';
 
     let mode = 'obstacle';
 
