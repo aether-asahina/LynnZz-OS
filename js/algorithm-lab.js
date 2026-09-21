@@ -41,6 +41,14 @@ function renderAlgorithmLab(body){
           </div>
         </button>
 
+        <button class="algo-item" data-algo="compare">
+          <span>⚖️</span>
+          <div>
+            <strong>Compare</strong>
+            <small>A* vs Dijkstra</small>
+          </div>
+        </button>
+
         <button class="algo-item" data-algo="kmeans">
           <span>📊</span>
           <div>
@@ -308,6 +316,11 @@ function renderAlgorithmLab(body){
       return;
     }
 
+    if(active.dataset.algo === 'compare'){
+      runCompare();
+      return;
+    }
+
     if(active.dataset.algo !== 'ga'){
       status.textContent = 'Coming Soon';
       log.textContent =
@@ -317,6 +330,365 @@ function renderAlgorithmLab(body){
 
     runGeneticAlgorithm();
   };
+
+
+  function runCompare(){
+
+    const size =
+      Number(body.querySelector('#path-grid-size')?.value) || 12;
+
+    const movement =
+      Number(body.querySelector('#path-movement')?.value) || 4;
+
+    const density =
+      Number(body.querySelector('#path-obstacle-density')?.value) || 20;
+
+    const heuristicType =
+      body.querySelector('#astar-heuristic')?.value || 'manhattan';
+
+    const start = { r:1, c:1 };
+    const end = {
+      r:size - 2,
+      c:size - 2
+    };
+
+    const key = (r,c) => `${r},${c}`;
+
+    const obstacles = new Set();
+
+    const total = size * size;
+    const amount =
+      Math.floor((total - 2) * density / 100);
+
+    const candidates = [];
+
+    for(let r=0;r<size;r++){
+      for(let c=0;c<size;c++){
+
+        if(
+          (r === start.r && c === start.c) ||
+          (r === end.r && c === end.c)
+        ){
+          continue;
+        }
+
+        candidates.push({r,c});
+      }
+    }
+
+    for(let i=candidates.length-1;i>0;i--){
+
+      const j =
+        Math.floor(Math.random() * (i + 1));
+
+      [candidates[i],candidates[j]] =
+        [candidates[j],candidates[i]];
+    }
+
+    candidates
+      .slice(0, amount)
+      .forEach(cell =>
+        obstacles.add(
+          key(cell.r,cell.c)
+        )
+      );
+
+    const dirs = movement === 8
+      ? [
+          [-1,0],
+          [1,0],
+          [0,-1],
+          [0,1],
+          [-1,-1],
+          [-1,1],
+          [1,-1],
+          [1,1]
+        ]
+      : [
+          [-1,0],
+          [1,0],
+          [0,-1],
+          [0,1]
+        ];
+
+    function heuristic(a,b){
+
+      if(
+        movement === 8 &&
+        heuristicType === 'euclidean'
+      ){
+        return Math.sqrt(
+          Math.pow(a.r-b.r,2) +
+          Math.pow(a.c-b.c,2)
+        );
+      }
+
+      return Math.abs(a.r-b.r) +
+             Math.abs(a.c-b.c);
+    }
+
+    function neighbors(cell){
+
+      const result = [];
+
+      dirs.forEach(([dr,dc]) => {
+
+        const r = cell.r + dr;
+        const c = cell.c + dc;
+
+        if(
+          r < 0 ||
+          r >= size ||
+          c < 0 ||
+          c >= size
+        ){
+          return;
+        }
+
+        if(obstacles.has(key(r,c))){
+          return;
+        }
+
+        result.push({
+          r,
+          c,
+          cost:
+            dr !== 0 && dc !== 0
+              ? Math.SQRT2
+              : 1
+        });
+      });
+
+      return result;
+    }
+
+    function runSearch(useHeuristic){
+
+      const startTime = performance.now();
+
+      const open = [{
+        r:start.r,
+        c:start.c,
+        f:0
+      }];
+
+      const gScore = new Map();
+      const previous = new Map();
+      const closed = new Set();
+
+      gScore.set(key(start.r,start.c), 0);
+
+      let visited = 0;
+      let found = false;
+
+      while(open.length){
+
+        open.sort((a,b) => a.f - b.f);
+
+        const current = open.shift();
+        const currentKey =
+          key(current.r,current.c);
+
+        if(closed.has(currentKey)){
+          continue;
+        }
+
+        closed.add(currentKey);
+        visited++;
+
+        if(
+          current.r === end.r &&
+          current.c === end.c
+        ){
+          found = true;
+          break;
+        }
+
+        neighbors(current).forEach(neighbor => {
+
+          const neighborKey =
+            key(neighbor.r,neighbor.c);
+
+          if(closed.has(neighborKey)){
+            return;
+          }
+
+          const tentative =
+            (gScore.get(currentKey) ?? Infinity) +
+            neighbor.cost;
+
+          if(
+            tentative <
+            (gScore.get(neighborKey) ?? Infinity)
+          ){
+
+            gScore.set(
+              neighborKey,
+              tentative
+            );
+
+            previous.set(
+              neighborKey,
+              currentKey
+            );
+
+            const h =
+              useHeuristic
+                ? heuristic(neighbor,end)
+                : 0;
+
+            open.push({
+              r:neighbor.r,
+              c:neighbor.c,
+              f:tentative + h
+            });
+          }
+        });
+      }
+
+      let path = [];
+
+      if(found){
+
+        let currentKey =
+          key(end.r,end.c);
+
+        path.push(currentKey);
+
+        while(currentKey !== key(start.r,start.c)){
+
+          currentKey =
+            previous.get(currentKey);
+
+          if(!currentKey){
+            path = [];
+            break;
+          }
+
+          path.push(currentKey);
+        }
+
+        path.reverse();
+      }
+
+      const elapsed =
+        performance.now() - startTime;
+
+      return {
+        found,
+        visited,
+        pathLength:
+          path.length
+            ? path.length - 1
+            : 0,
+        distance:
+          found
+            ? gScore.get(key(end.r,end.c))
+            : Infinity,
+        time:elapsed,
+        path
+      };
+    }
+
+    const astar =
+      runSearch(true);
+
+    const dijkstra =
+      runSearch(false);
+
+    status.textContent =
+      astar.found && dijkstra.found
+        ? 'Comparison Complete'
+        : 'No Path';
+
+    visual.innerHTML = `
+      <div class="compare-result">
+
+        <div class="compare-card">
+          <div class="compare-title">
+            <span>🧠</span>
+            A*
+          </div>
+
+          <div class="compare-status">
+            ${astar.found ? 'Path Found' : 'No Path'}
+          </div>
+
+          <div class="compare-stat">
+            <span>Nodes Visited</span>
+            <strong>${astar.visited}</strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Path Length</span>
+            <strong>${astar.pathLength}</strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Distance</span>
+            <strong>
+              ${astar.found
+                ? astar.distance.toFixed(2)
+                : '—'}
+            </strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Execution</span>
+            <strong>${astar.time.toFixed(2)} ms</strong>
+          </div>
+        </div>
+
+        <div class="compare-card">
+          <div class="compare-title">
+            <span>🧭</span>
+            Dijkstra
+          </div>
+
+          <div class="compare-status">
+            ${dijkstra.found ? 'Path Found' : 'No Path'}
+          </div>
+
+          <div class="compare-stat">
+            <span>Nodes Visited</span>
+            <strong>${dijkstra.visited}</strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Path Length</span>
+            <strong>${dijkstra.pathLength}</strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Distance</span>
+            <strong>
+              ${dijkstra.found
+                ? dijkstra.distance.toFixed(2)
+                : '—'}
+            </strong>
+          </div>
+
+          <div class="compare-stat">
+            <span>Execution</span>
+            <strong>${dijkstra.time.toFixed(2)} ms</strong>
+          </div>
+        </div>
+
+      </div>
+    `;
+
+    log.textContent =
+      `A* vs Dijkstra\n\n` +
+      `Grid       : ${size} × ${size}\n` +
+      `Movement   : ${movement} directions\n` +
+      `Obstacles  : ${density}%\n\n` +
+      `A* Nodes   : ${astar.visited}\n` +
+      `A* Path    : ${astar.pathLength}\n` +
+      `A* Time    : ${astar.time.toFixed(2)} ms\n\n` +
+      `Dij Nodes  : ${dijkstra.visited}\n` +
+      `Dij Path   : ${dijkstra.pathLength}\n` +
+      `Dij Time   : ${dijkstra.time.toFixed(2)} ms`;
+  }
 
   function runDijkstra(){
 
