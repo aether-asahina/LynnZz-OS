@@ -380,6 +380,10 @@ function renderAlgorithmLab(body){
     sorting: {
       title: 'Sorting Visualizer',
       description: 'Memvisualisasikan proses pengurutan data.'
+    },
+    dataset: {
+      title: 'Dataset Manager',
+      description: 'Mengelola dataset CSV untuk eksperimen algoritma.'
     }
   };
 
@@ -392,8 +396,36 @@ function renderAlgorithmLab(body){
 
       const algo = algorithms[btn.dataset.algo];
 
+      if(!algo){
+        console.error(
+          '[Algorithm Lab] Unknown module:',
+          btn.dataset.algo
+        );
+        return;
+      }
+
       title.textContent = algo.title;
       description.textContent = algo.description;
+
+      if(btn.dataset.algo === 'dataset'){
+        renderDatasetManager(body);
+        config.innerHTML = `
+          <div class="algo-field">
+            <label>Dataset</label>
+            <div class="dataset-config-info">
+              <span>📂</span>
+              <div>
+                <strong>CSV Dataset</strong>
+                <small>Upload dataset untuk eksperimen.</small>
+              </div>
+            </div>
+          </div>
+        `;
+        runBtn.textContent = '📂 Open Dataset';
+        status.textContent = 'Dataset Manager';
+        log.textContent = 'Waiting for dataset upload...';
+        return;
+      }
 
       if(btn.dataset.algo === 'ga'){
 
