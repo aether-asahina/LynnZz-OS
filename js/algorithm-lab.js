@@ -3,6 +3,119 @@
 // LYNNZZ OS — ALGORITHM LAB
 // ============================================================
 
+// ---- Sorting: generators yield step-by-step for animation; the final
+// 'done' step also carries the true comparisons/swaps count ----
+function* bubbleSortGen(input){
+  const arr = input.slice();
+  let comparisons = 0, swaps = 0;
+  const n = arr.length;
+  for (let i = 0; i < n - 1; i++){
+    for (let j = 0; j < n - 1 - i; j++){
+      comparisons++;
+      yield { type:'compare', a1:j, a2:j+1, array:arr.slice(), comparisons, swaps };
+      if (arr[j] > arr[j+1]){
+        [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+        swaps++;
+        yield { type:'swap', a1:j, a2:j+1, array:arr.slice(), comparisons, swaps };
+      }
+    }
+  }
+  yield { type:'done', a1:-1, a2:-1, array:arr.slice(), comparisons, swaps };
+}
+
+function* quickSortGen(input){
+  const arr = input.slice();
+  let comparisons = 0, swaps = 0;
+  function* qs(lo, hi){
+    if (lo >= hi) return;
+    const pivot = arr[hi];
+    let i = lo - 1;
+    for (let j = lo; j < hi; j++){
+      comparisons++;
+      yield { type:'compare', a1:j, a2:hi, array:arr.slice(), comparisons, swaps };
+      if (arr[j] < pivot){
+        i++;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        swaps++;
+        yield { type:'swap', a1:i, a2:j, array:arr.slice(), comparisons, swaps };
+      }
+    }
+    [arr[i+1], arr[hi]] = [arr[hi], arr[i+1]];
+    swaps++;
+    yield { type:'swap', a1:i+1, a2:hi, array:arr.slice(), comparisons, swaps };
+    yield* qs(lo, i);
+    yield* qs(i + 2, hi);
+  }
+  yield* qs(0, arr.length - 1);
+  yield { type:'done', a1:-1, a2:-1, array:arr.slice(), comparisons, swaps };
+}
+
+function* mergeSortGen(input){
+  const arr = input.slice();
+  let comparisons = 0, swaps = 0;
+  function* merge(lo, mid, hi){
+    const left = arr.slice(lo, mid+1);
+    const right = arr.slice(mid+1, hi+1);
+    let i=0, j=0, k=lo;
+    while (i < left.length && j < right.length){
+      comparisons++;
+      yield { type:'compare', a1:lo+i, a2:mid+1+j, array:arr.slice(), comparisons, swaps };
+      if (left[i] <= right[j]){ arr[k] = left[i]; i++; } else { arr[k] = right[j]; j++; }
+      swaps++;
+      yield { type:'swap', a1:k, a2:k, array:arr.slice(), comparisons, swaps };
+      k++;
+    }
+    while (i < left.length){ arr[k] = left[i]; i++; swaps++; yield { type:'swap', a1:k, a2:k, array:arr.slice(), comparisons, swaps }; k++; }
+    while (j < right.length){ arr[k] = right[j]; j++; swaps++; yield { type:'swap', a1:k, a2:k, array:arr.slice(), comparisons, swaps }; k++; }
+  }
+  function* ms(lo, hi){
+    if (lo >= hi) return;
+    const mid = Math.floor((lo+hi)/2);
+    yield* ms(lo, mid);
+    yield* ms(mid+1, hi);
+    yield* merge(lo, mid, hi);
+  }
+  yield* ms(0, arr.length - 1);
+  yield { type:'done', a1:-1, a2:-1, array:arr.slice(), comparisons, swaps };
+}
+
+const SORT_ALGOS = {
+  bubble: { label: 'Bubble Sort', gen: bubbleSortGen },
+  quick:  { label: 'Quick Sort',  gen: quickSortGen  },
+  merge:  { label: 'Merge Sort',  gen: mergeSortGen  },
+};
+
+function runSortMetrics(genFn, data){
+  const start = performance.now();
+  let last = null;
+  for (const step of genFn(data)) last = step;
+  const time = performance.now() - start;
+  return { array: last.array, comparisons: last.comparisons, swaps: last.swaps, time };
+}
+function collectSortSteps(genFn, data){
+  const steps = [];
+  for (const step of genFn(data)) steps.push(step);
+  return steps;
+}
+function sortRandomDataset(count, max = 99){
+  return Array.from({ length: count }, () => Math.floor(Math.random() * max) + 1);
+}
+// pulls the first fully-numeric column out of the dataset uploaded via Dataset Manager
+function sortDatasetFromCSV(){
+  const raw = localStorage.getItem('lynnzz_dataset');
+  if (!raw) return { error: 'Belum ada dataset. Upload CSV lewat Dataset Manager dulu.' };
+  let parsed;
+  try { parsed = JSON.parse(raw); } catch(e){ return { error: 'Dataset tersimpan rusak, upload ulang.' }; }
+  const { headers, data } = parsed;
+  for (let col = 0; col < headers.length; col++){
+    const values = data.map(row => Number(row[col]));
+    if (values.every(v => !Number.isNaN(v)) && values.length){
+      return { data: values, column: headers[col] };
+    }
+  }
+  return { error: `Dataset "${parsed.name}" tidak punya kolom yang seluruhnya angka.` };
+}
+function algoSortSleep(ms){ return new Promise(r => setTimeout(r, ms)); }
 
 function renderDatasetManager(body){
 
@@ -78,10 +191,29 @@ function renderDatasetManager(body){
   const clearBtn = body.querySelector('#dataset-clear');
 
   backBtn.onclick = () => {
-    const firstAlgo = body.querySelector('.algo-item');
+
+    const lab = document.querySelector('.algo-wrap');
+
+    if(!lab){
+      location.reload();
+      return;
+    }
+
+    const algoContent = lab.querySelector('.algo-content');
+
+    if(!algoContent){
+      location.reload();
+      return;
+    }
+
+    const firstAlgo = lab.querySelector('.algo-item');
+
     if(firstAlgo){
       firstAlgo.click();
+      return;
     }
+
+    location.reload();
   };
 
   clearBtn.onclick = () => {
@@ -595,6 +727,46 @@ function renderAlgorithmLab(body){
 
         runBtn.textContent = '📂 Open Dataset';
 
+      }else if(btn.dataset.algo === 'sorting'){
+
+        const hasDataset = !!localStorage.getItem('lynnzz_dataset');
+
+        config.innerHTML = `
+          <div class="algo-field">
+            <label>Algoritma</label>
+            <select id="sort-algo">
+              <option value="bubble">Bubble Sort</option>
+              <option value="quick">Quick Sort</option>
+              <option value="merge">Merge Sort</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Sumber Data</label>
+            <select id="sort-source">
+              <option value="random" selected>Random</option>
+              <option value="dataset" ${hasDataset ? '' : 'disabled'}>Dataset CSV${hasDataset ? '' : ' (belum ada)'}</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Jumlah Data (Random)</label>
+            <input id="sort-count" type="number" value="30" min="4" max="300">
+          </div>
+
+          <div class="algo-field">
+            <label>Animation</label>
+            <select id="sort-speed">
+              <option value="0">Instant</option>
+              <option value="15">Fast</option>
+              <option value="30" selected>Normal</option>
+              <option value="80">Slow</option>
+            </select>
+          </div>
+        `;
+
+        runBtn.textContent = '▶ Run Sort';
+
       }else{
 
         config.innerHTML = `
@@ -644,6 +816,11 @@ function renderAlgorithmLab(body){
 
     if(active.dataset.algo === 'dataset'){
       renderDatasetManager(body);
+      return;
+    }
+
+    if(active.dataset.algo === 'sorting'){
+      runSorting();
       return;
     }
 
@@ -2087,5 +2264,82 @@ function renderAlgorithmLab(body){
     `;
 
     log.textContent = output;
+  }
+
+  async function runSorting(){
+
+    const algoKey = body.querySelector('#sort-algo').value;
+    const source = body.querySelector('#sort-source').value;
+    const speed = Number(body.querySelector('#sort-speed').value) || 0;
+
+    let dataset, sourceLabel;
+
+    if (source === 'dataset'){
+      const result = sortDatasetFromCSV();
+      if (result.error){
+        status.textContent = 'Data Ditolak';
+        log.textContent = `Sorting\n\nError: ${result.error}`;
+        return;
+      }
+      dataset = result.data;
+      sourceLabel = `Dataset CSV (kolom "${result.column}")`;
+    } else {
+      const count = Math.max(4, Math.min(300, Number(body.querySelector('#sort-count').value) || 30));
+      dataset = sortRandomDataset(count);
+      sourceLabel = 'Random';
+    }
+
+    const genFn = SORT_ALGOS[algoKey].gen;
+    const original = dataset.slice();
+
+    status.textContent = 'Running';
+    runBtn.disabled = true;
+
+    visual.innerHTML = `<div class="sort-bars" id="sort-bars"></div>`;
+    const barsEl = body.querySelector('#sort-bars');
+
+    function drawBars(array, highlight, mode){
+      barsEl.innerHTML = '';
+      const max = Math.max(...array), min = Math.min(...array);
+      const range = (max - min) || 1;
+      array.forEach((val, idx) => {
+        const bar = document.createElement('div');
+        bar.className = 'sort-bar';
+        bar.style.height = (8 + ((val - min) / range) * 92) + '%';
+        if (mode === 'done') bar.classList.add('done');
+        else if (highlight.includes(idx)) bar.classList.add(mode === 'swap' ? 'swap' : 'compare');
+        barsEl.appendChild(bar);
+      });
+    }
+
+    const trueMetrics = runSortMetrics(genFn, original);
+    const steps = collectSortSteps(genFn, original);
+    const stride = Math.max(1, Math.floor(steps.length / 400));
+
+    for (let s = 0; s < steps.length; s += stride){
+      const step = steps[s];
+      drawBars(step.array, [step.a1, step.a2], step.type);
+      log.textContent =
+        `${SORT_ALGOS[algoKey].label}\n\n` +
+        `Sumber Data   : ${sourceLabel}\n` +
+        `Jumlah Data   : ${dataset.length}\n` +
+        `Komparasi     : ${step.comparisons}\n` +
+        `Swap/Tulis    : ${step.swaps}\n` +
+        `Status        : Berjalan...`;
+      if (speed > 0) await algoSortSleep(speed);
+    }
+
+    drawBars(trueMetrics.array, [], 'done');
+    status.textContent = 'Done';
+    log.textContent =
+      `${SORT_ALGOS[algoKey].label}\n\n` +
+      `Sumber Data   : ${sourceLabel}\n` +
+      `Jumlah Data   : ${dataset.length}\n` +
+      `Waktu         : ${trueMetrics.time.toFixed(2)} ms\n` +
+      `Komparasi     : ${trueMetrics.comparisons}\n` +
+      `Swap/Tulis    : ${trueMetrics.swaps}\n` +
+      `Status        : Selesai`;
+
+    runBtn.disabled = false;
   }
 }

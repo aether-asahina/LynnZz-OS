@@ -313,6 +313,29 @@
   color:var(--muted);
 }
 
+.sort-bars{
+  height:170px;
+  display:flex;
+  align-items:flex-end;
+  gap:2px;
+  background:rgba(0,0,0,.35);
+  border-radius:10px;
+  padding:8px;
+  overflow:hidden;
+}
+
+.sort-bar{
+  flex:1;
+  min-width:2px;
+  background:var(--violet);
+  border-radius:2px 2px 0 0;
+  transition:background .1s;
+}
+
+.sort-bar.compare{ background:#facc15; }
+.sort-bar.swap{ background:#ff2e63; }
+.sort-bar.done{ background:#86efac; }
+
 .algo-placeholder{
   grid-column:1/-1;
   padding:14px;
