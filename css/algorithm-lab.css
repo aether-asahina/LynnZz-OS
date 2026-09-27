@@ -802,3 +802,66 @@
   }
 }
 
+/* =========================================================
+   COMPARE (A* VS DIJKSTRA)
+========================================================= */
+
+.compare-result{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  width:100%;
+}
+
+.compare-card{
+  background:rgba(255,255,255,.025);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.compare-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--text);
+  padding-bottom:6px;
+  border-bottom:1px solid var(--border);
+}
+
+.compare-status{
+  font-size:10px;
+  font-weight:700;
+  padding:4px 8px;
+  border-radius:6px;
+  background:rgba(168,85,247,.15);
+  color:var(--violet);
+  display:inline-block;
+  align-self:flex-start;
+}
+
+.compare-stat{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:11px;
+  color:var(--muted);
+  padding:2px 0;
+}
+
+.compare-stat strong{
+  color:var(--text);
+  font-weight:600;
+}
+
+@media(max-width:600px){
+  .compare-result{
+    grid-template-columns:1fr;
+  }
+}
+

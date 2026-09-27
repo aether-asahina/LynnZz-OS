@@ -191,30 +191,55 @@ function renderDatasetManager(body){
   const clearBtn = body.querySelector('#dataset-clear');
 
   backBtn.onclick = () => {
-
-    const lab = document.querySelector('.algo-wrap');
-
-    if(!lab){
-      location.reload();
-      return;
-    }
-
-    const algoContent = lab.querySelector('.algo-content');
-
-    if(!algoContent){
-      location.reload();
-      return;
-    }
-
-    const firstAlgo = lab.querySelector('.algo-item');
-
-    if(firstAlgo){
-      firstAlgo.click();
-      return;
-    }
-
-    location.reload();
+    renderAlgorithmLab(body);
   };
+
+  function displayDataset(dataset){
+    if(!dataset || !dataset.headers || !dataset.data) return;
+
+    rowsEl.textContent = dataset.rows ?? dataset.data.length;
+    colsEl.textContent = dataset.columns ?? dataset.headers.length;
+    nameEl.textContent = dataset.name || 'Dataset CSV';
+    statusEl.textContent = 'Dataset loaded';
+
+    table.innerHTML = '';
+
+    const thead = document.createElement('thead');
+    const headRow = document.createElement('tr');
+
+    dataset.headers.forEach(header => {
+      const th = document.createElement('th');
+      th.textContent = header || 'Column';
+      headRow.appendChild(th);
+    });
+
+    thead.appendChild(headRow);
+    table.appendChild(thead);
+
+    const tbody = document.createElement('tbody');
+
+    dataset.data.slice(0, 50).forEach(row => {
+      const tr = document.createElement('tr');
+      dataset.headers.forEach((_, index) => {
+        const td = document.createElement('td');
+        td.textContent = row[index] ?? '';
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+  }
+
+  // Load existing dataset from localStorage if present
+  const savedRaw = localStorage.getItem('lynnzz_dataset');
+  if(savedRaw){
+    try {
+      const parsed = JSON.parse(savedRaw);
+      displayDataset(parsed);
+      statusEl.textContent = 'Dataset loaded (cached)';
+    } catch(e){}
+  }
 
   clearBtn.onclick = () => {
 
@@ -312,48 +337,6 @@ function renderDatasetManager(body){
         .slice(1)
         .map(parseCSVLine);
 
-      rowsEl.textContent = data.length;
-      colsEl.textContent = headers.length;
-      nameEl.textContent = file.name;
-      statusEl.textContent = 'Dataset loaded';
-
-      table.innerHTML = '';
-
-      const thead = document.createElement('thead');
-      const headRow = document.createElement('tr');
-
-      headers.forEach(header => {
-
-        const th = document.createElement('th');
-
-        th.textContent = header || 'Column';
-
-        headRow.appendChild(th);
-      });
-
-      thead.appendChild(headRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-
-      data.slice(0,50).forEach(row => {
-
-        const tr = document.createElement('tr');
-
-        headers.forEach((_, index) => {
-
-          const td = document.createElement('td');
-
-          td.textContent = row[index] ?? '';
-
-          tr.appendChild(td);
-        });
-
-        tbody.appendChild(tr);
-      });
-
-      table.appendChild(tbody);
-
       const dataset = {
         name: file.name,
         headers,
@@ -363,15 +346,16 @@ function renderDatasetManager(body){
         uploadedAt: new Date().toISOString()
       };
 
-      localStorage.setItem(
-        'lynnzz_dataset',
-        JSON.stringify(dataset)
-      );
+      try {
+        localStorage.setItem(
+          'lynnzz_dataset',
+          JSON.stringify(dataset)
+        );
+      } catch(err){
+        console.warn('Dataset terlalu besar untuk localStorage:', err);
+      }
 
-      console.log(
-        '[LynnZz Dataset]',
-        dataset
-      );
+      displayDataset(dataset);
     };
 
     reader.onerror = () => {
@@ -543,6 +527,10 @@ function renderAlgorithmLab(body){
       title: 'Dijkstra',
       description: 'Mencari jalur terpendek dari satu node ke node lainnya.'
     },
+    compare: {
+      title: 'Compare (A* vs Dijkstra)',
+      description: 'Perbandingan performa antara A* Pathfinding dan Dijkstra.'
+    },
     kmeans: {
       title: 'K-Means',
       description: 'Mengelompokkan data berdasarkan kedekatan antar titik.'
@@ -559,6 +547,9 @@ function renderAlgorithmLab(body){
 
   body.querySelectorAll('.algo-item').forEach(btn => {
     btn.onclick = () => {
+      body._algoSessionId = (body._algoSessionId || 0) + 1;
+      runBtn.disabled = false;
+
       body.querySelectorAll('.algo-item')
         .forEach(x => x.classList.remove('active'));
 
@@ -576,26 +567,6 @@ function renderAlgorithmLab(body){
 
       title.textContent = algo.title;
       description.textContent = algo.description;
-
-      if(btn.dataset.algo === 'dataset'){
-        renderDatasetManager(body);
-        config.innerHTML = `
-          <div class="algo-field">
-            <label>Dataset</label>
-            <div class="dataset-config-info">
-              <span>📂</span>
-              <div>
-                <strong>CSV Dataset</strong>
-                <small>Upload dataset untuk eksperimen.</small>
-              </div>
-            </div>
-          </div>
-        `;
-        runBtn.textContent = '📂 Open Dataset';
-        status.textContent = 'Dataset Manager';
-        log.textContent = 'Waiting for dataset upload...';
-        return;
-      }
 
       if(btn.dataset.algo === 'ga'){
 
@@ -696,6 +667,58 @@ function renderAlgorithmLab(body){
             ? '▶ Run A*'
             : '▶ Run Dijkstra';
 
+        const setupGrid = () => {
+          if(isAStar) runAStar();
+          else runDijkstra();
+        };
+
+        setupGrid();
+
+        const gridSizeEl = config.querySelector('#path-grid-size');
+        if(gridSizeEl) gridSizeEl.onchange = setupGrid;
+
+      }else if(btn.dataset.algo === 'compare'){
+
+        config.innerHTML = `
+          <div class="algo-field">
+            <label>Grid Size</label>
+            <select id="path-grid-size">
+              <option value="8">8 × 8</option>
+              <option value="12" selected>12 × 12</option>
+              <option value="16">16 × 16</option>
+              <option value="20">20 × 20</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Movement</label>
+            <select id="path-movement">
+              <option value="4" selected>4 Directions</option>
+              <option value="8">8 Directions</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Heuristic (A*)</label>
+            <select id="astar-heuristic">
+              <option value="manhattan" selected>Manhattan</option>
+              <option value="euclidean">Euclidean</option>
+            </select>
+          </div>
+
+          <div class="algo-field">
+            <label>Obstacles</label>
+            <select id="path-obstacle-density">
+              <option value="10">10%</option>
+              <option value="20" selected>20%</option>
+              <option value="30">30%</option>
+              <option value="40">40%</option>
+            </select>
+          </div>
+        `;
+
+        runBtn.textContent = '▶ Run Comparison';
+
       }else if(btn.dataset.algo === 'dataset'){
 
         config.innerHTML = `
@@ -779,6 +802,10 @@ function renderAlgorithmLab(body){
         runBtn.textContent = '▶ Run';
       }
 
+      if(btn.dataset.algo === 'astar' || btn.dataset.algo === 'dijkstra'){
+        return;
+      }
+
       visual.innerHTML = `
         <div class="algo-empty">
           <div class="algo-empty-icon">⚡</div>
@@ -800,12 +827,22 @@ function renderAlgorithmLab(body){
     if(!active) return;
 
     if(active.dataset.algo === 'astar'){
-      runAStar();
+      const startBtn = visual.querySelector('#astar-start');
+      if(startBtn){
+        startBtn.click();
+      }else{
+        runAStar();
+      }
       return;
     }
 
     if(active.dataset.algo === 'dijkstra'){
-      runDijkstra();
+      const startBtn = visual.querySelector('#dijkstra-start');
+      if(startBtn){
+        startBtn.click();
+      }else{
+        runDijkstra();
+      }
       return;
     }
 
@@ -1222,6 +1259,7 @@ function renderAlgorithmLab(body){
 
     const visualGrid = document.createElement('div');
     visualGrid.className = 'astar-grid';
+    visualGrid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
     const controls = document.createElement('div');
     controls.className = 'astar-controls';
@@ -1426,9 +1464,9 @@ function renderAlgorithmLab(body){
       status.textContent = 'Grid Generated';
 
       log.textContent =
-        `${algoTitle}\\n\\n` +
-        `Grid       : ${size} × ${size}\\n` +
-        `Obstacles  : ${density}%\\n` +
+        `${algoTitle}\n\n` +
+        `Grid       : ${size} × ${size}\n` +
+        `Obstacles  : ${density}%\n` +
         'Status     : Ready';
     };
 
@@ -1441,7 +1479,7 @@ function renderAlgorithmLab(body){
       status.textContent = 'Ready';
 
       log.textContent =
-        `${algoTitle}\\n\\n` +
+        `${algoTitle}\n\n` +
         'All obstacles cleared.';
     };
 
@@ -1455,6 +1493,9 @@ function renderAlgorithmLab(body){
     status.textContent = 'Ready';
 
     controls.querySelector('#dijkstra-start').onclick = async () => {
+
+      body._algoSessionId = (body._algoSessionId || 0) + 1;
+      const sessionId = body._algoSessionId;
 
       const begin = performance.now();
 
@@ -1622,6 +1663,8 @@ function renderAlgorithmLab(body){
         await new Promise(resolve =>
           setTimeout(resolve,speed)
         );
+
+        if(body._algoSessionId !== sessionId) return;
       }
 
       const elapsed =
@@ -1672,6 +1715,8 @@ function renderAlgorithmLab(body){
           await new Promise(resolve =>
             setTimeout(resolve,speed)
           );
+
+          if(body._algoSessionId !== sessionId) return;
         }
 
         status.textContent = 'Path Found';
@@ -1727,6 +1772,7 @@ function renderAlgorithmLab(body){
 
     const visualGrid = document.createElement('div');
     visualGrid.className = 'astar-grid';
+    visualGrid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
 
     const controls = document.createElement('div');
     controls.className = 'astar-controls';
@@ -1861,9 +1907,96 @@ function renderAlgorithmLab(body){
     visual.innerHTML = '';
 
     visual.appendChild(visualGrid);
+
+    const mazeTools = document.createElement('div');
+    mazeTools.className = 'astar-maze-tools';
+
+    mazeTools.innerHTML = `
+      <button class="astar-tool" id="astar-random">
+        ⚡ Random Obstacles
+      </button>
+
+      <button class="astar-tool" id="astar-clear">
+        🧹 Clear Obstacles
+      </button>
+    `;
+
+    visual.appendChild(mazeTools);
     visual.appendChild(controls);
 
     renderGrid();
+
+    mazeTools.querySelector('#astar-random').onclick = () => {
+
+      const density =
+        Number(
+          body.querySelector('#path-obstacle-density')?.value
+        ) || 20;
+
+      obstacles.clear();
+
+      const total =
+        size * size;
+
+      const amount =
+        Math.floor(total * density / 100);
+
+      const candidates = [];
+
+      for(let r=0;r<size;r++){
+        for(let c=0;c<size;c++){
+
+          if(
+            (r === start.r && c === start.c) ||
+            (r === end.r && c === end.c)
+          ){
+            continue;
+          }
+
+          candidates.push({r,c});
+        }
+      }
+
+      for(let i=candidates.length-1;i>0;i--){
+
+        const j =
+          Math.floor(Math.random() * (i + 1));
+
+        [candidates[i],candidates[j]] =
+          [candidates[j],candidates[i]];
+      }
+
+      candidates
+        .slice(0,amount)
+        .forEach(cell =>
+          obstacles.add(
+            key(cell.r,cell.c)
+          )
+        );
+
+      renderGrid();
+
+      status.textContent = 'Grid Generated';
+
+      log.textContent =
+        `A* Pathfinding\n\n` +
+        `Grid       : ${size} × ${size}\n` +
+        `Obstacles  : ${density}%\n` +
+        'Status     : Ready';
+    };
+
+    mazeTools.querySelector('#astar-clear').onclick = () => {
+
+      obstacles.clear();
+
+      renderGrid();
+
+      status.textContent = 'Ready';
+
+      log.textContent =
+        'A* Pathfinding\n\n' +
+        'All obstacles cleared.';
+    };
 
     log.textContent =
       'A* Pathfinding\n\n' +
@@ -1875,6 +2008,9 @@ function renderAlgorithmLab(body){
     status.textContent = 'Ready';
 
     controls.querySelector('#astar-start').onclick = async () => {
+
+      body._algoSessionId = (body._algoSessionId || 0) + 1;
+      const sessionId = body._algoSessionId;
 
       const begin = performance.now();
 
@@ -2066,6 +2202,8 @@ function renderAlgorithmLab(body){
         await new Promise(resolve =>
           setTimeout(resolve,speed)
         );
+
+        if(body._algoSessionId !== sessionId) return;
       }
 
       const elapsed =
@@ -2116,6 +2254,8 @@ function renderAlgorithmLab(body){
           await new Promise(resolve =>
             setTimeout(resolve,speed)
           );
+
+          if(body._algoSessionId !== sessionId) return;
         }
 
         status.textContent = 'Path Found';
@@ -2142,22 +2282,34 @@ function renderAlgorithmLab(body){
 
   function runGeneticAlgorithm(){
 
-    const populationSize =
-      Number(body.querySelector('#ga-population').value) || 20;
+    const popInput = body.querySelector('#ga-population')?.value;
+    const populationSize = popInput && !isNaN(Number(popInput))
+      ? Math.max(4, Math.min(100, Math.round(Number(popInput))))
+      : 20;
 
-    const mutationRate =
-      Number(body.querySelector('#ga-mutation').value) || 5;
+    const mutInput = body.querySelector('#ga-mutation')?.value;
+    const mutationRate = mutInput !== '' && !isNaN(Number(mutInput))
+      ? Math.max(0, Math.min(100, Number(mutInput)))
+      : 5;
 
-    const generations =
-      Number(body.querySelector('#ga-generations').value) || 30;
+    const genInput = body.querySelector('#ga-generations')?.value;
+    const generations = genInput && !isNaN(Number(genInput))
+      ? Math.max(1, Math.min(500, Math.round(Number(genInput))))
+      : 30;
 
-    const target =
-      Number(body.querySelector('#ga-target').value) || 100;
+    const targetInput = body.querySelector('#ga-target')?.value;
+    const target = targetInput !== '' && !isNaN(Number(targetInput))
+      ? Math.round(Number(targetInput))
+      : 100;
+
+    const minBound = Math.min(-100, target - 50);
+    const maxBound = Math.max(100, target + 50);
+    const rangeSpan = maxBound - minBound;
 
     let population =
       Array.from(
         {length: populationSize},
-        () => Math.floor(Math.random() * 201) - 100
+        () => Math.floor(Math.random() * (rangeSpan + 1)) + minBound
       );
 
     let best = null;
@@ -2180,9 +2332,10 @@ function renderAlgorithmLab(body){
     }
 
     function crossover(a,b){
-      return Math.random() < 0.5
-        ? a
-        : b;
+      const r = Math.random();
+      if(r < 0.45) return a;
+      if(r < 0.90) return b;
+      return Math.round((a + b) / 2);
     }
 
     function mutate(value){
@@ -2195,7 +2348,7 @@ function renderAlgorithmLab(body){
         value += change;
       }
 
-      return Math.max(-100, Math.min(100, value));
+      return Math.max(minBound, Math.min(maxBound, value));
     }
 
     for(let generation = 1; generation <= generations; generation++){
@@ -2244,6 +2397,14 @@ function renderAlgorithmLab(body){
     status.textContent =
       finalBest === target ? 'Optimal' : 'Completed';
 
+    const accuracy = Math.max(
+      0,
+      Math.min(
+        100,
+        Math.round((1 - Math.min(1, Math.abs(target - finalBest) / (Math.abs(target) || 100))) * 100)
+      )
+    );
+
     visual.innerHTML = `
       <div class="algo-result">
         <div class="algo-result-label">BEST SOLUTION</div>
@@ -2252,13 +2413,7 @@ function renderAlgorithmLab(body){
           Target: ${target}
         </div>
         <div class="algo-progress">
-          <div style="width:${Math.max(
-            0,
-            Math.min(
-              100,
-              100 - Math.abs(target-finalBest)
-            )
-          )}%"></div>
+          <div style="width:${accuracy}%"></div>
         </div>
       </div>
     `;
@@ -2267,6 +2422,9 @@ function renderAlgorithmLab(body){
   }
 
   async function runSorting(){
+
+    body._algoSessionId = (body._algoSessionId || 0) + 1;
+    const sessionId = body._algoSessionId;
 
     const algoKey = body.querySelector('#sort-algo').value;
     const source = body.querySelector('#sort-source').value;
@@ -2295,51 +2453,59 @@ function renderAlgorithmLab(body){
     status.textContent = 'Running';
     runBtn.disabled = true;
 
-    visual.innerHTML = `<div class="sort-bars" id="sort-bars"></div>`;
-    const barsEl = body.querySelector('#sort-bars');
+    try {
+      visual.innerHTML = `<div class="sort-bars" id="sort-bars"></div>`;
+      const barsEl = body.querySelector('#sort-bars');
 
-    function drawBars(array, highlight, mode){
-      barsEl.innerHTML = '';
-      const max = Math.max(...array), min = Math.min(...array);
-      const range = (max - min) || 1;
-      array.forEach((val, idx) => {
-        const bar = document.createElement('div');
-        bar.className = 'sort-bar';
-        bar.style.height = (8 + ((val - min) / range) * 92) + '%';
-        if (mode === 'done') bar.classList.add('done');
-        else if (highlight.includes(idx)) bar.classList.add(mode === 'swap' ? 'swap' : 'compare');
-        barsEl.appendChild(bar);
-      });
-    }
+      function drawBars(array, highlight, mode){
+        if (!barsEl || body._algoSessionId !== sessionId) return;
+        barsEl.innerHTML = '';
+        const max = Math.max(...array), min = Math.min(...array);
+        const range = (max - min) || 1;
+        array.forEach((val, idx) => {
+          const bar = document.createElement('div');
+          bar.className = 'sort-bar';
+          bar.style.height = (8 + ((val - min) / range) * 92) + '%';
+          if (mode === 'done') bar.classList.add('done');
+          else if (highlight.includes(idx)) bar.classList.add(mode === 'swap' ? 'swap' : 'compare');
+          barsEl.appendChild(bar);
+        });
+      }
 
-    const trueMetrics = runSortMetrics(genFn, original);
-    const steps = collectSortSteps(genFn, original);
-    const stride = Math.max(1, Math.floor(steps.length / 400));
+      const trueMetrics = runSortMetrics(genFn, original);
+      const steps = collectSortSteps(genFn, original);
+      const stride = Math.max(1, Math.floor(steps.length / 400));
 
-    for (let s = 0; s < steps.length; s += stride){
-      const step = steps[s];
-      drawBars(step.array, [step.a1, step.a2], step.type);
+      for (let s = 0; s < steps.length; s += stride){
+        if (body._algoSessionId !== sessionId) return;
+        const step = steps[s];
+        drawBars(step.array, [step.a1, step.a2], step.type);
+        log.textContent =
+          `${SORT_ALGOS[algoKey].label}\n\n` +
+          `Sumber Data   : ${sourceLabel}\n` +
+          `Jumlah Data   : ${dataset.length}\n` +
+          `Komparasi     : ${step.comparisons}\n` +
+          `Swap/Tulis    : ${step.swaps}\n` +
+          `Status        : Berjalan...`;
+        if (speed > 0) await algoSortSleep(speed);
+      }
+
+      if (body._algoSessionId !== sessionId) return;
+
+      drawBars(trueMetrics.array, [], 'done');
+      status.textContent = 'Done';
       log.textContent =
         `${SORT_ALGOS[algoKey].label}\n\n` +
         `Sumber Data   : ${sourceLabel}\n` +
         `Jumlah Data   : ${dataset.length}\n` +
-        `Komparasi     : ${step.comparisons}\n` +
-        `Swap/Tulis    : ${step.swaps}\n` +
-        `Status        : Berjalan...`;
-      if (speed > 0) await algoSortSleep(speed);
+        `Waktu         : ${trueMetrics.time.toFixed(2)} ms\n` +
+        `Komparasi     : ${trueMetrics.comparisons}\n` +
+        `Swap/Tulis    : ${trueMetrics.swaps}\n` +
+        `Status        : Selesai`;
+    } finally {
+      if (body._algoSessionId === sessionId){
+        runBtn.disabled = false;
+      }
     }
-
-    drawBars(trueMetrics.array, [], 'done');
-    status.textContent = 'Done';
-    log.textContent =
-      `${SORT_ALGOS[algoKey].label}\n\n` +
-      `Sumber Data   : ${sourceLabel}\n` +
-      `Jumlah Data   : ${dataset.length}\n` +
-      `Waktu         : ${trueMetrics.time.toFixed(2)} ms\n` +
-      `Komparasi     : ${trueMetrics.comparisons}\n` +
-      `Swap/Tulis    : ${trueMetrics.swaps}\n` +
-      `Status        : Selesai`;
-
-    runBtn.disabled = false;
   }
 }
