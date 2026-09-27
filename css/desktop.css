@@ -585,3 +585,13 @@ html[data-accent="crimson"]{
     margin-top:14px;
   }
 }
+
+/* ===================== LYNNZZ ANIMATED WALLPAPER ===================== */
+#wallpaper-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  opacity:.55;
+}
