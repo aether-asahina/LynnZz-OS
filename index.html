@@ -21,6 +21,278 @@
 <link rel="stylesheet" href="css/desktop.css?v=1.8">
 <link rel="stylesheet" href="css/taskbar.css?v=1.8">
 <link rel="stylesheet" href="css/algorithm-lab.css">
+
+<style id="lynnzz-login-ring">
+/* ===================== LYNNZZ LOGIN RING ===================== */
+
+.login-ring-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--login-r);
+  padding: var(--login-thick);
+}
+
+.login-ring-wrap > .login-ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  animation: lzRingFadeOut .35s ease-out 1.6s forwards;
+}
+
+.login-ring-wrap > .login-ring-svg path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: lzDrawLine 1.6s ease-out forwards;
+}
+
+.login-ring-idle {
+  position: absolute;
+  inset: -100%;
+  z-index: 1;
+  opacity: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    #a855f7 60deg,
+    #3b82f6 140deg,
+    transparent 220deg
+  );
+  animation:
+    lzSpinRing 6s linear infinite,
+    lzRingFadeIn .35s ease-out 1.6s forwards;
+}
+
+.login-ring-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  background: rgba(21,21,31,.92);
+  border-radius: calc(var(--login-r) - var(--login-thick));
+}
+
+@keyframes lzDrawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lzRingFadeOut {
+  to { opacity: 0; }
+}
+
+@keyframes lzRingFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes lzSpinRing {
+  to { transform: rotate(360deg); }
+}
+
+/* reveal isi login */
+.login-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: lzReveal .5s ease-out forwards;
+}
+
+.login-reveal:nth-child(1) { animation-delay: .10s; }
+.login-reveal:nth-child(2) { animation-delay: .25s; }
+.login-reveal:nth-child(3) { animation-delay: .40s; }
+.login-reveal:nth-child(4) { animation-delay: .60s; }
+.login-reveal:nth-child(5) { animation-delay: .80s; }
+.login-reveal:nth-child(6) { animation-delay: 1.00s; }
+.login-reveal:nth-child(7) { animation-delay: 1.20s; }
+
+@keyframes lzReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* override border lama */
+.auth-card.login-ring-wrap {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.auth-card.login-ring-wrap > .login-ring-inner {
+  padding: 32px 28px;
+}
+
+.login-field-ring {
+  --login-r: 10px;
+  --login-thick: 1.5px;
+  min-height: 42px;
+}
+
+.login-field-ring .login-ring-idle {
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    #3b82f6 60deg,
+    #06b6d4 140deg,
+    transparent 220deg
+  );
+  animation-duration: 4s, .35s;
+}
+
+.login-field-ring .login-ring-svg path {
+  animation-duration: 1.2s;
+}
+
+.login-field-ring input {
+  border: none !important;
+  border-radius: calc(var(--login-r) - var(--login-thick));
+  background: transparent !important;
+  height: 100%;
+  position: relative;
+  z-index: 4;
+}
+</style>
+
+
+<style id="lynnzz-login-ring">
+/* ===================== LYNNZZ LOGIN RING ===================== */
+
+.login-ring-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--login-r);
+  padding: var(--login-thick);
+}
+
+.login-ring-wrap > .login-ring-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+  animation: lzRingFadeOut .35s ease-out 1.6s forwards;
+}
+
+.login-ring-wrap > .login-ring-svg path {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: lzDrawLine 1.6s ease-out forwards;
+}
+
+.login-ring-idle {
+  position: absolute;
+  inset: -100%;
+  z-index: 1;
+  opacity: 0;
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    #a855f7 60deg,
+    #3b82f6 140deg,
+    transparent 220deg
+  );
+  animation:
+    lzSpinRing 6s linear infinite,
+    lzRingFadeIn .35s ease-out 1.6s forwards;
+}
+
+.login-ring-inner {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  background: rgba(21,21,31,.92);
+  border-radius: calc(var(--login-r) - var(--login-thick));
+}
+
+@keyframes lzDrawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes lzRingFadeOut {
+  to { opacity: 0; }
+}
+
+@keyframes lzRingFadeIn {
+  to { opacity: 1; }
+}
+
+@keyframes lzSpinRing {
+  to { transform: rotate(360deg); }
+}
+
+/* reveal isi login */
+.login-reveal {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: lzReveal .5s ease-out forwards;
+}
+
+.login-reveal:nth-child(1) { animation-delay: .10s; }
+.login-reveal:nth-child(2) { animation-delay: .25s; }
+.login-reveal:nth-child(3) { animation-delay: .40s; }
+.login-reveal:nth-child(4) { animation-delay: .60s; }
+.login-reveal:nth-child(5) { animation-delay: .80s; }
+.login-reveal:nth-child(6) { animation-delay: 1.00s; }
+.login-reveal:nth-child(7) { animation-delay: 1.20s; }
+
+@keyframes lzReveal {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* override border lama */
+.auth-card.login-ring-wrap {
+  border: none;
+  background: transparent;
+  padding: 0;
+}
+
+.auth-card.login-ring-wrap > .login-ring-inner {
+  padding: 32px 28px;
+}
+
+.login-field-ring {
+  --login-r: 10px;
+  --login-thick: 1.5px;
+  min-height: 42px;
+}
+
+.login-field-ring .login-ring-idle {
+  background: conic-gradient(
+    from 0deg,
+    transparent,
+    #3b82f6 60deg,
+    #06b6d4 140deg,
+    transparent 220deg
+  );
+  animation-duration: 4s, .35s;
+}
+
+.login-field-ring .login-ring-svg path {
+  animation-duration: 1.2s;
+}
+
+.login-field-ring input {
+  border: none !important;
+  border-radius: calc(var(--login-r) - var(--login-thick));
+  background: transparent !important;
+  height: 100%;
+  position: relative;
+  z-index: 4;
+}
+</style>
+
 </head>
 <body>
 
@@ -49,24 +321,65 @@
   <div class="auth-bg-orb orb1"></div>
   <div class="auth-bg-orb orb2"></div>
 
-  <div class="auth-card">
-    <div class="auth-brand">
-      <div class="auth-brand-mark">Lz</div>
-      <div class="auth-brand-text">LynnZz<span>OS</span></div>
-    </div>
+  <div class="auth-card login-ring-wrap" style="--login-r:20px;--login-thick:2px;">
+    <svg class="login-ring-svg" aria-hidden="true">
+      <path pathLength="100" stroke="url(#loginCardGrad)" d=""></path>
+      <defs>
+        <linearGradient id="loginCardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#a855f7"/>
+          <stop offset="100%" stop-color="#3b82f6"/>
+        </linearGradient>
+      </defs>
+    </svg>
+
+    <div class="login-ring-idle"></div>
+
+    <div class="login-ring-inner">
+      <div class="auth-brand login-reveal">
+        <div class="auth-brand-mark">Lz</div>
+        <div class="auth-brand-text">LynnZz<span>OS</span></div>
+      </div>
 
     <!-- LOGIN -->
     <form id="login-form" class="auth-form">
       <h1>Masuk</h1>
       <p class="auth-sub">Lanjutkan ke workspace lo.</p>
 
-      <label class="field">
+      <label class="field login-reveal">
         <span>Email</span>
-        <input type="email" id="login-email" required placeholder="nama@email.com" autocomplete="email">
+        <div class="login-field-ring login-ring-wrap">
+          <svg class="login-ring-svg" aria-hidden="true">
+            <path pathLength="100" stroke="url(#loginEmailGrad)" d=""></path>
+            <defs>
+              <linearGradient id="loginEmailGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6"/>
+                <stop offset="100%" stop-color="#06b6d4"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="login-ring-idle"></div>
+          <div class="login-ring-inner">
+            <input type="email" id="login-email" required placeholder="nama@email.com" autocomplete="email">
+          </div>
+        </div>
       </label>
-      <label class="field">
+      <label class="field login-reveal">
         <span>Kata sandi</span>
-        <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+        <div class="login-field-ring login-ring-wrap">
+          <svg class="login-ring-svg" aria-hidden="true">
+            <path pathLength="100" stroke="url(#loginPassGrad)" d=""></path>
+            <defs>
+              <linearGradient id="loginPassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#a855f7"/>
+                <stop offset="100%" stop-color="#ec4899"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="login-ring-idle"></div>
+          <div class="login-ring-inner">
+            <input type="password" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+          </div>
+        </div>
       </label>
 
       <div class="auth-error" id="login-error"></div>
@@ -101,6 +414,7 @@
 
       <p class="auth-switch">Udah punya akun? <a href="#" id="go-login">Masuk</a></p>
     </form>
+    </div>
   </div>
 </div>
 
@@ -218,5 +532,52 @@
 <script src="js/window.js?v=1.8"></script>
 <script src="js/algorithm-lab.js"></script>
 <script src="js/apps.js?v=1.9"></script>
+
+<script>
+(function initLynnZzLoginRings() {
+  function roundedRectPath(w, h, r) {
+    return `
+      M ${w-r},0
+      A ${r},${r} 0 0 1 ${w},${r}
+      L ${w},${h-r}
+      A ${r},${r} 0 0 1 ${w-r},${h}
+      L ${r},${h}
+      A ${r},${r} 0 0 1 0,${h-r}
+      L 0,${r}
+      A ${r},${r} 0 0 1 ${r},0
+      Z
+    `.trim();
+  }
+
+  function updateLoginRings() {
+    document.querySelectorAll('.login-ring-wrap').forEach(function(el) {
+      var svg = el.querySelector(':scope > .login-ring-svg');
+      var path = svg && svg.querySelector('path');
+
+      if (!svg || !path) return;
+
+      var rect = el.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+
+      var radius = parseFloat(
+        getComputedStyle(el).getPropertyValue('--login-r')
+      ) || 10;
+
+      svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
+      path.setAttribute(
+        'd',
+        roundedRectPath(rect.width, rect.height, radius)
+      );
+    });
+  }
+
+  window.addEventListener('load', updateLoginRings);
+  window.addEventListener('resize', updateLoginRings);
+
+  setTimeout(updateLoginRings, 100);
+  setTimeout(updateLoginRings, 500);
+})();
+</script>
+
 </body>
 </html>
