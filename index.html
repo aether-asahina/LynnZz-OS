@@ -23,138 +23,105 @@
 <link rel="stylesheet" href="css/algorithm-lab.css">
 
 <style id="lynnzz-login-ring">
-/* ===================== LYNNZZ LOGIN RING ===================== */
-
-.login-ring-wrap {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--login-r);
-  padding: var(--login-thick);
+.login-ring-wrap{
+  position:relative;
+  overflow:hidden;
+  border-radius:var(--login-r);
+  padding:0;
 }
 
-.login-ring-wrap > .login-ring-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 3;
-  pointer-events: none;
-  animation: lzRingFadeOut .35s ease-out 1.6s forwards;
+.login-ring-wrap>.login-ring-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:3;
+  pointer-events:none;
 }
 
-.login-ring-wrap > .login-ring-svg path {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: lzDrawLine 1.6s ease-out forwards;
+.login-ring-wrap>.login-ring-svg path{
+  fill:none;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-dasharray:100;
+  stroke-dashoffset:100;
+  animation:lzDrawLine 1.6s ease-out forwards;
 }
 
-.login-ring-idle {
-  position: absolute;
-  inset: -100%;
-  z-index: 1;
-  opacity: 0;
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    #a855f7 60deg,
-    #3b82f6 140deg,
-    transparent 220deg
-  );
-  animation:
-    lzSpinRing 12s linear infinite,
-    lzRingFadeIn .35s ease-out 1.6s forwards;
+.login-ring-idle{
+  display:none;
 }
 
-.login-ring-inner {
-  position: relative;
-  z-index: 2;
-  width: calc(100% - (var(--login-thick) * 2));
-  height: calc(100% - (var(--login-thick) * 2));
-  margin: var(--login-thick);
-  background: rgba(21,21,31,.92);
-  border-radius: calc(var(--login-r) - var(--login-thick));
+.login-ring-wrap.ring-ready>.login-ring-svg path{
+  stroke-dasharray:18 82;
+  stroke-dashoffset:0;
+  animation:lzBorderSpin 2.5s linear infinite;
 }
 
-@keyframes lzDrawLine {
-  to { stroke-dashoffset: 0; }
+.login-ring-inner{
+  position:relative;
+  z-index:2;
+  width:calc(100% - (var(--login-thick)*2));
+  height:calc(100% - (var(--login-thick)*2));
+  margin:var(--login-thick);
+  background:rgba(21,21,31,.96);
+  border-radius:calc(var(--login-r) - var(--login-thick));
 }
 
-@keyframes lzRingFadeOut {
-  to { opacity: 0; }
+.auth-card.login-ring-wrap{
+  border:none;
+  background:transparent;
+  padding:0;
 }
 
-@keyframes lzRingFadeIn {
-  to { opacity: 1; }
+.auth-card.login-ring-wrap>.login-ring-inner{
+  padding:32px 28px;
 }
 
-@keyframes lzSpinRing {
-  to { transform: rotate(360deg); }
+.login-field-ring{
+  --login-r:10px;
+  --login-thick:1.5px;
+  min-height:42px;
 }
 
-/* reveal isi login */
-.login-reveal {
-  opacity: 0;
-  transform: translateY(10px);
-  animation: lzReveal .5s ease-out forwards;
+.login-field-ring .login-ring-svg path{
+  animation-duration:1.2s;
 }
 
-.login-reveal:nth-child(1) { animation-delay: .10s; }
-.login-reveal:nth-child(2) { animation-delay: .25s; }
-.login-reveal:nth-child(3) { animation-delay: .40s; }
-.login-reveal:nth-child(4) { animation-delay: .60s; }
-.login-reveal:nth-child(5) { animation-delay: .80s; }
-.login-reveal:nth-child(6) { animation-delay: 1.00s; }
-.login-reveal:nth-child(7) { animation-delay: 1.20s; }
+.login-field-ring.ring-ready>.login-ring-svg path{
+  stroke-dasharray:20 80;
+  animation:lzBorderSpin 2s linear infinite;
+}
 
-@keyframes lzReveal {
-  to {
-    opacity: 1;
-    transform: translateY(0);
+.login-field-ring .login-ring-inner{
+  background:rgba(21,21,31,.96);
+}
+
+.login-field-ring .login-ring-inner input{
+  border:none;
+  background:transparent;
+  outline:none;
+}
+
+.login-reveal{
+  opacity:0;
+  transform:translateY(10px);
+  animation:lzReveal .5s ease-out forwards;
+}
+
+@keyframes lzDrawLine{
+  to{stroke-dashoffset:0;}
+}
+
+@keyframes lzBorderSpin{
+  to{stroke-dashoffset:-100;}
+}
+
+@keyframes lzReveal{
+  to{
+    opacity:1;
+    transform:translateY(0);
   }
-}
-
-/* override border lama */
-.auth-card.login-ring-wrap {
-  border: none;
-  background: transparent;
-  padding: 0;
-}
-
-.auth-card.login-ring-wrap > .login-ring-inner {
-  padding: 32px 28px;
-}
-
-.login-field-ring {
-  --login-r: 10px;
-  --login-thick: 1.5px;
-  min-height: 42px;
-}
-
-.login-field-ring .login-ring-idle {
-  background: conic-gradient(
-    from 0deg,
-    transparent,
-    #3b82f6 60deg,
-    #06b6d4 140deg,
-    transparent 220deg
-  );
-  animation-duration: 12s, .35s;
-}
-
-.login-field-ring .login-ring-svg path {
-  animation-duration: 1.2s;
-}
-
-.login-field-ring input {
-  border: none !important;
-  border-radius: calc(var(--login-r) - var(--login-thick));
-  background: transparent !important;
-  height: 100%;
-  position: relative;
-  z-index: 4;
 }
 </style>
 
