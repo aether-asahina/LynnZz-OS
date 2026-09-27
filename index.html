@@ -71,8 +71,9 @@
 .login-ring-inner {
   position: relative;
   z-index: 2;
-  width: 100%;
-  height: 100%;
+  width: calc(100% - (var(--login-thick) * 2));
+  height: calc(100% - (var(--login-thick) * 2));
+  margin: var(--login-thick);
   background: rgba(21,21,31,.92);
   border-radius: calc(var(--login-r) - var(--login-thick));
 }
@@ -293,6 +294,42 @@
 }
 </style>
 
+
+.login-ring-wrap {
+  padding: 0;
+}
+
+.auth-card.login-ring-wrap > .login-ring-inner {
+  padding: 32px 28px;
+}
+
+.login-field-ring .login-ring-idle {
+  inset: 0;
+  animation-duration: 4s, .35s;
+}
+
+.login-field-ring .login-ring-inner {
+  background: rgba(21,21,31,.92);
+}
+
+.login-ring-wrap.ring-ready > .login-ring-svg {
+  animation: lzFadeOut .35s ease-out 1.6s forwards;
+}
+
+.login-ring-wrap.ring-ready > .login-ring-svg path {
+  animation: lzDrawLine 1.6s ease-out forwards;
+}
+
+.login-ring-wrap.ring-ready > .login-ring-idle {
+  animation:
+    lzSpinRing 6s linear infinite,
+    lzRingFadeIn .35s ease-out 1.6s forwards;
+}
+
+@keyframes lzFadeOut {
+  to { opacity: 0; }
+}
+
 </head>
 <body>
 
@@ -341,7 +378,7 @@
       </div>
 
     <!-- LOGIN -->
-    <form id="login-form" class="auth-form">
+    <form id="login-form" class="auth-form login-reveal">
       <h1>Masuk</h1>
       <p class="auth-sub">Lanjutkan ke workspace lo.</p>
 
@@ -382,16 +419,16 @@
         </div>
       </label>
 
-      <div class="auth-error" id="login-error"></div>
+      <div class="auth-error login-reveal" id="login-error"></div>
 
-      <button type="submit" class="btn-primary">Masuk</button>
-      <button type="button" class="btn-ghost" id="btn-guest">Masuk sebagai Tamu</button>
+      <button type="submit" class="btn-primary login-reveal">Masuk</button>
+      <button type="button" class="btn-ghost login-reveal" id="btn-guest">Masuk sebagai Tamu</button>
 
       <p class="auth-switch">Belum punya akun? <a href="#" id="go-register">Daftar</a></p>
     </form>
 
     <!-- REGISTER -->
-    <form id="register-form" class="auth-form hidden">
+    <form id="register-form" class="auth-form hidden login-reveal">
       <h1>Daftar</h1>
       <p class="auth-sub">Bikin akun buat nyimpen data lo di cloud.</p>
 
@@ -536,17 +573,20 @@
 <script>
 (function initLynnZzLoginRings() {
   function roundedRectPath(w, h, r) {
-    return `
-      M ${w-r},0
-      A ${r},${r} 0 0 1 ${w},${r}
-      L ${w},${h-r}
-      A ${r},${r} 0 0 1 ${w-r},${h}
-      L ${r},${h}
-      A ${r},${r} 0 0 1 0,${h-r}
-      L 0,${r}
-      A ${r},${r} 0 0 1 ${r},0
-      Z
-    `.trim();
+    r = Math.min(r, w / 2, h / 2);
+
+    return [
+      'M', r, 0,
+      'H', w - r,
+      'A', r, r, 0, 0, 1, w, r,
+      'V', h - r,
+      'A', r, r, 0, 0, 1, w - r, h,
+      'H', r,
+      'A', r, r, 0, 0, 1, 0, h - r,
+      'V', r,
+      'A', r, r, 0, 0, 1, r, 0,
+      'Z'
+    ].join(' ');
   }
 
   function updateLoginRings() {
@@ -557,13 +597,21 @@
       if (!svg || !path) return;
 
       var rect = el.getBoundingClientRect();
+
       if (!rect.width || !rect.height) return;
 
-      var radius = parseFloat(
-        getComputedStyle(el).getPropertyValue('--login-r')
-      ) || 10;
+      var style = getComputedStyle(el);
 
-      svg.setAttribute('viewBox', '0 0 ' + rect.width + ' ' + rect.height);
+      var radius =
+        parseFloat(style.getPropertyValue('--login-r')) || 10;
+
+      svg.setAttribute(
+        'viewBox',
+        '0 0 ' + rect.width + ' ' + rect.height
+      );
+
+      svg.setAttribute('preserveAspectRatio', 'none');
+
       path.setAttribute(
         'd',
         roundedRectPath(rect.width, rect.height, radius)
@@ -571,11 +619,33 @@
     });
   }
 
-  window.addEventListener('load', updateLoginRings);
+  function refreshLoginRings() {
+    requestAnimationFrame(function() {
+      updateLoginRings();
+
+      setTimeout(updateLoginRings, 100);
+      setTimeout(updateLoginRings, 500);
+    });
+  }
+
+  window.addEventListener('load', refreshLoginRings);
   window.addEventListener('resize', updateLoginRings);
 
-  setTimeout(updateLoginRings, 100);
-  setTimeout(updateLoginRings, 500);
+  var authScreen = document.getElementById('auth-screen');
+
+  if (authScreen) {
+    var observer = new MutationObserver(function() {
+      refreshLoginRings();
+    });
+
+    observer.observe(authScreen, {
+      attributes: true,
+      childList: true,
+      subtree: true
+    });
+  }
+
+  refreshLoginRings();
 })();
 </script>
 
