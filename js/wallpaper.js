@@ -9,8 +9,8 @@
 
   const colors = [
     'rgba(168,85,247,',
-    'rgba(80,180,255,',
-    'rgba(255,46,99,'
+    'rgba(96,165,250,',
+    'rgba(236,72,153,'
   ];
 
   function resize() {
@@ -31,13 +31,14 @@
       y: Math.random() * h,
       vx: (Math.random() - .5) * .18,
       vy: (Math.random() - .5) * .18,
-      r: Math.random() * 1.4 + .5,
+      r: Math.random() * 2.5 + 2.5,
       color: colors[Math.floor(Math.random() * colors.length)]
     }));
   }
 
   function draw() {
-    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#030712';
+    ctx.fillRect(0, 0, w, h);
 
     for (const n of nodes) {
       n.x += n.vx;
@@ -54,7 +55,7 @@
 
       ctx.beginPath();
       ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
-      ctx.fillStyle = a.color + '.75)';
+      ctx.fillStyle = a.color + '.95)';
       ctx.fill();
 
       for (let j = i + 1; j < nodes.length; j++) {
@@ -64,21 +65,21 @@
         const dy = a.y - b.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (distance < 145) {
-          const opacity = (1 - distance / 145) * .22;
+        if (distance < 180) {
+          const opacity = (1 - distance / 180) * .40;
 
           ctx.beginPath();
           ctx.moveTo(a.x, a.y);
           ctx.lineTo(b.x, b.y);
           ctx.strokeStyle = a.color + opacity + ')';
-          ctx.lineWidth = .7;
+          ctx.lineWidth = 1.2;
           ctx.stroke();
         }
       }
     }
 
-    ctx.fillStyle = "red";
-    ctx.fillRect(20,20,100,100);
+    // debug removed
+    // debug removed
     requestAnimationFrame(draw);
   }
 
