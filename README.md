@@ -2,14 +2,14 @@
 
 # 🖥️ LynnZz OS
 
-**Sistem operasi desktop berbasis browser.**
+**A browser-based desktop operating system.**
 
-Simulasi desktop environment yang dibangun menggunakan HTML, CSS, dan JavaScript vanilla, tanpa framework frontend dan tanpa build step.
+A desktop environment simulation built with vanilla HTML, CSS, and JavaScript. No frontend framework, no build step.
 
-[![Status](https://img.shields.io/badge/status-active-success)](#️-status-pengembangan)
-[![Hosting](https://img.shields.io/badge/hosting-GitHub%20Pages-222?logo=github)](#-menjalankan)
-[![Firebase](https://img.shields.io/badge/backend-Firebase%20optional-FFCA28?logo=firebase&logoColor=black)](#-firebase-opsional)
-[![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?logo=javascript&logoColor=black)](#-teknologi)
+[![Status](https://img.shields.io/badge/status-active-success)](#️-development-status)
+[![Hosting](https://img.shields.io/badge/hosting-GitHub%20Pages-222?logo=github)](#-getting-started)
+[![Firebase](https://img.shields.io/badge/backend-Firebase%20optional-FFCA28?logo=firebase&logoColor=black)](#-firebase-optional)
+[![JavaScript](https://img.shields.io/badge/JavaScript-vanilla-F7DF1E?logo=javascript&logoColor=black)](#-tech-stack)
 
 [**🚀 Live Demo**](https://aether-asahina.github.io/LynnZz-OS/)
 
@@ -17,58 +17,58 @@ Simulasi desktop environment yang dibangun menggunakan HTML, CSS, dan JavaScript
 
 ---
 
-## 📖 Tentang Proyek
+## 📖 About
 
-LynnZz OS adalah simulasi desktop operating system yang berjalan sepenuhnya di browser.
+LynnZz OS is a desktop operating system simulation that runs entirely in the browser.
 
-Proyek ini mencoba menghadirkan pengalaman desktop melalui web, termasuk boot sequence, authentication, desktop environment, animated wallpaper, taskbar, start menu, window management, virtual filesystem, terminal simulation, serta berbagai aplikasi bawaan.
+It recreates a desktop experience on the web, including a boot sequence, authentication, a desktop environment, animated wallpaper, taskbar, start menu, window management, a virtual filesystem, a terminal simulation, and a set of built-in applications.
 
-Proyek ini dikembangkan sebagai eksperimen dan pembelajaran untuk mengeksplorasi sejauh mana teknologi web dapat digunakan untuk membangun lingkungan yang menyerupai sistem operasi.
+The project is an experiment and a learning exercise: how far can web technologies go in building an environment that resembles an operating system?
 
-LynnZz OS dapat berjalan dalam mode lokal tanpa backend eksternal. Firebase bersifat opsional dan dapat digunakan untuk authentication serta penyimpanan data berbasis cloud.
+LynnZz OS runs in local mode without any external backend. Firebase is optional and can be enabled for authentication and cloud-based data storage.
 
 ---
 
-## ✨ Fitur
+## ✨ Features
 
 ### 🖥️ Desktop Environment
 
-- Boot sequence dengan progress indicator
-- Desktop dengan animated canvas wallpaper
+- Boot sequence with progress indicator
+- Desktop with animated canvas wallpaper
 - Desktop icons
-- Taskbar dan start menu
-- Jam dan tanggal realtime
+- Taskbar and start menu
+- Realtime clock and date
 - User profile
 - Toast notifications
 - Multi-window environment
 
 ### 🪟 Window Manager
 
-- Membuka beberapa aplikasi secara bersamaan
-- Drag window
-- Resize window
+- Open multiple applications at the same time
+- Drag windows
+- Resize windows
 - Minimize
 - Maximize
 - Close
 - Window state management
 
-### 📦 Aplikasi & Sistem
+### 📦 Apps & System
 
-| Komponen | Deskripsi |
+| Component | Description |
 | --- | --- |
-| 📁 File Manager | Virtual filesystem untuk mengelola file dan folder |
-| 📝 Notes | Membuat dan mengelola catatan |
-| 🧮 Calculator | Kalkulator berbasis browser |
-| 🌐 Browser | Browser interface dengan fallback ke tab baru |
-| 🎵 Music Player | Memutar file audio dari perangkat |
-| 🖼️ Gallery | Menampilkan gambar dari perangkat |
-| ⚙️ Settings | Pengaturan wallpaper, akun, dan data lokal |
-| 💻 Terminal | Simulasi terminal dengan virtual filesystem |
-| 🧪 Algorithm Lab | Eksperimen dan visualisasi algoritma |
+| 📁 File Manager | Virtual filesystem for managing files and folders |
+| 📝 Notes | Create and manage notes |
+| 🧮 Calculator | Browser-based calculator |
+| 🌐 Browser | Browser interface with new-tab fallback |
+| 🎵 Music Player | Play audio files from your device |
+| 🖼️ Gallery | View images from your device |
+| ⚙️ Settings | Wallpaper, account, and local data settings |
+| 💻 Terminal | Terminal simulation with a virtual filesystem |
+| 🧪 Algorithm Lab | Algorithm experiments and visualization |
 
 ### 🧪 Algorithm Lab
 
-Algorithm Lab digunakan untuk mengeksplorasi dan memvisualisasikan algoritma secara interaktif, termasuk:
+Algorithm Lab lets you explore and visualize algorithms interactively, including:
 
 - Bubble Sort
 - Quick Sort
@@ -76,135 +76,135 @@ Algorithm Lab digunakan untuk mengeksplorasi dan memvisualisasikan algoritma sec
 - A\*
 - Dijkstra
 - Dataset management
-- Perbandingan algoritma
+- Algorithm comparison
 
 ---
 
-## 💾 Mode Penyimpanan
+## 💾 Storage Modes
 
-LynnZz OS mendukung dua pendekatan penyimpanan.
+LynnZz OS supports two storage approaches.
 
 ### Local Mode
 
-Tanpa konfigurasi Firebase. Data tertentu disimpan menggunakan browser storage sehingga sistem dapat digunakan secara lokal.
+No Firebase configuration required. Data is stored in browser storage, so the system works fully offline-first on a single device.
 
 ### Firebase Mode
 
-Firebase dapat digunakan untuk:
+Firebase can be used for:
 
 - Authentication
 - Cloud data
 - User-based storage
 
-Mode Firebase bersifat opsional sehingga proyek tetap dapat dijalankan sebagai static web application.
+Firebase mode is optional, so the project can still be deployed as a static web application.
 
 ---
 
-## 🚀 Menjalankan
+## 🚀 Getting Started
 
 ### GitHub Pages
 
-LynnZz OS dapat langsung dijalankan melalui GitHub Pages:
+LynnZz OS runs directly on GitHub Pages:
 
 **https://aether-asahina.github.io/LynnZz-OS/**
 
-Untuk fork sendiri: *Settings → Pages → Branch `main` / folder `/ (root)` → Save*.
+To host your own fork: *Settings → Pages → Branch `main` / folder `/ (root)` → Save*.
 
-### Lokal
+### Run Locally
 
-Clone repository:
+Clone the repository:
 
 ```bash
 git clone https://github.com/aether-asahina/LynnZz-OS.git
 cd LynnZz-OS
 ```
 
-Karena proyek menggunakan browser APIs, disarankan menjalankannya melalui local HTTP server.
+Because the project relies on browser APIs, running it through a local HTTP server is recommended.
 
-Dengan Python:
+With Python:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Kemudian buka `http://localhost:8000`.
+Then open `http://localhost:8000`.
 
-Alternatif menggunakan Node.js:
+Or with Node.js:
 
 ```bash
 npx serve .
 ```
 
-> Hindari membuka `index.html` langsung menggunakan `file://` jika ingin mendapatkan perilaku yang sama seperti saat proyek dijalankan melalui HTTP server.
+> Avoid opening `index.html` directly via `file://` if you want the same behavior as when the project is served over HTTP.
 
 ---
 
-## 🔥 Firebase (Opsional)
+## 🔥 Firebase (Optional)
 
-Firebase tidak wajib untuk menjalankan LynnZz OS.
+Firebase is not required to run LynnZz OS.
 
-Untuk menggunakan Firebase:
+To enable it:
 
-1. Buat project di [Firebase Console](https://console.firebase.google.com).
-2. Daftarkan Web App dan salin objek `firebaseConfig`.
-3. Tempel ke `js/firebase-config.js`, ganti semua nilai `GANTI_...`.
-4. Aktifkan **Email/Password** di *Authentication → Sign-in method*.
-5. Buat **Cloud Firestore** di *Firestore Database → Create database*.
-6. Atur Firestore Security Rules sesuai kebutuhan aplikasi.
-7. Muat ulang halaman. Sistem otomatis berpindah dari Local Mode ke Firebase Mode.
+1. Create a project in the [Firebase Console](https://console.firebase.google.com).
+2. Register a Web App and copy the `firebaseConfig` object.
+3. Paste it into `js/firebase-config.js`, replacing every `GANTI_...` placeholder.
+4. Enable **Email/Password** under *Authentication → Sign-in method*.
+5. Create a **Cloud Firestore** database under *Firestore Database → Create database*.
+6. Configure Firestore Security Rules to fit your application.
+7. Reload the page. The system automatically switches from Local Mode to Firebase Mode.
 
-> **Catatan keamanan:** konfigurasi Firebase Web dapat terlihat di sisi client. Keamanan data tetap harus diterapkan melalui Authentication dan Firestore Security Rules. Jangan menaruh secret server-side atau API key sensitif di frontend.
+> **Security note:** Firebase Web configuration is visible on the client side. Data security must be enforced through Authentication and Firestore Security Rules. Do not put server-side secrets or sensitive API keys in the frontend.
 
 ---
 
-## 🧱 Arsitektur
+## 🧱 Architecture
 
-Proyek menggunakan pendekatan *browser-first architecture*.
+The project follows a *browser-first architecture*.
 
-### Struktur Folder
+### Folder Structure
 
 ```text
 LynnZz-OS/
-├── index.html               # Entry point: boot, login, shell desktop
-├── css/                     # Styling desktop, window, taskbar, interface
+├── index.html               # Entry point: boot, login, desktop shell
+├── css/                     # Styling for desktop, windows, taskbar, UI
 ├── js/
-│   ├── firebase-config.js   # Konfigurasi Firebase
-│   ├── os.js                # Boot, auth, storage, utilitas sistem
+│   ├── firebase-config.js   # Firebase configuration
+│   ├── os.js                # Boot, auth, storage, system utilities
 │   ├── window.js            # Window manager
 │   ├── wallpaper.js         # Animated canvas wallpaper
-│   ├── algorithm-lab.js     # Visualisasi algoritma
-│   └── apps.js              # Registry dan kode aplikasi bawaan
-├── apps/                    # Komponen dan aset per aplikasi
-└── assets/                  # Icon, wallpaper, dan static assets
+│   ├── algorithm-lab.js     # Algorithm visualization
+│   └── apps.js              # Registry and code for built-in apps
+├── apps/                    # Per-app components and assets
+└── assets/                  # Icons, wallpapers, and static assets
 ```
 
-### Komponen Utama
+### Main Components
 
-| Komponen | Tanggung Jawab |
+| Component | Responsibility |
 | --- | --- |
-| `index.html` | Entry point dan struktur utama desktop |
-| `css/` | Styling desktop, window, taskbar, dan interface |
-| `js/` | Core system logic dan application logic |
-| `apps/` | Komponen dan aset yang berkaitan dengan aplikasi |
-| `assets/` | Icon, wallpaper, dan static assets |
+| `index.html` | Entry point and main desktop structure |
+| `css/` | Styling for the desktop, windows, taskbar, and interface |
+| `js/` | Core system logic and application logic |
+| `apps/` | Application-related components and assets |
+| `assets/` | Icons, wallpapers, and static assets |
 
 ### Core Modules
 
-| Module | Tanggung Jawab |
+| Module | Responsibility |
 | --- | --- |
-| `os.js` | Core OS logic, boot, authentication, storage, dan system utilities |
+| `os.js` | Core OS logic, boot, authentication, storage, and system utilities |
 | `window.js` | Window management |
 | `algorithm-lab.js` | Algorithm visualization |
 | `wallpaper.js` | Animated canvas wallpaper |
 | `firebase-config.js` | Firebase configuration |
 
-> Struktur file dapat berubah selama pengembangan karena LynnZz OS masih merupakan proyek aktif.
+> The file structure may change during development, as LynnZz OS is an active project.
 
 ---
 
-## 🛣️ Status Pengembangan
+## 🛣️ Development Status
 
-LynnZz OS saat ini berada dalam tahap *active development*.
+LynnZz OS is currently under *active development*.
 
 ### Implemented
 
@@ -234,35 +234,35 @@ LynnZz OS saat ini berada dalam tahap *active development*.
 
 ---
 
-## ⚠️ Keterbatasan
+## ⚠️ Limitations
 
-Karena LynnZz OS berjalan di dalam browser, beberapa kemampuan memiliki batasan dari browser dan website pihak ketiga.
+Because LynnZz OS runs inside the browser, some capabilities are limited by the browser and by third-party websites.
 
-- File audio dan gambar yang menggunakan browser object URLs tidak otomatis menjadi persistent storage.
-- Beberapa website tidak dapat ditampilkan melalui iframe karena kebijakan keamanan seperti `X-Frame-Options` atau CSP.
-- Firebase membutuhkan konfigurasi project sendiri.
-- Virtual filesystem merupakan simulasi berbasis browser, bukan filesystem OS sebenarnya.
-- Fitur yang membutuhkan API eksternal harus memperhatikan keamanan credential karena aplikasi berjalan di sisi client.
+- Audio and image files loaded through browser object URLs are not automatically persisted.
+- Some websites cannot be displayed in an iframe due to security policies such as `X-Frame-Options` or CSP.
+- Firebase requires your own project configuration.
+- The virtual filesystem is a browser-based simulation, not a real OS filesystem.
+- Features that depend on external APIs must handle credentials carefully, since the app runs on the client side.
 
 ---
 
-## 🧰 Teknologi
+## 🧰 Tech Stack
 
-| Teknologi | Penggunaan |
+| Technology | Usage |
 | --- | --- |
-| HTML5 | Struktur aplikasi |
-| CSS3 | Interface, layout, dan animation |
-| JavaScript | Core system dan application logic |
-| Firebase | Authentication dan cloud data |
-| Canvas API | Animated wallpaper dan visualisasi |
+| HTML5 | Application structure |
+| CSS3 | Interface, layout, and animation |
+| JavaScript | Core system and application logic |
+| Firebase | Authentication and cloud data |
+| Canvas API | Animated wallpaper and visualizations |
 | Browser Storage APIs | Local persistence |
 | GitHub Pages | Static hosting |
 
 ---
 
-## 🎯 Tujuan Proyek
+## 🎯 Project Goals
 
-LynnZz OS dibuat sebagai proyek eksperimen untuk mempelajari:
+LynnZz OS was built as an experimental project to learn about:
 
 - Frontend engineering
 - Browser APIs
@@ -274,11 +274,11 @@ LynnZz OS dibuat sebagai proyek eksperimen untuk mempelajari:
 - Algorithm visualization
 - Interactive UI development
 
-Proyek ini bukan operating system dalam arti kernel atau sistem operasi desktop sebenarnya. LynnZz OS adalah simulasi lingkungan desktop yang berjalan di browser.
+This is not an operating system in the sense of a kernel or a real desktop OS. LynnZz OS is a desktop environment simulation that runs in the browser.
 
 ---
 
-## 👤 Pembuat
+## 👤 Author
 
 **Muhammad Naufal Dzakiy**
 
