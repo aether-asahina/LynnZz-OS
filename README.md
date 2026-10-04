@@ -78,26 +78,26 @@ Browser Storage APIs| Local persistence
 
 Architecture
 
-LynnZz-OS/
-├── apps/
-├── assets/
-│   ├── icons/
-│   └── wallpapers/
-├── css/
-│   ├── desktop.css
-│   ├── taskbar.css
-│   └── algorithm-lab.css
-├── js/
-│   ├── firebase-config.js
-│   ├── os.js
-│   ├── window.js
-│   ├── algorithm-lab.js
-│   └── wallpaper.js
-├── index.html
-└── README.md
+The project is organized into several main layers:
 
-The project uses a browser-first architecture. Most applications are rendered and managed through JavaScript rather than relying on separate server-side components.
+Directory / File| Purpose
+"apps/"| Built-in applications and application components
+"assets/"| Icons, wallpapers, images, and other static assets
+"css/"| Desktop, taskbar, application, and interface styling
+"js/"| Core system logic, window management, applications, and interactive features
+"index.html"| Main entry point of LynnZz OS
+"README.md"| Project documentation
 
+Core JavaScript Modules
+
+Module| Responsibility
+"os.js"| Core desktop and operating system logic
+"window.js"| Window creation and window management
+"algorithm-lab.js"| Algorithm visualization and experimentation
+"wallpaper.js"| Animated canvas-based wallpaper
+"firebase-config.js"| Firebase configuration and integration
+
+The architecture follows a browser-first approach, where the desktop environment and applications are primarily managed through client-side JavaScript and browser APIs.
 ---
 
 Running Locally
