@@ -1,78 +1,200 @@
-# LynnZz OS v1.0
+LynnZz OS
 
-"Operating System" yang jalan penuh di browser. Dibangun buat di-host gratis di GitHub Pages / Netlify.
+«A browser-based operating system interface built with HTML, CSS, and JavaScript.»
 
-## Cara pakai (dari HP, tanpa laptop)
+LynnZz OS is a web-based operating system simulation designed to recreate a desktop environment directly inside a browser.
 
-1. Push folder ini ke repo GitHub baru (misal `LynnZz-OS`).
-2. Aktifkan **GitHub Pages**: Settings → Pages → Branch: `main` / folder `root` → Save.
-3. Buka link Pages-nya (`https://username.github.io/LynnZz-OS/`) — OS langsung boot.
+It includes a boot sequence, authentication, desktop environment, window management, virtual filesystem, built-in applications, animated wallpapers, and browser-based system utilities.
 
-Tanpa setup Firebase pun sudah jalan penuh: sistem otomatis pakai **mode lokal** (akun & data disimpan di `localStorage` HP/browser lo).
+Live Demo:
+https://aether-asahina.github.io/LynnZz-OS/
 
-## Aktifin Firebase (login beneran + cloud sync)
+---
 
-1. Buka [Firebase Console](https://console.firebase.google.com) → buat project baru (gratis).
-2. Klik ikon Web `</>` → daftarkan app → copy object `firebaseConfig`.
-3. Tempel ke `js/firebase-config.js`, ganti semua nilai `"GANTI_..."`.
-4. Di Firebase Console:
-   - **Authentication → Sign-in method** → aktifkan **Email/Password**.
-   - **Firestore Database → Create database**.
-5. Reload — sistem otomatis pindah dari mode lokal ke mode cloud.
+Features
 
-## Struktur folder
+Desktop Environment
 
-```
+- Boot sequence with progress indicator
+- Animated desktop wallpaper
+- Desktop icons
+- Taskbar and start menu
+- Real-time clock and date
+- User profile
+- Toast notifications
+
+Window Management
+
+- Multiple applications running simultaneously
+- Drag and resize windows
+- Minimize, maximize, and close
+- Window state management
+
+Built-in Applications
+
+- File Manager
+- Notes
+- Calculator
+- Browser
+- Music Player
+- Gallery
+- Settings
+- Algorithm Lab
+- Terminal simulation
+
+Authentication & Storage
+
+LynnZz OS supports two storage modes:
+
+- Local Mode using browser storage
+- Firebase Mode for authentication and cloud data
+
+The system can operate locally without requiring a Firebase configuration.
+
+Developer Experiments
+
+The project also contains several experimental components, including:
+
+- Algorithm visualization
+- A* and Dijkstra pathfinding
+- Sorting algorithm visualization
+- Virtual filesystem
+- Canvas-based animated wallpapers
+- Browser-based terminal simulation
+
+---
+
+Tech Stack
+
+Technology| Purpose
+HTML5| Application structure
+CSS3| Desktop UI and animations
+JavaScript| Core system logic
+Firebase| Authentication and cloud storage
+Canvas API| Animated graphics and visualizations
+Browser Storage APIs| Local persistence
+
+---
+
+Architecture
+
 LynnZz-OS/
-├── index.html              → boot screen, login/register, shell desktop
+├── apps/
+├── assets/
+│   ├── icons/
+│   └── wallpapers/
 ├── css/
-│   ├── desktop.css         → wallpaper, ikon, window, notifikasi
-│   └── taskbar.css         → taskbar, start menu, jam
+│   ├── desktop.css
+│   ├── taskbar.css
+│   └── algorithm-lab.css
 ├── js/
-│   ├── firebase-config.js  → config Firebase (isi sendiri)
-│   ├── os.js               → boot, auth, notifikasi, jam, storage
-│   ├── window.js           → window manager (drag/resize/minimize/maximize)
-│   └── apps.js             → semua app bawaan (registry + kode)
-├── apps/                   → dokumentasi tiap app (lihat catatan di bawah)
-└── assets/
-    ├── icons/
-    └── wallpapers/
-```
+│   ├── firebase-config.js
+│   ├── os.js
+│   ├── window.js
+│   ├── algorithm-lab.js
+│   └── wallpaper.js
+├── index.html
+└── README.md
 
-**Catatan desain:** semua app (Notes, Calculator, File Manager, dst) di-render langsung dari
-`js/apps.js`, bukan file HTML terpisah di `apps/`. Ini sengaja — kalau app-nya `fetch()` file HTML
-sendiri-sendiri, itu bakal gagal kena CORS pas dibuka lewat `file://` (sebelum di-push ke GitHub
-Pages), yang ngerepotin banget buat workflow dari Termux/HP. Folder `apps/*/` gue biarin sebagai
-tempat naruh dokumentasi/aset per-app kalau nanti mau dipisah beneran pas masuk fase App Store (v3.0).
+The project uses a browser-first architecture. Most applications are rendered and managed through JavaScript rather than relying on separate server-side components.
 
-## Fitur v1.0 yang sudah jalan
+---
 
-- ✅ Boot sequence dengan progress bar
-- ✅ Login / Register / Guest (Firebase atau mode lokal otomatis)
-- ✅ Desktop dengan wallpaper animasi + ikon
-- ✅ Taskbar + jam & tanggal realtime (format Indonesia)
-- ✅ Start menu dengan profil user
-- ✅ Sistem notifikasi (toast)
-- ✅ Window manager: buka banyak app, drag, resize, minimize, maximize, close
-- ✅ File Manager (virtual filesystem tersimpan per-user)
-- ✅ Notes (CRUD, autosave)
-- ✅ Calculator
-- ✅ Browser (iframe + fallback tab baru buat situs yang nge-block embed)
-- ✅ Music Player (pilih file audio dari HP)
-- ✅ Gallery (pilih gambar dari HP, lightbox)
-- ✅ Settings (ganti wallpaper, info akun, hapus data lokal)
+Running Locally
 
-## Belum di v1.0 (nyusul v2.0 / v3.0 sesuai rencana lo)
+Clone the repository:
 
-- Lynn AI (Gemini API) — butuh API key, gampang ditambahin sebagai app baru di `apps.js`
-- Terminal dengan virtual filesystem (`mkdir`, `cd`, `ls`, dst)
-- App Store buat install app baru
-- Window snapping / multi-desktop
+git clone https://github.com/aether-asahina/LynnZz-OS.git
+cd LynnZz-OS
 
-## Known limitations
+Then open "index.html" in a browser.
 
-- Gallery & Music Player pakai `URL.createObjectURL` — playlist/gambar hilang kalau tab ditutup
-  (file besar nggak cocok disimpan permanen di localStorage). Kalau mau persist, opsi ke depan:
-  upload ke Firebase Storage.
-- Browser app: banyak situs besar (Google, YouTube, Instagram) block iframe lewat header
-  `X-Frame-Options` — ini pembatasan dari situs tujuan, bukan bug LynnZz OS.
+For development, the project can also be served using a local HTTP server.
+
+GitHub Pages
+
+The project is designed to work as a static web application and can be deployed directly through GitHub Pages.
+
+---
+
+Firebase Configuration
+
+Firebase is optional.
+
+Without Firebase configuration, LynnZz OS uses local browser storage.
+
+To enable Firebase:
+
+1. Create a Firebase project.
+2. Register a Web App.
+3. Enable Email/Password Authentication.
+4. Enable Firestore.
+5. Add the Firebase configuration to:
+
+js/firebase-config.js
+
+Do not commit private API keys or credentials that should not be public.
+
+---
+
+Current Status
+
+LynnZz OS is an ongoing personal development project.
+
+The current implementation focuses on:
+
+- Desktop environment
+- Window management
+- Browser-based applications
+- Local persistence
+- Firebase integration
+- Algorithm visualization
+- Terminal and filesystem simulation
+
+---
+
+Roadmap
+
+Future development may include:
+
+- AI assistant integration
+- Expanded virtual terminal
+- Application Store
+- Window snapping
+- Multiple virtual desktops
+- Improved filesystem capabilities
+- Firebase Storage integration
+- More system applications
+
+---
+
+Known Limitations
+
+Some browser APIs have limitations that affect the simulated operating system.
+
+- Files selected for the Gallery and Music Player may not persist after the browser session ends.
+- Some websites cannot be embedded inside the browser application because they block iframe access.
+- Firebase functionality requires additional project configuration.
+- The virtual filesystem is a browser-side simulation and is not an actual operating-system filesystem.
+
+---
+
+Why This Project?
+
+LynnZz OS started as an experiment in recreating an operating system experience using only web technologies.
+
+The project explores how far a browser can be pushed to simulate concepts normally associated with desktop operating systems, including window management, filesystems, applications, authentication, and interactive system utilities.
+
+It is primarily a learning and experimentation project focused on frontend engineering, browser APIs, system design concepts, and interactive UI development.
+
+---
+
+Author
+
+Muhammad Naufal Dzakiy
+
+GitHub: https://github.com/aether-asahina
+
+---
+
+«Build. Break. Learn. Repeat.»
